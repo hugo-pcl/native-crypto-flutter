@@ -386,6 +386,7 @@ fastlane/screenshots/**/*.png
 iOSInjectionProject/
 
 ### VisualStudioCode ###
+.vscode
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
