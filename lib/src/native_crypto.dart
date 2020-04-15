@@ -5,20 +5,25 @@ import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 
+/// [Sources]
 /// Plugin class.
 /// Contains raw functions.
 /// 
-/// You can use [symmetrical_crypto] for an **AES Helper**.
+/// Use [symmetrical_crypto] for an **AES API**.
 class NativeCrypto {
+  /// [Private]
+  /// Contains the channel for platform specific code.
   static const MethodChannel _channel =
       const MethodChannel('native.crypto.helper');
 
   /// Generates AES key.
   ///
-  /// Size of **256 bits** by design.
-  /// And returns `Uint8List`.
-  Future<Uint8List> symKeygen() async {
-    final Uint8List aesKey = await _channel.invokeMethod('symKeygen');
+  /// [size] is in bits, 128, 192 or 256. 
+  /// It returns an `Uint8List`.
+  Future<Uint8List> symKeygen(int size) async {
+    final Uint8List aesKey = await _channel.invokeMethod('symKeygen', <String, dynamic>{
+      'size': size
+    });
     return aesKey;
   }
 
