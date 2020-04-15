@@ -58,20 +58,27 @@ class _MyAppState extends State<MyApp> {
 
   void decrypt() async {
 
-    final hardCodedAESkey = Uint8List.fromList([126, 193, 178, 226, 223, 97, 231, 48, 181, 172, 41, 25, 243, 79, 104, 172, 180, 10, 241, 188, 40, 44, 242, 142, 217, 148, 47, 199, 17, 72, 243, 75]);
+    final hardCodedIOSAESkey = Uint8List.fromList([126, 193, 178, 226, 223, 97, 231, 48, 181, 172, 41, 25, 243, 79, 104, 172, 180, 10, 241, 188, 40, 44, 242, 142, 217, 148, 47, 199, 17, 72, 243, 75]);
 
     final hardCodedIOSCipher = Uint8List.fromList([62, 66, 70, 151, 117, 25, 153, 74, 76, 59, 216, 186, 125, 121, 23, 103, 226, 239, 79, 177, 252, 237, 41, 195, 176, 128, 137, 89, 97, 140, 206, 53, 88, 144, 5, 41, 197, 87, 25, 127, 237, 190, 23, 152, 89, 95, 2, 66, 50, 179, 12, 207, 86, 159, 155, 35, 72, 143, 133, 9, 148, 91, 240, 195]);
 
     final hardCodedIOSIv = Uint8List.fromList([42, 53, 43, 236, 4, 149, 16, 114, 130, 244, 94, 75, 63, 196, 199, 231]);
 
+    final hardCodedAndroidAESkey = Uint8List.fromList([163, 161, 49, 53, 13, 251, 12, 210, 46, 79, 148, 162, 134, 124, 236, 233, 18, 245, 48, 8, 81, 158, 94, 192, 248, 10, 254, 139, 198, 163, 41, 99]);
+
+    final hardCodedAndroidCipher = Uint8List.fromList([175, 223, 113, 228, 201, 163, 195, 52, 191, 75, 216, 148, 81, 38, 56, 70, 36, 73, 113, 61, 64, 89, 135, 49, 121, 46, 240, 9, 47, 209, 90, 66, 168, 100, 214, 80, 137, 247, 218, 146, 185, 62, 39, 15, 250, 45, 75, 142, 148, 238, 156, 154, 52, 12, 134, 149, 252, 214, 25, 205, 121, 204, 7, 193]);
+    
+    final hardCodedAndroidIV = Uint8List.fromList([39, 192, 131, 12, 181, 252, 191, 178, 138, 135, 125, 251, 53, 162, 70, 99]);
+
     // Test payload with some hardcoded values
-    encryptedPayload = [hardCodedIOSCipher, hardCodedIOSIv];    
+    aeskey = hardCodedAndroidAESkey;
+    encryptedPayload = [hardCodedAndroidCipher, hardCodedAndroidIV];
 
     var output;
     if (encryptedPayload == null || encryptedPayload.isEmpty) {
       output = 'Encrypt before.';
     } else {
-      decryptedPayload = await NativeCrypto().symDecrypt(encryptedPayload, hardCodedAESkey);
+      decryptedPayload = await NativeCrypto().symDecrypt(encryptedPayload, aeskey);
       output = 'String successfully Decrypted:\n${bytesToString(decryptedPayload)}';
     }
     setState(() {
