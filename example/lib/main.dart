@@ -58,11 +58,11 @@ class _MyAppState extends State<MyApp> {
 
   void decrypt() async {
 
-    final hardCodedAESkey = Uint8List.fromList([29, 4, 177, 73, 96, 186, 180, 218, 158, 84, 106, 158, 254, 34, 255, 5, 93, 213, 196, 102, 251, 70, 189, 184, 246, 170, 227, 143, 112, 168, 182, 65]);
+    final hardCodedAESkey = Uint8List.fromList([126, 193, 178, 226, 223, 97, 231, 48, 181, 172, 41, 25, 243, 79, 104, 172, 180, 10, 241, 188, 40, 44, 242, 142, 217, 148, 47, 199, 17, 72, 243, 75]);
 
-    final hardCodedIOSCipher = Uint8List.fromList([31, 108, 97, 95, 23, 144, 222, 197, 157, 201, 161, 18, 1, 133, 110, 158, 132, 29, 104, 71, 72, 191, 67, 224, 88, 2, 63, 110, 92, 41, 190, 228]);
+    final hardCodedIOSCipher = Uint8List.fromList([62, 66, 70, 151, 117, 25, 153, 74, 76, 59, 216, 186, 125, 121, 23, 103, 226, 239, 79, 177, 252, 237, 41, 195, 176, 128, 137, 89, 97, 140, 206, 53, 88, 144, 5, 41, 197, 87, 25, 127, 237, 190, 23, 152, 89, 95, 2, 66, 50, 179, 12, 207, 86, 159, 155, 35, 72, 143, 133, 9, 148, 91, 240, 195]);
 
-    final hardCodedIOSIv = Uint8List.fromList([145, 239, 253, 138, 83, 126, 213, 108, 42, 172, 200, 230, 243, 204, 121, 35]);
+    final hardCodedIOSIv = Uint8List.fromList([42, 53, 43, 236, 4, 149, 16, 114, 130, 244, 94, 75, 63, 196, 199, 231]);
 
     // Test payload with some hardcoded values
     encryptedPayload = [hardCodedIOSCipher, hardCodedIOSIv];    
@@ -106,7 +106,7 @@ class _MyAppState extends State<MyApp> {
                 Text(_inputRawCoded),
                 SizedBox(height: 20),
                 FlatButton(
-                    onPressed: null,
+                    onPressed: encrypt,
                     color: Colors.blue,
                     child: Text(
                       'Encrypt',
