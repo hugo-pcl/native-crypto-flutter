@@ -39,9 +39,7 @@ class NativeCrypto {
 
     log('Payload Length: ${payloadbytes.length}', name: _tag);
     log('Cipher Length: ${encryptedPayload.first.length}', name: _tag);
-    print('Cipher: ${encryptedPayload.first}');
     log('IV Length: ${encryptedPayload.last.length}', name: _tag);
-    print('IV: ${encryptedPayload.last}');
 
     return encryptedPayload;
   }
