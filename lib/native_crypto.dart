@@ -11,7 +11,11 @@ class NativeCrypto {
   static const MethodChannel _channel =
       const MethodChannel('native.crypto.helper');
 
-  Future<Uint8List> sumKeygen() async {
+  /// Generates AES key.
+  ///
+  /// Size of **256 bits** by design.
+  /// And returns `Uint8List`.
+  Future<Uint8List> symKeygen() async {
     final Uint8List aesKey = await _channel.invokeMethod('symKeygen');
 
     log('AES Key Length: ${aesKey.length}', name: _tag);
@@ -20,6 +24,11 @@ class NativeCrypto {
     return aesKey;
   }
 
+  /// Encrypts passed data with a given AES key.
+  ///
+  /// Generates a random **IV**. Returns a list
+  /// of `Uint8List` with encrypted cipher as first
+  /// and IV as second member.
   Future<List<Uint8List>> symEncrypt(
       Uint8List payloadbytes, Uint8List aesKey) async {
     final List<Uint8List> encryptedPayload =
@@ -33,10 +42,14 @@ class NativeCrypto {
     print('Cipher: ${encryptedPayload.first}');
     log('IV Length: ${encryptedPayload.last.length}', name: _tag);
     print('IV: ${encryptedPayload.last}');
-    
+
     return encryptedPayload;
   }
 
+  /// Decrypts a passed payload with a given AES key.
+  ///
+  /// The payload must be a list of `Uint8List`
+  /// with encrypted cipher as first and IV as second member.
   Future<Uint8List> symDecrypt(
       List<Uint8List> payloadbytes, Uint8List aesKey) async {
     final Uint8List decryptedPayload =
@@ -46,5 +59,20 @@ class NativeCrypto {
     });
 
     return decryptedPayload;
+  }
+}
+
+class TypeHelper {
+  /// Returns bytes `Uint8List` from a `String`.
+  Uint8List stringToBytes(String source) {
+    var list = source.codeUnits;
+    var bytes = Uint8List.fromList(list);
+    return bytes;
+  }
+
+  /// Returns a `String` from bytes `Uint8List`.
+  String bytesToString(Uint8List bytes) {
+    var string = String.fromCharCodes(bytes);
+    return string;
   }
 }
