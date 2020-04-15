@@ -2,6 +2,7 @@
 // Author: Hugo Pointcheval
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:native_crypto/native_crypto.dart';
@@ -15,79 +16,81 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final textController = TextEditingController();
-  String _inputRawCoded = 'Message à chiffrer WOW';
-  String _decryptedString = 'none';
+  String _output = 'none';
+  
   Uint8List aeskey;
   List<Uint8List> encryptedPayload;
   Uint8List decryptedPayload;
 
   void generateKey() async {
-    aeskey = await NativeCrypto().sumKeygen();
+    aeskey = await NativeCrypto().symKeygen();
     setState(() {
-      _decryptedString = 'Key generated.';
+      _output = 'Key generated.';
     });
   }
 
-  /// Returns bytes `Uint8List` from a `String`.
-  Uint8List stringToBytes(String source) {
-    var list = source.codeUnits;
-    var bytes = Uint8List.fromList(list);
-    return bytes;
-  }
-
-  /// Returns a `String` from bytes `Uint8List`.
-  String bytesToString(Uint8List bytes) {
-    var string = String.fromCharCodes(bytes);
-    return string;
-  }
-
   void encrypt() async {
-    final plainText = _inputRawCoded;
+    final plainText = textController.text.trim();
 
     var output;
     if (plainText.isEmpty) {
       output = 'Entry is empty';
     } else {
-      encryptedPayload = await NativeCrypto().symEncrypt(stringToBytes(plainText), aeskey);
+      var stringToBytes = TypeHelper().stringToBytes(plainText);
+      encryptedPayload = await NativeCrypto().symEncrypt(stringToBytes, aeskey);
       output = 'String successfully encrypted.';
     }
     setState(() {
-      _decryptedString = output;
+      _output = output;
     });
   }
 
   void decrypt() async {
 
-    final hardCodedIOSAESkey = Uint8List.fromList([126, 193, 178, 226, 223, 97, 231, 48, 181, 172, 41, 25, 243, 79, 104, 172, 180, 10, 241, 188, 40, 44, 242, 142, 217, 148, 47, 199, 17, 72, 243, 75]);
-
-    final hardCodedIOSCipher = Uint8List.fromList([62, 66, 70, 151, 117, 25, 153, 74, 76, 59, 216, 186, 125, 121, 23, 103, 226, 239, 79, 177, 252, 237, 41, 195, 176, 128, 137, 89, 97, 140, 206, 53, 88, 144, 5, 41, 197, 87, 25, 127, 237, 190, 23, 152, 89, 95, 2, 66, 50, 179, 12, 207, 86, 159, 155, 35, 72, 143, 133, 9, 148, 91, 240, 195]);
-
-    final hardCodedIOSIv = Uint8List.fromList([42, 53, 43, 236, 4, 149, 16, 114, 130, 244, 94, 75, 63, 196, 199, 231]);
-
-    final hardCodedAndroidAESkey = Uint8List.fromList([163, 161, 49, 53, 13, 251, 12, 210, 46, 79, 148, 162, 134, 124, 236, 233, 18, 245, 48, 8, 81, 158, 94, 192, 248, 10, 254, 139, 198, 163, 41, 99]);
-
-    final hardCodedAndroidCipher = Uint8List.fromList([175, 223, 113, 228, 201, 163, 195, 52, 191, 75, 216, 148, 81, 38, 56, 70, 36, 73, 113, 61, 64, 89, 135, 49, 121, 46, 240, 9, 47, 209, 90, 66, 168, 100, 214, 80, 137, 247, 218, 146, 185, 62, 39, 15, 250, 45, 75, 142, 148, 238, 156, 154, 52, 12, 134, 149, 252, 214, 25, 205, 121, 204, 7, 193]);
-    
-    final hardCodedAndroidIV = Uint8List.fromList([39, 192, 131, 12, 181, 252, 191, 178, 138, 135, 125, 251, 53, 162, 70, 99]);
-
-    // Test payload with some hardcoded values
-    aeskey = hardCodedAndroidAESkey;
-    encryptedPayload = [hardCodedAndroidCipher, hardCodedAndroidIV];
-
     var output;
     if (encryptedPayload == null || encryptedPayload.isEmpty) {
-      output = 'Encrypt before.';
+      output = 'Encrypt before decrypting!';
     } else {
       decryptedPayload = await NativeCrypto().symDecrypt(encryptedPayload, aeskey);
-      output = 'String successfully Decrypted:\n${bytesToString(decryptedPayload)}';
+      output = 'String successfully decrypted:\n\n${TypeHelper().bytesToString(decryptedPayload)}';
     }
     setState(() {
-      _decryptedString = output;
+      _output = output;
     });
+  }
+
+  void benchmark(int megabytes) async {
+
+    var output;
+    var bigFile = Uint8List(megabytes * 1000000);
+
+    var before = DateTime.now();
+    var encrypted = await NativeCrypto().symEncrypt(bigFile, aeskey);
+    var after = DateTime.now();
+    
+    var benchmark = after.millisecondsSinceEpoch - before.millisecondsSinceEpoch;
+
+    output = '$megabytes MB\n\nAES Encryption:\n$benchmark ms\n\n';
+
+    before = DateTime.now();
+    var decrypted = await NativeCrypto().symDecrypt(encrypted, aeskey);
+    after = DateTime.now();
+
+    print(listEquals(bigFile, decrypted));
+
+    benchmark = after.millisecondsSinceEpoch - before.millisecondsSinceEpoch;
+
+    output += 'AES Decryption:\n$benchmark ms';
+
+    setState(() {
+      _output = output;
+    });
+
   }
 
   @override
   void initState() {
+    // Generate AES key on init.
     generateKey();
     super.initState();
   }
@@ -101,8 +104,10 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
+          centerTitle: true,
           title: const Text('Native Crypto'),
         ),
         body: Padding(
@@ -110,13 +115,18 @@ class _MyAppState extends State<MyApp> {
           child: Center(
             child: Column(
               children: <Widget>[
-                Text(_inputRawCoded),
+                TextField(
+                  controller: textController,
+                  decoration: InputDecoration(
+                    hintText: 'Text to encrypt.',
+                  ),
+                ),
                 SizedBox(height: 20),
                 FlatButton(
                     onPressed: encrypt,
                     color: Colors.blue,
                     child: Text(
-                      'Encrypt',
+                      'Encrypt String',
                       style: TextStyle(color: Colors.white),
                     )),
                 (encryptedPayload != null && encryptedPayload.isNotEmpty)
@@ -126,14 +136,36 @@ class _MyAppState extends State<MyApp> {
                     onPressed: decrypt,
                     color: Colors.blue,
                     child: Text(
-                      'Decrypt',
+                      'Decrypt String',
                       style: TextStyle(color: Colors.white),
                     )),
-                (decryptedPayload != null && decryptedPayload.isNotEmpty)
-                ? Text(decryptedPayload.toList().toString())
-                : Container(),
                 SizedBox(height: 20),
-                Text(_decryptedString),
+                // Output
+                Text(_output,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
+                SizedBox(height: 20),
+                FlatButton(
+                    onPressed: () {benchmark(1);},
+                    color: Colors.blue,
+                    child: Text(
+                      'Benchmark 1 MB',
+                      style: TextStyle(color: Colors.white),
+                    )),
+                FlatButton(
+                    onPressed: () {benchmark(10);},
+                    color: Colors.blue,
+                    child: Text(
+                      'Benchmark 10 MB',
+                      style: TextStyle(color: Colors.white),
+                    )),
+                FlatButton(
+                    onPressed: () {benchmark(20);},
+                    color: Colors.blue,
+                    child: Text(
+                      'Benchmark 20 MB',
+                      style: TextStyle(color: Colors.white),
+                    )),
               ],
             ),
           ),
