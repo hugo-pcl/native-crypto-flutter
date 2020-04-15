@@ -43,6 +43,7 @@ class _MyAppState extends State<MyApp> {
 
   void encrypt() async {
     final plainText = _inputRawCoded;
+
     var output;
     if (plainText.isEmpty) {
       output = 'Entry is empty';
@@ -56,11 +57,21 @@ class _MyAppState extends State<MyApp> {
   }
 
   void decrypt() async {
+
+    final hardCodedAESkey = Uint8List.fromList([29, 4, 177, 73, 96, 186, 180, 218, 158, 84, 106, 158, 254, 34, 255, 5, 93, 213, 196, 102, 251, 70, 189, 184, 246, 170, 227, 143, 112, 168, 182, 65]);
+
+    final hardCodedIOSCipher = Uint8List.fromList([31, 108, 97, 95, 23, 144, 222, 197, 157, 201, 161, 18, 1, 133, 110, 158, 132, 29, 104, 71, 72, 191, 67, 224, 88, 2, 63, 110, 92, 41, 190, 228]);
+
+    final hardCodedIOSIv = Uint8List.fromList([145, 239, 253, 138, 83, 126, 213, 108, 42, 172, 200, 230, 243, 204, 121, 35]);
+
+    // Test payload with some hardcoded values
+    encryptedPayload = [hardCodedIOSCipher, hardCodedIOSIv];    
+
     var output;
     if (encryptedPayload == null || encryptedPayload.isEmpty) {
       output = 'Encrypt before.';
     } else {
-      decryptedPayload = await NativeCrypto().symDecrypt(encryptedPayload, aeskey);
+      decryptedPayload = await NativeCrypto().symDecrypt(encryptedPayload, hardCodedAESkey);
       output = 'String successfully Decrypted:\n${bytesToString(decryptedPayload)}';
     }
     setState(() {
@@ -95,7 +106,7 @@ class _MyAppState extends State<MyApp> {
                 Text(_inputRawCoded),
                 SizedBox(height: 20),
                 FlatButton(
-                    onPressed: encrypt,
+                    onPressed: null,
                     color: Colors.blue,
                     child: Text(
                       'Encrypt',
