@@ -1,13 +1,15 @@
 // Copyright (c) 2020
 // Author: Hugo Pointcheval
 import 'dart:async';
-import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 
+/// Plugin class.
+/// Contains raw functions.
+/// 
+/// You can use [symmetrical_crypto] for an **AES Helper**.
 class NativeCrypto {
-  static const String _tag = 'fr.pointcheval.native_crypto';
   static const MethodChannel _channel =
       const MethodChannel('native.crypto.helper');
 
@@ -17,10 +19,6 @@ class NativeCrypto {
   /// And returns `Uint8List`.
   Future<Uint8List> symKeygen() async {
     final Uint8List aesKey = await _channel.invokeMethod('symKeygen');
-
-    log('AES Key Length: ${aesKey.length}', name: _tag);
-    print('AES Key: $aesKey');
-
     return aesKey;
   }
 
@@ -36,11 +34,6 @@ class NativeCrypto {
       'payload': payloadbytes,
       'aesKey': aesKey,
     });
-
-    log('Payload Length: ${payloadbytes.length}', name: _tag);
-    log('Cipher Length: ${encryptedPayload.first.length}', name: _tag);
-    log('IV Length: ${encryptedPayload.last.length}', name: _tag);
-
     return encryptedPayload;
   }
 
@@ -55,22 +48,6 @@ class NativeCrypto {
       'payload': payloadbytes,
       'aesKey': aesKey,
     });
-
     return decryptedPayload;
-  }
-}
-
-class TypeHelper {
-  /// Returns bytes `Uint8List` from a `String`.
-  Uint8List stringToBytes(String source) {
-    var list = source.codeUnits;
-    var bytes = Uint8List.fromList(list);
-    return bytes;
-  }
-
-  /// Returns a `String` from bytes `Uint8List`.
-  String bytesToString(Uint8List bytes) {
-    var string = String.fromCharCodes(bytes);
-    return string;
   }
 }
