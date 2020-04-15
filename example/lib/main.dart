@@ -20,13 +20,13 @@ class _MyAppState extends State<MyApp> {
   String _bench;
 
   AES aes = AES();
-  Encrypted encrypted = Encrypted();
+  Encrypted encrypted;
   Uint8List decryptedPayload;
 
   void _generateKey() async {
-    await aes.init(KeySize.bits256);
+    await aes.init(keySize: KeySize.bits256);
     setState(() {
-      _output = 'Key generated.';
+      _output = 'Key generated. Length: ${aes.key.length}';
     });
   }
 
@@ -145,7 +145,7 @@ class _MyAppState extends State<MyApp> {
                         'Encrypt String',
                         style: TextStyle(color: Colors.white),
                       )),
-                  (encrypted.cipherText != null && encrypted.cipherText.isNotEmpty)
+                  (encrypted != null && encrypted.cipherText != null && encrypted.cipherText.isNotEmpty)
                       ? Text(encrypted.cipherText.toString())
                       : Container(),
                   FlatButton(
@@ -218,7 +218,7 @@ class _MyAppState extends State<MyApp> {
 class TypeHelper {
   /// Returns bytes `Uint8List` from a `String`.
   Uint8List stringToBytes(String source) {
-    var list = source.codeUnits;
+    var list = source.runes.toList();
     var bytes = Uint8List.fromList(list);
     return bytes;
   }
