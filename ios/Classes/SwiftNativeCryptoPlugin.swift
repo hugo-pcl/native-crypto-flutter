@@ -1,7 +1,6 @@
 import Flutter
 import UIKit
 import CryptoKit
-import Foundation
 import CommonCrypto
 
 extension FlutterStandardTypedData {
@@ -99,8 +98,10 @@ public class SwiftNativeCryptoPlugin: NSObject, FlutterPlugin {
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
     case "symKeygen":
+        let args = call.arguments as! NSDictionary
+        let keySize = args["size"] as! NSNumber
         
-        let keyBytes = symKeygen()
+        let keyBytes = symKeygen(keySize: keySize)!
         
         result(FlutterStandardTypedData.init(bytes: keyBytes))
 
@@ -108,6 +109,7 @@ public class SwiftNativeCryptoPlugin: NSObject, FlutterPlugin {
         let args = call.arguments as! NSDictionary
         let payload = (args["payload"] as! FlutterStandardTypedData).data
         let aesKey = (args["aesKey"] as! FlutterStandardTypedData).data
+        
         let encryptedPayloadIV = symEncrypt(payload: payload, aesKey: aesKey)
         
         result(encryptedPayloadIV)
@@ -121,6 +123,7 @@ public class SwiftNativeCryptoPlugin: NSObject, FlutterPlugin {
         let encryptedPayload = [encrypted, iv]
         
         let aesKey = (args["aesKey"] as! FlutterStandardTypedData).data
+        
         let decryptedPayload = symDecrypt(payload: encryptedPayload, aesKey: aesKey)!
         
         result(decryptedPayload)
@@ -135,10 +138,15 @@ public class SwiftNativeCryptoPlugin: NSObject, FlutterPlugin {
         return hashed.data
     }
     
-    func symKeygen() -> Data {
-        let key = SymmetricKey(size: .bits256)
-        let keyBytes = key.withUnsafeBytes {return Data(Array($0))}
-        return keyBytes
+    func symKeygen(keySize : NSNumber) -> Data? {
+        var bytes = [Int8](repeating: 0, count: keySize.intValue / 8)
+        let status = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
+
+        if status == errSecSuccess { // Always test the status.
+            let keyBytes = bytes.withUnsafeBytes {return Data(Array($0))}
+            return keyBytes
+        }
+        return nil
     }
     
     func symEncrypt(payload : Data, aesKey : Data) -> [Data] {
@@ -176,5 +184,4 @@ public class SwiftNativeCryptoPlugin: NSObject, FlutterPlugin {
             return nil
         }
     }
-    
 }
