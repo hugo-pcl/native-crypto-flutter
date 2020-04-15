@@ -15,6 +15,17 @@ extension FlutterStandardTypedData {
   }
 }
 
+// CryptoKit.Digest utils
+@available(iOS 13.0, *)
+extension Digest {
+    var bytes: [UInt8] { Array(makeIterator()) }
+    var data: Data { Data(bytes) }
+
+    var hexStr: String {
+        bytes.map { String(format: "%02X", $0) }.joined()
+    }
+}
+
 func crypt(operation: Int, algorithm: Int, options: Int, key: Data,
         initializationVector: Data, dataIn: Data) -> Data? {
     return key.withUnsafeBytes { keyUnsafeRawBufferPointer in
@@ -110,7 +121,7 @@ public class SwiftNativeCryptoPlugin: NSObject, FlutterPlugin {
         let encryptedPayload = [encrypted, iv]
         
         let aesKey = (args["aesKey"] as! FlutterStandardTypedData).data
-        let decryptedPayload = symDecrypt(payload: encryptedPayload, aesKey: aesKey)
+        let decryptedPayload = symDecrypt(payload: encryptedPayload, aesKey: aesKey)!
         
         result(decryptedPayload)
         
@@ -119,6 +130,11 @@ public class SwiftNativeCryptoPlugin: NSObject, FlutterPlugin {
     }
   }
     
+    func digest(input : Data) -> Data {
+        let hashed = SHA256.hash(data: input)
+        return hashed.data
+    }
+    
     func symKeygen() -> Data {
         let key = SymmetricKey(size: .bits256)
         let keyBytes = key.withUnsafeBytes {return Data(Array($0))}
@@ -126,7 +142,9 @@ public class SwiftNativeCryptoPlugin: NSObject, FlutterPlugin {
     }
     
     func symEncrypt(payload : Data, aesKey : Data) -> [Data] {
-        var encrypted = payload.encryptAES256_CBC_PKCS7_IV(key: aesKey)!
+        let mac = digest(input: aesKey + payload)
+        let dataToEncrypt = mac + payload
+        var encrypted = dataToEncrypt.encryptAES256_CBC_PKCS7_IV(key: aesKey)!
         
         // Create a range based on the length of data to return
         let range = 0..<16
@@ -139,11 +157,24 @@ public class SwiftNativeCryptoPlugin: NSObject, FlutterPlugin {
         return [encrypted, iv]
     }
     
-    func symDecrypt(payload : [Data], aesKey : Data) -> Data {
+    func symDecrypt(payload : [Data], aesKey : Data) -> Data? {
         let encrypted = payload[1] + payload[0]
-        let decrypted = encrypted.decryptAES256_CBC_PKCS7_IV(key: aesKey)!
+        var decrypted = encrypted.decryptAES256_CBC_PKCS7_IV(key: aesKey)!
         
-        return decrypted
+        // Create a range based on the length of data to return
+        let range = 0..<32
+
+        // Get a new copy of data
+        let mac = decrypted.subdata(in: range)
+        decrypted.removeSubrange(range)
+        
+        let verificationMac = digest(input: aesKey + decrypted)
+        
+        if (mac.base64EncodedData() == verificationMac.base64EncodedData()) {
+            return decrypted
+        } else {
+            return nil
+        }
     }
     
 }
