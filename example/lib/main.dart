@@ -65,22 +65,25 @@ class _MyAppState extends State<MyApp> {
     var bigFile = Uint8List(megabytes * 1000000);
 
     var before = DateTime.now();
-    var encrypted = await NativeCrypto().symEncrypt(bigFile, aeskey);
+    var encryptedBigFile = await NativeCrypto().symEncrypt(bigFile, aeskey);
     var after = DateTime.now();
     
     var benchmark = after.millisecondsSinceEpoch - before.millisecondsSinceEpoch;
 
     output = '$megabytes MB\n\nAES Encryption:\n$benchmark ms\n\n';
 
-    before = DateTime.now();
-    var decrypted = await NativeCrypto().symDecrypt(encrypted, aeskey);
-    after = DateTime.now();
+    var beforeDec = DateTime.now();
+    var decryptedBigFile = await NativeCrypto().symDecrypt(encryptedBigFile, aeskey);
+    var afterDec = DateTime.now();
 
-    print(listEquals(bigFile, decrypted));
+    print(bigFile.length);
+    print(decryptedBigFile.length);
 
-    benchmark = after.millisecondsSinceEpoch - before.millisecondsSinceEpoch;
+    print(listEquals(bigFile, decryptedBigFile));
 
-    output += 'AES Decryption:\n$benchmark ms';
+    var benchmarkDec = afterDec.millisecondsSinceEpoch - beforeDec.millisecondsSinceEpoch;
+
+    output += 'AES Decryption:\n$benchmarkDec ms';
 
     setState(() {
       _output = output;
@@ -160,10 +163,10 @@ class _MyAppState extends State<MyApp> {
                       style: TextStyle(color: Colors.white),
                     )),
                 FlatButton(
-                    onPressed: () {benchmark(20);},
+                    onPressed: () {benchmark(50);},
                     color: Colors.blue,
                     child: Text(
-                      'Benchmark 20 MB',
+                      'Benchmark 50 MB',
                       style: TextStyle(color: Colors.white),
                     )),
               ],
