@@ -27,7 +27,6 @@ public class NativeCryptoPlugin : FlutterPlugin, MethodCallHandler {
     private val HASH_FUNC = "SHA-256"
     private val SYM_CRYPTO_METHOD = "AES"
     private val SYM_CRYPTO_PADDING = "AES/CBC/PKCS5PADDING"
-    private val SYM_CRYPTO_BITS = 256
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         val channel = MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "native.crypto.helper")
@@ -44,7 +43,10 @@ public class NativeCryptoPlugin : FlutterPlugin, MethodCallHandler {
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
         if (call.method == "symKeygen") {
-            val aesKey = symKeygen() // Collection<ByteArray>
+
+            val keySize = call.argument<Int>("size") // 128, 192, 256
+
+            val aesKey = symKeygen(keySize!!) // Collection<ByteArray>
 
             if (aesKey.isNotEmpty()) {
                 result.success(aesKey)
@@ -88,7 +90,9 @@ public class NativeCryptoPlugin : FlutterPlugin, MethodCallHandler {
         return md.digest(obj)
     }
 
-    private fun symKeygen(): ByteArray {
+    private fun symKeygen(keySize : Int): ByteArray {
+
+        val SYM_CRYPTO_BITS = keySize
 
         val secureRandom = SecureRandom()
         val keyGenerator = KeyGenerator.getInstance(SYM_CRYPTO_METHOD)
