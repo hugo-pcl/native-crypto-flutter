@@ -7,9 +7,9 @@ import 'package:flutter/services.dart';
 
 /// [Sources]
 /// Plugin class.
-/// Contains raw functions.
+/// Contains raw functions and specific platform calls.
 /// 
-/// Use [symmetrical_crypto] for an **AES API**.
+/// Use [symmetrical_crypto] for an **AES Layer API**.
 class NativeCrypto {
   /// [Private]
   /// Contains the channel for platform specific code.

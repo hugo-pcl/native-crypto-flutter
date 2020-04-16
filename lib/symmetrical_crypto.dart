@@ -18,20 +18,24 @@ class AES {
   /// This key is used for encryption and decryption.
   Uint8List key;
 
+  bool _isInitialized = false;
+
   /// Check if the AES object is intialized with a valid key before perform any operation.
-  bool isInitialized = false;
+  bool get isInitialized => _isInitialized;
+
+  KeySize _keySize;
 
   /// Defines the size of the generated or passed key.
-  KeySize keySize;
-
+  KeySize get keySize => _keySize;
+  
   /// You can pass a key in constructor.
   AES({this.key}) {
     try {
       bool isValidKey = _testKey();
-      this.isInitialized = isValidKey;
+      this._isInitialized = isValidKey;
     } on KeyException {
-      this.isInitialized = false;
-      throw KeyException('Invalid key length.');
+      this._isInitialized = false;
+      throw KeyException('Invalid key length: ${this.key.length} Bytes');
     }
   }
 
@@ -43,16 +47,16 @@ class AES {
     if (this.key != null) {
       switch (this.key.length) {
         case 16:
-          this.keySize = KeySize.bits128;
+          this._keySize = KeySize.bits128;
           break;
         case 24:
-          this.keySize = KeySize.bits192;
+          this._keySize = KeySize.bits192;
           break;
         case 32:
-          this.keySize = KeySize.bits256;
+          this._keySize = KeySize.bits256;
           break;
         default:
-          throw KeyException('Invalid key length.');
+          throw KeyException('Invalid key length: ${this.key.length} Bytes');
       }
       return true;
     } else {
@@ -68,7 +72,8 @@ class AES {
     if (this.key != null) return null;
 
     int size;
-
+    this._keySize = keySize;
+    
     switch (keySize) {
       case KeySize.bits128:
         size = 128;
@@ -88,73 +93,37 @@ class AES {
     this.key = await NativeCrypto().symKeygen(size);
     try {
       bool isValidKey = _testKey();
-      this.isInitialized = isValidKey;
+      this._isInitialized = isValidKey;
     } on KeyException {
-      this.isInitialized = false;
-      throw KeyException('Invalid key length.');
+      this._isInitialized = false;
+      throw KeyException('Invalid key length: ${this.key.length} Bytes');
     }
   }
 
   /// Encrypts data.
-  /// 
+  ///
   /// Takes `Uint8List` data as parameter.
-  /// And returns an `Encrypted` object.
-  Future<Encrypted> encrypt(Uint8List data) async {
-    if (!this.isInitialized)
+  /// And returns an `Uint8List` **list**.
+  /// 
+  /// The first member of this list is the `cipher data`,
+  /// and the second member is the `IV`.
+  Future<List<Uint8List>> encrypt(Uint8List data) async {
+    if (!this._isInitialized)
       throw EncryptionException('Instance not initialized.');
     List<Uint8List> encryptedPayload =
         await NativeCrypto().symEncrypt(data, this.key);
-    Encrypted encrypted = Encrypted.fromList(Cipher.AES, encryptedPayload);
-
-    return encrypted;
+    return encryptedPayload;
   }
 
   /// Decrypts data.
-  /// 
-  /// Takes `Encrypted` object as parameter.
+  ///
+  /// Takes `Uint8List` **list** as parameter.
   /// And returns plain text data as `Uint8List`.
-  Future<Uint8List> decrypt(Encrypted encrypted) async {
-    if (!this.isInitialized)
+  Future<Uint8List> decrypt(List<Uint8List> encryptedPayload) async {
+    if (!this._isInitialized)
       throw DecryptionException('Instance not initialized.');
     Uint8List decryptedPayload =
-        await NativeCrypto().symDecrypt(encrypted.toList(), this.key);
+        await NativeCrypto().symDecrypt(encryptedPayload, this.key);
     return decryptedPayload;
-  }
-}
-
-/// Contains data of an encrypted payload.
-/// More practical than a list.
-class Encrypted {
-  /// Contains encryption algorithm.
-  Cipher cipher;
-
-  /// Contains encrypted bytes.
-  Uint8List cipherText;
-
-  /// Contains IV used for encryption.
-  /// 
-  /// Needed for decryption.
-  Uint8List iv;
-
-  /// Contains MAC.
-  ///
-  /// Used in decryption to authenticate the data.
-  Uint8List mac;
-
-  /// Creates an encrypted from payload `List<Uint8List>`.
-  Encrypted.fromList(this.cipher, List<Uint8List> encryptedPayload) {
-    this.mac = encryptedPayload[0].sublist(0, 32);
-    this.cipherText =
-        encryptedPayload[0].sublist(32, encryptedPayload[0].length);
-    this.iv = encryptedPayload[1];
-  }
-
-  /// Returns a payload `List<Uint8List>` from this encrypted.
-  List<Uint8List> toList() {
-    List<Uint8List> encryptedPayload = [
-      Uint8List.fromList(this.mac + this.cipherText),
-      this.iv
-    ];
-    return encryptedPayload;
   }
 }
