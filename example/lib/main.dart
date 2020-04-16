@@ -20,7 +20,7 @@ class _MyAppState extends State<MyApp> {
   String _bench;
 
   AES aes = AES();
-  Encrypted encrypted;
+  List<Uint8List> encryptedPayload;
   Uint8List decryptedPayload;
 
   void _generateKey() async {
@@ -38,7 +38,7 @@ class _MyAppState extends State<MyApp> {
       output = 'Entry is empty';
     } else {
       var stringToBytes = TypeHelper().stringToBytes(plainText);
-      encrypted = await aes.encrypt(stringToBytes);
+      encryptedPayload = await aes.encrypt(stringToBytes);
       output = 'String successfully encrypted.';
     }
     setState(() {
@@ -48,10 +48,10 @@ class _MyAppState extends State<MyApp> {
 
   void _decrypt() async {
     var output;
-    if (encrypted.cipherText == null || encrypted.cipherText.isEmpty) {
+    if (encryptedPayload == null || encryptedPayload[0].isEmpty) {
       output = 'Encrypt before decrypting!';
     } else {
-      decryptedPayload = await aes.decrypt(encrypted);
+      decryptedPayload = await aes.decrypt(encryptedPayload);
       var bytesToString = TypeHelper().bytesToString(decryptedPayload);
       output = 'String successfully decrypted:\n\n$bytesToString';
     }
@@ -95,7 +95,7 @@ class _MyAppState extends State<MyApp> {
       setState(() {
         _bench = 'Open the logcat!';
       });
-      for (int i=1;i<100;i+=10) {
+      for (int i=1;i<50;i+=10) {
         var benchmark = await _benchmark(i);
         log(benchmark);
       }
@@ -145,9 +145,6 @@ class _MyAppState extends State<MyApp> {
                         'Encrypt String',
                         style: TextStyle(color: Colors.white),
                       )),
-                  (encrypted != null && encrypted.cipherText != null && encrypted.cipherText.isNotEmpty)
-                      ? Text(encrypted.cipherText.toString())
-                      : Container(),
                   FlatButton(
                       onPressed: _decrypt,
                       color: Colors.blue,
