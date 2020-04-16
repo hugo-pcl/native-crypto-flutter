@@ -50,8 +50,8 @@ For iOS:
 
 ## Todo 🚀
 
-* ✅ Implement working cross platform encryption/decryption.
-* Complete AES implementation (all key sizes, padding, modes...).
-* Improve performances.
-* Add ChaCha20.
+* ✅ Implement working cross platform AES encryption/decryption.
+* ✅ Different key sizes support.
+* ✅ Improve performances.
+* Add other ciphers.
 * ... add asym crypto support.
