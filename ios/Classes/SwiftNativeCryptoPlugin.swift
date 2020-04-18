@@ -1,6 +1,5 @@
 import Flutter
 import UIKit
-import CryptoKit
 import CommonCrypto
 
 extension FlutterStandardTypedData {
@@ -14,16 +13,6 @@ extension FlutterStandardTypedData {
   }
 }
 
-// CryptoKit.Digest utils
-@available(iOS 13.0, *)
-extension Digest {
-    var bytes: [UInt8] { Array(makeIterator()) }
-    var data: Data { Data(bytes) }
-
-    var hexStr: String {
-        bytes.map { String(format: "%02X", $0) }.joined()
-    }
-}
 
 func crypt(operation: Int, algorithm: Int, options: Int, key: Data,
         initializationVector: Data, dataIn: Data) -> Data? {
@@ -47,6 +36,37 @@ func crypt(operation: Int, algorithm: Int, options: Int, key: Data,
             }
         }
     }
+}
+
+func pbkdf2(hash: CCPBKDFAlgorithm, password: String, salt: String, keyByteCount: Int, rounds: Int) -> Data? {
+    let passwordData = password.data(using: .utf8)!
+    let saltData = salt.data(using: .utf8)!
+    var derivedKeyData = Data(repeating: 0, count: keyByteCount)
+    
+    var localDerivedKeyData = derivedKeyData
+    
+    let derivationStatus = derivedKeyData.withUnsafeMutableBytes { derivedKeyBytes in
+        saltData.withUnsafeBytes { saltBytes in
+            
+            CCKeyDerivationPBKDF(
+                CCPBKDFAlgorithm(kCCPBKDF2),
+                password, passwordData.count,
+                saltBytes, saltData.count,
+                hash,
+                UInt32(rounds),
+                derivedKeyBytes, localDerivedKeyData.count)
+        }
+    }
+    if (derivationStatus != kCCSuccess) {
+        print("Error: \(derivationStatus)")
+        return nil;
+    }
+    
+    return derivedKeyData
+}
+
+func pbkdf2sha256(password: String, salt: String, keyByteCount: Int, rounds: Int) -> Data? {
+    return pbkdf2(hash: CCPBKDFAlgorithm(kCCPRFHmacAlgSHA256), password: password, salt: salt, keyByteCount: keyByteCount, rounds: rounds)
 }
 
 func randomGenerateBytes(count: Int) -> Data? {
@@ -85,9 +105,32 @@ extension Data {
             options: kCCOptionPKCS7Padding, key: key, initializationVector: iv,
             dataIn: ciphertext)
     }
+    
+    enum Algorithm {
+        case sha256
+        
+        var digestLength: Int {
+            switch self {
+            case .sha256: return Int(CC_SHA256_DIGEST_LENGTH)
+            }
+        }
+    }
+    
+    func hash(for algorithm: Algorithm) -> Data {
+        let hashBytes = UnsafeMutablePointer<UInt8>.allocate(capacity: algorithm.digestLength)
+        defer { hashBytes.deallocate() }
+        switch algorithm {
+        case .sha256:
+            withUnsafeBytes { (buffer) -> Void in
+                CC_SHA256(buffer.baseAddress!, CC_LONG(buffer.count), hashBytes)
+            }
+        }
+        
+        return Data(bytes: hashBytes, count: algorithm.digestLength)
+    }
+
 }
 
-@available(iOS 13.0, *)
 public class SwiftNativeCryptoPlugin: NSObject, FlutterPlugin {
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "native.crypto.helper", binaryMessenger: registrar.messenger())
@@ -97,13 +140,37 @@ public class SwiftNativeCryptoPlugin: NSObject, FlutterPlugin {
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
+    case "pbkdf2":
+        let args = call.arguments as! NSDictionary
+        let password = args["password"] as! String
+        let salt = args["salt"] as! String
+        let keyLength = args["keyLength"] as! NSNumber
+        let iteration = args["iteration"] as! NSNumber
+        
+        let keyBytes = pbkdf2sha256(password: password, salt: salt, keyByteCount: keyLength.intValue, rounds: iteration.intValue)
+        
+        if keyBytes != nil {
+            result(FlutterStandardTypedData.init(bytes: keyBytes!))
+        } else {
+            result(FlutterError(code: "PBKDF2ERROR",
+                                message: "PBKDF2 KEY IS NIL.",
+                                details: nil))
+        }
+        
+                    
     case "symKeygen":
         let args = call.arguments as! NSDictionary
         let keySize = args["size"] as! NSNumber
         
-        let keyBytes = symKeygen(keySize: keySize)!
+        let keyBytes = symKeygen(keySize: keySize)
         
-        result(FlutterStandardTypedData.init(bytes: keyBytes))
+        if keyBytes != nil {
+            result(FlutterStandardTypedData.init(bytes: keyBytes!))
+        } else {
+            result(FlutterError(code: "SYMKEYGENERROR",
+                                message: "GENERATED KEY IS NIL.",
+                                details: nil))
+        }
 
     case "symEncrypt":
         let args = call.arguments as! NSDictionary
@@ -124,9 +191,15 @@ public class SwiftNativeCryptoPlugin: NSObject, FlutterPlugin {
         
         let aesKey = (args["aesKey"] as! FlutterStandardTypedData).data
         
-        let decryptedPayload = symDecrypt(payload: encryptedPayload, aesKey: aesKey)!
+        let decryptedPayload = symDecrypt(payload: encryptedPayload, aesKey: aesKey)
         
-        result(decryptedPayload)
+        if decryptedPayload != nil {
+            result(FlutterStandardTypedData.init(bytes: decryptedPayload!))
+        } else {
+            result(FlutterError(code: "DECRYPTIONERROR",
+                                message: "DECRYPTED PAYLOAD IS NIL. MAYBE VERIFICATION MAC IS UNVALID.",
+                                details: nil))
+        }
         
     default: result(FlutterMethodNotImplemented)
         
@@ -134,8 +207,8 @@ public class SwiftNativeCryptoPlugin: NSObject, FlutterPlugin {
   }
     
     func digest(input : Data) -> Data {
-        let hashed = SHA256.hash(data: input)
-        return hashed.data
+        let hashed = input.hash(for: .sha256)
+        return hashed
     }
     
     func symKeygen(keySize : NSNumber) -> Data? {
