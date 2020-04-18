@@ -16,6 +16,11 @@ class DecryptionException implements Exception {
   DecryptionException(this.error);
 }
 
+class PlatformException implements Exception {
+  String error;
+  PlatformException(this.error);
+}
+
 class NotImplementedException implements Exception {
   String error;
   NotImplementedException(this.error);
