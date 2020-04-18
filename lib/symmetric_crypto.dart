@@ -1,9 +1,16 @@
 // Copyright (c) 2020
 // Author: Hugo Pointcheval
+import 'dart:async';
+import 'dart:developer';
 import 'dart:typed_data';
 
-import 'package:native_crypto/src/native_crypto.dart';
-import 'package:native_crypto/src/exceptions.dart';
+import 'package:flutter/services.dart';
+
+import 'src/native_crypto.dart';
+import 'exceptions.dart';
+
+const String TAG_ERROR = 'error.native_crypto.symmetric_crypto'; 
+const String TAG_DEBUG = 'debug.native_crypto.symmetric_crypto'; 
 
 /// Defines all available key sizes.
 enum KeySize { bits128, bits192, bits256 }
@@ -18,6 +25,7 @@ class KeyGenerator {
   /// Generate a secret key.
   ///
   /// You can specify a `keySize`. Default is 256 bits.
+  /// It returns an `Uint8List`.
   Future<Uint8List> secretKey({KeySize keySize}) async {
     int size;
     switch (keySize) {
@@ -35,7 +43,32 @@ class KeyGenerator {
         size = 256;
         break;
     }
-    return await NativeCrypto().symKeygen(size);
+
+    Uint8List key;
+    try {
+      key = await NativeCrypto().symKeygen(size);
+      log("KEY LENGTH: ${key.length}", name: TAG_DEBUG);
+    } on PlatformException catch (e) {
+      log(e.message, name: TAG_ERROR);
+      throw e;
+    }
+    return key;
+  }
+
+  /// PBKDF2.
+  ///
+  /// `keyLength` is in Bytes. 
+  /// It returns an `Uint8List`.
+  Future<Uint8List> pbkdf2(String password, String salt, {int keyLength: 32, int iteration: 10000}) async {
+    Uint8List key;
+    try {
+      key = await NativeCrypto().pbkdf2( password, salt, keyLength: keyLength, iteration: iteration);
+      log("PBKDF2 KEY LENGTH: ${key.length}", name: TAG_DEBUG);
+    } on PlatformException catch (e) {
+      log(e.message, name: TAG_ERROR);
+      throw e;
+    }
+    return key;
   }
 }
 
@@ -54,9 +87,9 @@ class AES {
     this._key = key;
     try {
       this._isInitialized = _testKey();
-    } on KeyException {
+    } on KeyException catch (e) {
       this._isInitialized = false;
-      throw KeyException('Invalid key length: ${this.key.length} Bytes');
+      throw e;
     }
   }
 
@@ -86,7 +119,9 @@ class AES {
           this._keySize = KeySize.bits256;
           break;
         default:
-          throw KeyException('Invalid key length: ${this.key.length} Bytes');
+          var error = 'Invalid key length: ${this.key.length} Bytes';
+          log(error, name: TAG_ERROR);
+          throw KeyException(error);
       }
       return true;
     } else {
@@ -102,13 +137,18 @@ class AES {
     if (this.key != null) return null;
 
     this._keySize = keySize;
-    this._key = await KeyGenerator().secretKey(keySize: keySize);
+
+    try {
+      this._key = await KeyGenerator().secretKey(keySize: keySize);
+    } on PlatformException catch (e) {
+      log(e.message, name: TAG_ERROR);
+    }
 
     try {
       this._isInitialized = _testKey();
-    } on KeyException {
+    } on KeyException catch (e) {
       this._isInitialized = false;
-      throw KeyException('Invalid key length: ${this.key.length} Bytes');
+      throw e;
     }
   }
 
@@ -140,9 +180,16 @@ class AES {
   Future<Uint8List> decrypt(List<Uint8List> encryptedPayload, {Uint8List key}) async {
     if (!this._isInitialized && key == null)
       throw DecryptionException(
-          'Instance not initialized. You can pass a key directly in encrypt method.');
-    Uint8List decryptedPayload =
-        await NativeCrypto().symDecrypt(encryptedPayload, key ?? this.key);
+          'Instance not initialized. You can pass a key directly in decrypt method.');
+
+    Uint8List decryptedPayload;
+    try {
+      decryptedPayload = await NativeCrypto().symDecrypt(encryptedPayload, key ?? this.key);
+    } on DecryptionException catch (e) {
+      log(e.message, name: TAG_ERROR);
+      throw e;
+    }
+
     return decryptedPayload;
   }
 }
