@@ -84,8 +84,8 @@ class _MyAppState extends State<MyApp> {
     if (encryptedPayload == null || encryptedPayload[0].isEmpty) {
       output = 'Encrypt before altering payload!';
     } else {
-      // Shuffle payload.
-      encryptedPayload[0].shuffle();
+      // Add 1 to the first byte
+      encryptedPayload[0][0] += 1;
       output = 'Payload altered.';
     }
     setState(() {
