@@ -1,3 +1,9 @@
+//
+//  NativeCryptoPlugin
+//
+//  Copyright (c) 2020
+//  Author: Hugo Pointcheval
+//
 import Flutter
 import UIKit
 import CommonCrypto
@@ -12,7 +18,6 @@ extension FlutterStandardTypedData {
     }
   }
 }
-
 
 func crypt(operation: Int, algorithm: Int, options: Int, key: Data,
         initializationVector: Data, dataIn: Data) -> Data? {
