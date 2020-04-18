@@ -3,16 +3,17 @@
 Fast crypto functions for Flutter.
 
 * Table of content
-  - [Why](#why)
-  - [Performances](#performances)
-  - [How](#how)
-  - [Todo](#todo)
-  - [Installation](#installation)
-  - [Usage](#usage)
-  - [Example](#example)
+  * [Background](#background)
+  * [Performances](#performances)
+  * [Installation](#installation)
+  * [Usage](#usage)
+  * [Example](#example)
+  * [How](#how)
+  * [Todo](#todo)
 
-## Why 🤔
+## Background
 
+🤔 Why I started this project ?
 Because I faced a performance issue when I was using **PointyCastle**.
 
 It's quite simple, judge for yourself, these are times for AES256 encryption on an Android device (**Huawei P30 Pro**).
@@ -31,9 +32,9 @@ It's quite simple, judge for yourself, these are times for AES256 encryption on 
 
 > We notice that these times, in addition to being far too big, are not even linear.
 
-## Performances ⏱
+## Performances
 
-On an Android device: **Huawei P30 Pro / Android 10**
+⏱ On an **Android 10** device: **Huawei P30 Pro**
 
 | Size | NativeCrypto |
 |------|--------------|
@@ -45,30 +46,9 @@ On an Android device: **Huawei P30 Pro / Android 10**
 | 10 mB | 229 ms
 | 50 mB | 779 ms
 
-## How 🔬
+## Installation
 
-Using the native implementation of the crypto libs available on each OS.
-
-For Android:
-
-* [javax.crypto](https://docs.oracle.com/javase/7/docs/api/javax/crypto/package-summary.html)
-* [java.security](https://docs.oracle.com/javase/7/docs/api/java/security/package-summary.html)
-
-For iOS:
-
-* [CommonCrypto](https://developer.apple.com/library/archive/documentation/Security/Conceptual/cryptoservices/Introduction/Introduction.html)
-
-## Todo 🚀
-
-- [x] Implement working cross platform AES encryption/decryption.
-- [x] Different key sizes support.
-- [x] Improve performances.
-- [ ] Add exceptions.
-- [ ] PBKDF2 support.
-- [ ] Add other ciphers.
-- [ ] ... add asym crypto support.
-
-## Installation 🚧
+🚧 You can easely setup a Flutter project with this plugin.
 
 Just add these lines in your **pubspec.yaml**:
 
@@ -79,7 +59,7 @@ native_crypto:
         ref: v0.0.x
 ```
 
-> And replace "x" with the current version!
+> Replace "x" with the current version!
 
 Then in your code:
 
@@ -91,9 +71,10 @@ import 'package:native_crypto/symmetric_crypto.dart';
 import 'package:native_crypto/exceptions.dart';
 ```
 
-## Usage 🎯
+## Usage
 
 To create an AES instance, and generate a key.
+
 ```dart
 AES aes = AES();
 await aes.init(KeySize.bits256)
@@ -128,6 +109,34 @@ encryptedPayload = await AES().encrypt(data, key: aeskey);
 decryptedPayload = await AES().decrypt(encryptedPayload, key: aeskey);
 ```
 
-## Example 📐
+## Example
 
-Look in **example/lib/** for an example app.
+🔍 Look in **example/lib/** for an example app.
+
+## How
+
+🔬 But how it is possible ??
+
+Using the native implementation of crypto libs available on each OS.
+
+For **Android**:
+
+* [javax.crypto](https://docs.oracle.com/javase/7/docs/api/javax/crypto/package-summary.html)
+* [java.security](https://docs.oracle.com/javase/7/docs/api/java/security/package-summary.html)
+
+For **iOS**:
+
+* [CommonCrypto](https://developer.apple.com/library/archive/documentation/Security/Conceptual/cryptoservices/Introduction/Introduction.html)
+
+## Todos
+
+🚀 You can contribute to this project.
+
+* [x] Implement working cross platform AES encryption/decryption.
+* [x] Different key sizes support.
+* [x] Improve performances.
+* [x] Add exceptions.
+* [x] PBKDF2 support.
+* [ ] Add other ciphers.
+* [ ] Clean platform specific code.
+* [ ] Add asym crypto support...
