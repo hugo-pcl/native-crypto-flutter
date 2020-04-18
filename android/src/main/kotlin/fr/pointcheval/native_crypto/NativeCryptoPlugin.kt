@@ -2,7 +2,6 @@
  * Copyright (c) 2020
  * Author: Hugo Pointcheval
  */
-
 package fr.pointcheval.native_crypto
 
 import androidx.annotation.NonNull
@@ -17,7 +16,9 @@ import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
+import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.PBEKeySpec
 import javax.crypto.spec.SecretKeySpec
 
 
@@ -42,8 +43,21 @@ public class NativeCryptoPlugin : FlutterPlugin, MethodCallHandler {
     }
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
-        if (call.method == "symKeygen") {
+        if (call.method == "pbkdf2") {
 
+            val password = call.argument<String>("password")
+            val salt = call.argument<String>("salt")
+            val keyLength = call.argument<Int>("keyLength")
+            val iteration = call.argument<Int>("iteration")
+
+            val key = pbkdf2(password!!, salt!!, keyLength!!, iteration!!)
+
+            if (key.isNotEmpty()) {
+                result.success(key)
+            } else {
+                result.error("PBKDF2ERROR", "PBKDF2 KEY IS NULL.", null)
+            }
+        } else if (call.method == "symKeygen") {
             val keySize = call.argument<Int>("size") // 128, 192, 256
 
             val aesKey = symKeygen(keySize!!) // Collection<ByteArray>
@@ -51,7 +65,7 @@ public class NativeCryptoPlugin : FlutterPlugin, MethodCallHandler {
             if (aesKey.isNotEmpty()) {
                 result.success(aesKey)
             } else {
-                result.error("KeygenError", "Key generation failed.", null)
+                result.error("SYMKEYGENERROR", "GENERATED KEY IS NULL.", null)
             }
         } else if (call.method == "symEncrypt") {
             val payload = call.argument<ByteArray>("payload") // ByteArray
@@ -62,19 +76,24 @@ public class NativeCryptoPlugin : FlutterPlugin, MethodCallHandler {
             if (encryptedPayload.isNotEmpty()) {
                 result.success(encryptedPayload)
             } else {
-                result.error("EncryptionError", "Encryption failed.", null)
+                result.error("ENCRYPTIONERROR", "ENCRYPTED PAYLOAD IS NULL.", null)
             }
         } else if (call.method == "symDecrypt") {
             val payload = call.argument<Collection<ByteArray>>("payload") // Collection<ByteArray>
             val aesKey = call.argument<ByteArray>("aesKey") // ByteArray
+            var decryptedPayload : ByteArray? = null
 
-            val decryptedPayload = symDecrypt(payload!!, aesKey!!) // ByteArray
-
-            if (decryptedPayload != null && decryptedPayload.isNotEmpty()) {
-                result.success(decryptedPayload)
-            } else {
-                result.error("DecryptionError", "Decryption failed.", null)
+            try {
+                decryptedPayload = symDecrypt(payload!!, aesKey!!)
+                if (decryptedPayload != null && decryptedPayload.isNotEmpty()) {
+                    result.success(decryptedPayload)
+                } else {
+                    result.error("DECRYPTIONERROR", "DECRYPTED PAYLOAD IS NULL. MAYBE VERIFICATION MAC IS UNVALID.", null)
+                }
+            } catch (e : Exception) {
+                result.error("DECRYPTIONERROR", "AN ERROR OCCURED WHILE DECRYPTING.", null)
             }
+            
         } else {
             result.notImplemented()
         }
@@ -90,6 +109,15 @@ public class NativeCryptoPlugin : FlutterPlugin, MethodCallHandler {
         return md.digest(obj)
     }
 
+    private fun pbkdf2(password : String, salt : String, keyLength : Int, iteration : Int) : ByteArray {
+        val chars: CharArray = password.toCharArray()
+
+        val spec = PBEKeySpec(chars, salt.toByteArray(), iteration, keyLength * 8)
+        val skf: SecretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
+        return skf.generateSecret(spec).encoded
+
+    }
+
     private fun symKeygen(keySize : Int): ByteArray {
 
         val SYM_CRYPTO_BITS = keySize
@@ -101,7 +129,6 @@ public class NativeCryptoPlugin : FlutterPlugin, MethodCallHandler {
 
         return skey!!.encoded
     }
-
 
     private fun symEncrypt(payload: ByteArray, aesKey: ByteArray): Collection<ByteArray> {
 
