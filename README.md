@@ -2,11 +2,20 @@
 
 Fast crypto functions for Flutter.
 
+* Table of content
+  - [Why](#why)
+  - [Performances](#performances)
+  - [How](#how)
+  - [Todo](#todo)
+  - [Installation](#installation)
+  - [Usage](#usage)
+  - [Example](#example)
+
 ## Why 🤔
 
 Because I faced a performance issue when I was using **PointyCastle**.
 
-It's quite simple, judge for yourself, these are times for AES256 encryption on an Android device.
+It's quite simple, judge for yourself, these are times for AES256 encryption on an Android device (**Huawei P30 Pro**).
 
 | Size | PointyCastle |
 |------|--------------|
@@ -23,6 +32,8 @@ It's quite simple, judge for yourself, these are times for AES256 encryption on 
 > We notice that these times, in addition to being far too big, are not even linear.
 
 ## Performances ⏱
+
+On an Android device: **Huawei P30 Pro / Android 10**
 
 | Size | NativeCrypto |
 |------|--------------|
@@ -46,12 +57,77 @@ For Android:
 For iOS:
 
 * [CommonCrypto](https://developer.apple.com/library/archive/documentation/Security/Conceptual/cryptoservices/Introduction/Introduction.html)
-* [CryptoKit](https://developer.apple.com/documentation/cryptokit/)
 
 ## Todo 🚀
 
-* ✅ Implement working cross platform AES encryption/decryption.
-* ✅ Different key sizes support.
-* ✅ Improve performances.
-* Add other ciphers.
-* ... add asym crypto support.
+- [x] Implement working cross platform AES encryption/decryption.
+- [x] Different key sizes support.
+- [x] Improve performances.
+- [ ] Add exceptions.
+- [ ] PBKDF2 support.
+- [ ] Add other ciphers.
+- [ ] ... add asym crypto support.
+
+## Installation 🚧
+
+Just add these lines in your **pubspec.yaml**:
+
+```
+native_crypto:
+    git:
+        url: https://gogs.pointcheval.fr/hugo/native-crypto-flutter.git
+        ref: v0.0.x
+```
+
+> And replace "x" with the current version!
+
+Then in your code:
+
+```dart
+// Symmetric crypto.
+import 'package:native_crypto/symmetric_crypto.dart';
+
+// To handle exceptions.
+import 'package:native_crypto/exceptions.dart';
+```
+
+## Usage 🎯
+
+To create an AES instance, and generate a key.
+```dart
+AES aes = AES();
+await aes.init(KeySize.bits256)
+```
+
+You can also generate key, then use it in AES.
+
+```dart
+Uint8List aeskey = await KeyGenerator().secretKey(keySize: KeySize.bits256);
+AES aes = AES(key: aeskey);
+```
+
+You can create a key with PBKDF2.
+
+```dart
+Uint8List key = await KeyGenerator().pbkdf2(password, salt, keyLength: 32, iteration: 10000);
+AES aes = AES(key: key);
+```
+
+Then you can encrypt/decrypt data with this instance.
+
+```dart
+encryptedPayload = await aes.encrypt(data);
+decryptedPayload = await aes.decrypt(encryptedPayload);
+```
+
+Or you can also use AES on the fly with different keys.
+
+```dart
+Uint8List aeskey = await KeyGenerator().secretKey(keySize: KeySize.bits256);
+encryptedPayload = await AES().encrypt(data, key: aeskey);
+decryptedPayload = await AES().decrypt(encryptedPayload, key: aeskey);
+```
+
+## Example 📐
+
+Look in **example/lib/** for an example app.
