@@ -52,7 +52,7 @@ It's quite simple, judge for yourself, these are times for AES256 encryption on 
 
 Just add these lines in your **pubspec.yaml**:
 
-```
+```yaml
 native_crypto:
     git:
         url: https://gogs.pointcheval.fr/hugo/native-crypto-flutter.git
