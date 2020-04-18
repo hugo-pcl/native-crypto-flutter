@@ -4,8 +4,10 @@ import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:native_crypto/symmetric_crypto.dart';
+import 'package:native_crypto/exceptions.dart';
 
 void main() => runApp(MyApp());
 
@@ -16,20 +18,46 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final textController = TextEditingController();
+  final pwdController = TextEditingController();
+
   String _output = 'none';
   String _bench;
 
   AES aes = AES();
   List<Uint8List> encryptedPayload;
   Uint8List decryptedPayload;
+  Uint8List key;
 
   void _generateKey() async {
     // You can also generate key before creating aes object.
     // Uint8List aeskey = await KeyGenerator().secretKey(keySize: KeySize.bits256);
     // AES aes = AES(key: aeskey);
-    await aes.init(KeySize.bits256);
+    var output;
+    try {
+      await aes.init(KeySize.bits256);
+      output = 'Key generated. Length: ${aes.key.length}';
+    } catch (e) {
+      // PlatformException or KeyException, both have message property.
+      output = e.message;
+    }
+
     setState(() {
-      _output = 'Key generated. Length: ${aes.key.length}';
+      _output = output;
+    });
+  }
+
+  void _pbkdf2() async {
+    final password = pwdController.text.trim();
+
+    var output;
+    if (password.isEmpty) {
+      output = 'Password is empty';
+    } else {
+      key = await KeyGenerator().pbkdf2(password, 'salt');
+      output = 'Key successfully derived.';
+    }
+    setState(() {
+      _output = output;
     });
   }
 
@@ -43,8 +71,22 @@ class _MyAppState extends State<MyApp> {
       var stringToBytes = TypeHelper().stringToBytes(plainText);
       // You can also pass a specific key.
       // encryptedPayload = await AES().encrypt(stringToBytes, key: aeskey);
-      encryptedPayload = await aes.encrypt(stringToBytes);
+      encryptedPayload = await aes.encrypt(stringToBytes, key: key?? null);
       output = 'String successfully encrypted.';
+    }
+    setState(() {
+      _output = output;
+    });
+  }
+
+  void _alter() async {
+    var output;
+    if (encryptedPayload == null || encryptedPayload[0].isEmpty) {
+      output = 'Encrypt before altering payload!';
+    } else {
+      // Shuffle payload.
+      encryptedPayload[0].shuffle();
+      output = 'Payload altered.';
     }
     setState(() {
       _output = output;
@@ -58,9 +100,13 @@ class _MyAppState extends State<MyApp> {
     } else {
       // You can also pass a specific key.
       // decryptedPayload = await AES().decrypt(encryptedPayload, key: aeskey);
-      decryptedPayload = await aes.decrypt(encryptedPayload);
-      var bytesToString = TypeHelper().bytesToString(decryptedPayload);
-      output = 'String successfully decrypted:\n\n$bytesToString';
+      try {
+        decryptedPayload = await aes.decrypt(encryptedPayload, key: key?? null);
+        var bytesToString = TypeHelper().bytesToString(decryptedPayload);
+        output = 'String successfully decrypted:\n\n$bytesToString';
+      } on DecryptionException catch (e) {
+        output = e.message;
+      }
     }
     setState(() {
       _output = output;
@@ -120,6 +166,7 @@ class _MyAppState extends State<MyApp> {
   void dispose() {
     // Clean up the controller when the widget is disposed.
     textController.dispose();
+    pwdController.dispose();
     super.dispose();
   }
 
@@ -138,6 +185,21 @@ class _MyAppState extends State<MyApp> {
               child: Column(
                 children: <Widget>[
                   TextField(
+                    controller: pwdController,
+                    decoration: InputDecoration(
+                      hintText: 'Test password',
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  FlatButton(
+                      onPressed: _pbkdf2,
+                      color: Colors.blue,
+                      child: Text(
+                        'Pbkdf2',
+                        style: TextStyle(color: Colors.white),
+                      )),
+                  SizedBox(height: 30),
+                  TextField(
                     controller: textController,
                     decoration: InputDecoration(
                       hintText: 'Text to encrypt.',
@@ -149,6 +211,13 @@ class _MyAppState extends State<MyApp> {
                       color: Colors.blue,
                       child: Text(
                         'Encrypt String',
+                        style: TextStyle(color: Colors.white),
+                      )),
+                  FlatButton(
+                      onPressed: _alter,
+                      color: Colors.blue,
+                      child: Text(
+                        'Alter encrypted payload',
                         style: TextStyle(color: Colors.white),
                       )),
                   FlatButton(
