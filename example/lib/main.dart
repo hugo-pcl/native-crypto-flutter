@@ -5,7 +5,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
-import 'package:native_crypto/symmetrical_crypto.dart';
+import 'package:native_crypto/symmetric_crypto.dart';
 
 void main() => runApp(MyApp());
 
@@ -24,7 +24,10 @@ class _MyAppState extends State<MyApp> {
   Uint8List decryptedPayload;
 
   void _generateKey() async {
-    await aes.init(keySize: KeySize.bits256);
+    // You can also generate key before creating aes object.
+    // Uint8List aeskey = await KeyGenerator().secretKey(keySize: KeySize.bits256);
+    // AES aes = AES(key: aeskey);
+    await aes.init(KeySize.bits256);
     setState(() {
       _output = 'Key generated. Length: ${aes.key.length}';
     });
@@ -38,6 +41,8 @@ class _MyAppState extends State<MyApp> {
       output = 'Entry is empty';
     } else {
       var stringToBytes = TypeHelper().stringToBytes(plainText);
+      // You can also pass a specific key.
+      // encryptedPayload = await AES().encrypt(stringToBytes, key: aeskey);
       encryptedPayload = await aes.encrypt(stringToBytes);
       output = 'String successfully encrypted.';
     }
@@ -51,6 +56,8 @@ class _MyAppState extends State<MyApp> {
     if (encryptedPayload == null || encryptedPayload[0].isEmpty) {
       output = 'Encrypt before decrypting!';
     } else {
+      // You can also pass a specific key.
+      // decryptedPayload = await AES().decrypt(encryptedPayload, key: aeskey);
       decryptedPayload = await aes.decrypt(encryptedPayload);
       var bytesToString = TypeHelper().bytesToString(decryptedPayload);
       output = 'String successfully decrypted:\n\n$bytesToString';
@@ -71,7 +78,7 @@ class _MyAppState extends State<MyApp> {
     var benchmark =
         after.millisecondsSinceEpoch - before.millisecondsSinceEpoch;
 
-    output = '$megabytes MB\n\nAES Encryption:\n$benchmark ms\n\n';
+    output = '$megabytes MB\nAES Encryption: $benchmark ms\n';
 
     before = DateTime.now();
     await aes.decrypt(encryptedBigFile);
@@ -79,7 +86,7 @@ class _MyAppState extends State<MyApp> {
 
     benchmark = after.millisecondsSinceEpoch - before.millisecondsSinceEpoch;
 
-    output += 'AES Decryption:\n$benchmark ms\n\n\n';
+    output += 'AES Decryption: $benchmark ms\n\n';
 
     return output;
   }
@@ -95,9 +102,9 @@ class _MyAppState extends State<MyApp> {
       setState(() {
         _bench = 'Open the logcat!';
       });
-      for (int i=1;i<50;i+=10) {
+      for (int i=1;i<=50;i+=10) {
         var benchmark = await _benchmark(i);
-        log(benchmark);
+        log(benchmark, name: 'fr.pointcheval.native_crypto');
       }
     }
     
@@ -119,7 +126,6 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
           centerTitle: true,
