@@ -1,5 +1,7 @@
 # NativeCrypto
 
+![native_crypto](/assets/native_crypto.png)
+
 Fast crypto functions for Flutter.
 
 * Table of content
