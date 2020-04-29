@@ -21,7 +21,7 @@ class NativeCrypto {
   ///
   /// [keyLength] is in Bytes. 
   /// It returns an `Uint8List`.
-  Future<Uint8List> pbkdf2(String password, String salt, {int keyLength: 32, int iteration: 10000}) async {
+  Future<Uint8List> pbkdf2(String password, String salt, {int keyLength: 32, int iteration: 10000, String algorithm: 'sha256'}) async {
     Uint8List key;
     try {
       key = await _channel.invokeMethod('pbkdf2', <String, dynamic>{
@@ -29,6 +29,7 @@ class NativeCrypto {
       'salt': salt,
       'keyLength': keyLength,
       'iteration': iteration,
+      'algorithm': algorithm,
     });
     } on PlatformException catch (e) {
       throw e;

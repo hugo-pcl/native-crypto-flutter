@@ -4,7 +4,6 @@ import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'package:native_crypto/symmetric_crypto.dart';
 import 'package:native_crypto/exceptions.dart';
@@ -53,7 +52,7 @@ class _MyAppState extends State<MyApp> {
     if (password.isEmpty) {
       output = 'Password is empty';
     } else {
-      key = await KeyGenerator().pbkdf2(password, 'salt');
+      key = await KeyGenerator().pbkdf2(password, 'salt', algorithm: 'sha1');
       output = 'Key successfully derived.';
     }
     setState(() {

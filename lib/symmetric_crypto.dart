@@ -59,10 +59,10 @@ class KeyGenerator {
   ///
   /// `keyLength` is in Bytes. 
   /// It returns an `Uint8List`.
-  Future<Uint8List> pbkdf2(String password, String salt, {int keyLength: 32, int iteration: 10000}) async {
+  Future<Uint8List> pbkdf2(String password, String salt, {int keyLength: 32, int iteration: 10000, String algorithm: 'sha256'}) async {
     Uint8List key;
     try {
-      key = await NativeCrypto().pbkdf2( password, salt, keyLength: keyLength, iteration: iteration);
+      key = await NativeCrypto().pbkdf2( password, salt, keyLength: keyLength, iteration: iteration, algorithm: algorithm);
       log("PBKDF2 KEY LENGTH: ${key.length}", name: TAG_DEBUG);
     } on PlatformException catch (e) {
       log(e.message, name: TAG_ERROR);
