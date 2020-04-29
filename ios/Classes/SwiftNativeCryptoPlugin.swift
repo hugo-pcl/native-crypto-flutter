@@ -7,6 +7,7 @@
 import Flutter
 import UIKit
 import CommonCrypto
+import Security
 
 extension FlutterStandardTypedData {
   var uint8Array: Array<UInt8> {
@@ -17,6 +18,17 @@ extension FlutterStandardTypedData {
       [Int8](raw.bindMemory(to: Int8.self))
     }
   }
+}
+
+@available(iOS 10.0, *)
+func generateKeypair() {
+    var publicKeySec, privateKeySec: SecKey?
+    let keyattribute = [
+        kSecAttrKeyType as String: kSecAttrKeyTypeECSECPrimeRandom,
+        kSecAttrKeySizeInBits as String : 256
+        ] as CFDictionary
+    SecKeyGeneratePair(keyattribute, &publicKeySec, &privateKeySec)
+    
 }
 
 func crypt(operation: Int, algorithm: Int, options: Int, key: Data,
@@ -73,6 +85,11 @@ func pbkdf2(hash: CCPBKDFAlgorithm, password: String, salt: String, keyByteCount
 func pbkdf2sha256(password: String, salt: String, keyByteCount: Int, rounds: Int) -> Data? {
     return pbkdf2(hash: CCPBKDFAlgorithm(kCCPRFHmacAlgSHA256), password: password, salt: salt, keyByteCount: keyByteCount, rounds: rounds)
 }
+
+func pbkdf2sha1(password: String, salt: String, keyByteCount: Int, rounds: Int) -> Data? {
+    return pbkdf2(hash: CCPBKDFAlgorithm(kCCPRFHmacAlgSHA1), password: password, salt: salt, keyByteCount: keyByteCount, rounds: rounds)
+}
+
 
 func randomGenerateBytes(count: Int) -> Data? {
     let bytes = UnsafeMutableRawPointer.allocate(byteCount: count, alignment: 1)
@@ -151,8 +168,15 @@ public class SwiftNativeCryptoPlugin: NSObject, FlutterPlugin {
         let salt = args["salt"] as! String
         let keyLength = args["keyLength"] as! NSNumber
         let iteration = args["iteration"] as! NSNumber
+        let algo = args["algorithm"] as! String
         
-        let keyBytes = pbkdf2sha256(password: password, salt: salt, keyByteCount: keyLength.intValue, rounds: iteration.intValue)
+        var keyBytes: Data?
+        
+        if (algo == "sha1") {
+            keyBytes = pbkdf2sha1(password: password, salt: salt, keyByteCount: keyLength.intValue, rounds: iteration.intValue)
+        } else {
+            keyBytes = pbkdf2sha256(password: password, salt: salt, keyByteCount: keyLength.intValue, rounds: iteration.intValue)
+        }
         
         if keyBytes != nil {
             result(FlutterStandardTypedData.init(bytes: keyBytes!))
