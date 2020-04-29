@@ -16,7 +16,7 @@ const String TAG_DEBUG = 'debug.native_crypto.symmetric_crypto';
 enum KeySize { bits128, bits192, bits256 }
 
 /// Defines all available digest.
-enum Digest { sha1, sha256 }
+enum Digest { sha1, sha256, sha512 }
 
 /// Defines all available ciphers.
 enum Cipher { AES }
@@ -68,6 +68,7 @@ class KeyGenerator {
     String algo;
     if (digest == Digest.sha1) algo = 'sha1';
     if (digest == Digest.sha256) algo = 'sha256';
+    if (digest == Digest.sha512) algo = 'sha512';
     
     try {
       key = await NativeCrypto().pbkdf2( password, salt, keyLength: keyLength, iteration: iteration, algorithm: algo);

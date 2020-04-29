@@ -52,7 +52,7 @@ class _MyAppState extends State<MyApp> {
     if (password.isEmpty) {
       output = 'Password is empty';
     } else {
-      key = await KeyGenerator().pbkdf2(password, 'salt', digest: Digest.sha1);
+      key = await KeyGenerator().pbkdf2(password, 'salt', digest: Digest.sha512);
       output = 'Key successfully derived.';
     }
     setState(() {
