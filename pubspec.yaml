@@ -1,6 +1,6 @@
 name: native_crypto
 description: Fast crypto functions for Flutter.
-version: 0.0.2
+version: 0.0.4+1
 author: Hugo Pointcheval
 homepage: https://hugo.pointcheval.fr
 

@@ -1,5 +1,6 @@
 name: native_crypto_example
 description: Demonstrates how to use the native_crypto plugin.
+version: 1.0.0+1
 publish_to: 'none'
 
 environment:
