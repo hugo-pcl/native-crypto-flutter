@@ -15,6 +15,9 @@ const String TAG_DEBUG = 'debug.native_crypto.symmetric_crypto';
 /// Defines all available key sizes.
 enum KeySize { bits128, bits192, bits256 }
 
+/// Defines all available digest.
+enum Digest { sha1, sha256 }
+
 /// Defines all available ciphers.
 enum Cipher { AES }
 
@@ -59,11 +62,17 @@ class KeyGenerator {
   ///
   /// `keyLength` is in Bytes. 
   /// It returns an `Uint8List`.
-  Future<Uint8List> pbkdf2(String password, String salt, {int keyLength: 32, int iteration: 10000, String algorithm: 'sha256'}) async {
+  Future<Uint8List> pbkdf2(String password, String salt, {int keyLength: 32, int iteration: 10000, Digest digest: Digest.sha256}) async {
     Uint8List key;
+
+    String algo;
+    if (digest == Digest.sha1) algo = 'sha1';
+    if (digest == Digest.sha256) algo = 'sha256';
+    
     try {
-      key = await NativeCrypto().pbkdf2( password, salt, keyLength: keyLength, iteration: iteration, algorithm: algorithm);
-      log("PBKDF2 KEY LENGTH: ${key.length}", name: TAG_DEBUG);
+      key = await NativeCrypto().pbkdf2( password, salt, keyLength: keyLength, iteration: iteration, algorithm: algo);
+      log(key.toString());
+      log("PBKDF2 KEY LENGTH: ${key.length} | DIGEST: $algo", name: TAG_DEBUG);
     } on PlatformException catch (e) {
       log(e.message, name: TAG_ERROR);
       throw e;
