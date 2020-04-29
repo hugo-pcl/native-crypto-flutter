@@ -49,8 +49,9 @@ public class NativeCryptoPlugin : FlutterPlugin, MethodCallHandler {
             val salt = call.argument<String>("salt")
             val keyLength = call.argument<Int>("keyLength")
             val iteration = call.argument<Int>("iteration")
+            val algorithm = call.argument<String>("algorithm")
 
-            val key = pbkdf2(password!!, salt!!, keyLength!!, iteration!!)
+            val key = pbkdf2(password!!, salt!!, keyLength!!, iteration!!, algorithm!!)
 
             if (key.isNotEmpty()) {
                 result.success(key)
@@ -109,13 +110,16 @@ public class NativeCryptoPlugin : FlutterPlugin, MethodCallHandler {
         return md.digest(obj)
     }
 
-    private fun pbkdf2(password : String, salt : String, keyLength : Int, iteration : Int) : ByteArray {
+    private fun pbkdf2(password : String, salt : String, keyLength : Int, iteration : Int, algorithm : String) : ByteArray {
         val chars: CharArray = password.toCharArray()
 
         val spec = PBEKeySpec(chars, salt.toByteArray(), iteration, keyLength * 8)
-        val skf: SecretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
+        val skf: SecretKeyFactory = if (algorithm == "sha1") {
+            SecretKeyFactory.getInstance("PBKDF2withHmacSHA1")
+        } else {
+            SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
+        }
         return skf.generateSecret(spec).encoded
-
     }
 
     private fun symKeygen(keySize : Int): ByteArray {
