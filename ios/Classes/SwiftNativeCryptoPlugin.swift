@@ -82,6 +82,10 @@ func pbkdf2(hash: CCPBKDFAlgorithm, password: String, salt: String, keyByteCount
     return derivedKeyData
 }
 
+func pbkdf2sha512(password: String, salt: String, keyByteCount: Int, rounds: Int) -> Data? {
+    return pbkdf2(hash: CCPBKDFAlgorithm(kCCPRFHmacAlgSHA512), password: password, salt: salt, keyByteCount: keyByteCount, rounds: rounds)
+}
+
 func pbkdf2sha256(password: String, salt: String, keyByteCount: Int, rounds: Int) -> Data? {
     return pbkdf2(hash: CCPBKDFAlgorithm(kCCPRFHmacAlgSHA256), password: password, salt: salt, keyByteCount: keyByteCount, rounds: rounds)
 }
@@ -174,8 +178,10 @@ public class SwiftNativeCryptoPlugin: NSObject, FlutterPlugin {
         
         if (algo == "sha1") {
             keyBytes = pbkdf2sha1(password: password, salt: salt, keyByteCount: keyLength.intValue, rounds: iteration.intValue)
-        } else {
+        } else if (algo == "sha256"){
             keyBytes = pbkdf2sha256(password: password, salt: salt, keyByteCount: keyLength.intValue, rounds: iteration.intValue)
+        } else if (algo == "sha512"){
+            keyBytes = pbkdf2sha512(password: password, salt: salt, keyByteCount: keyLength.intValue, rounds: iteration.intValue)
         }
         
         if keyBytes != nil {
