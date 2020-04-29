@@ -32,7 +32,7 @@ It's quite simple, judge for yourself, these are times for AES256 encryption on 
 | 800 kB | 13582 ms
 | 900 kB | 17607 ms
 
-> We notice that these times, in addition to being far too big, are not even linear.
+> We notice that these times, in addition to being far too big, are **not even linear**.
 
 ## Performances
 
@@ -92,7 +92,7 @@ AES aes = AES(key: aeskey);
 You can create a key with PBKDF2.
 
 ```dart
-Uint8List key = await KeyGenerator().pbkdf2(password, salt, keyLength: 32, iteration: 10000);
+Uint8List key = await KeyGenerator().pbkdf2(password, salt, keyLength: 32, iteration: 10000, digest: Digest.sha256);
 AES aes = AES(key: key);
 ```
 
@@ -110,6 +110,17 @@ Uint8List aeskey = await KeyGenerator().secretKey(keySize: KeySize.bits256);
 encryptedPayload = await AES().encrypt(data, key: aeskey);
 decryptedPayload = await AES().decrypt(encryptedPayload, key: aeskey);
 ```
+
+Available `enums` are:
+
+```dart
+enum KeySize { bits128, bits192, bits256 }
+enum Digest { sha1, sha256, sha512 }
+```
+
+`KeySizes` defines all available key sizes for generation.
+
+`Digest` defines all available digest for PBKDF2.
 
 ## Example
 
