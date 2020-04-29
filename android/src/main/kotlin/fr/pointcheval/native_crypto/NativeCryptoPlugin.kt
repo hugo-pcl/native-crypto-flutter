@@ -116,8 +116,10 @@ public class NativeCryptoPlugin : FlutterPlugin, MethodCallHandler {
         val spec = PBEKeySpec(chars, salt.toByteArray(), iteration, keyLength * 8)
         val skf: SecretKeyFactory = if (algorithm == "sha1") {
             SecretKeyFactory.getInstance("PBKDF2withHmacSHA1")
-        } else {
+        } else if (algorithm == "sha256") {
             SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
+        } else {
+            SecretKeyFactory.getInstance("PBKDF2withHmacSHA512")
         }
         return skf.generateSecret(spec).encoded
     }
