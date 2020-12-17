@@ -9,8 +9,8 @@ import 'package:flutter/services.dart';
 import 'src/native_crypto.dart';
 import 'exceptions.dart';
 
-const String TAG_ERROR = 'error.native_crypto.symmetric_crypto'; 
-const String TAG_DEBUG = 'debug.native_crypto.symmetric_crypto'; 
+const String TAG_ERROR = 'error.native_crypto.symmetric_crypto';
+const String TAG_DEBUG = 'debug.native_crypto.symmetric_crypto';
 
 /// Defines all available key sizes.
 enum KeySize { bits128, bits192, bits256 }
@@ -27,25 +27,15 @@ enum Cipher { AES }
 class KeyGenerator {
   /// Generate a secret key.
   ///
-  /// You can specify a `keySize`. Default is 256 bits.
+  /// You can specify a `keySize`. Default is **256 bits**.
   /// It returns an `Uint8List`.
-  Future<Uint8List> secretKey({KeySize keySize}) async {
-    int size;
-    switch (keySize) {
-      case KeySize.bits128:
-        size = 128;
-        break;
-      case KeySize.bits192:
-        size = 192;
-        break;
-      case KeySize.bits256:
-        size = 256;
-        break;
-      default:
-        // Default size = 256 bits
-        size = 256;
-        break;
-    }
+  Future<Uint8List> secretKey({KeySize keySize = KeySize.bits256}) async {
+    Map<KeySize, int> availableSizes = {
+      KeySize.bits128: 128,
+      KeySize.bits192: 192,
+      KeySize.bits256: 256
+    };
+    int size = availableSizes[keySize];
 
     Uint8List key;
     try {
@@ -60,19 +50,25 @@ class KeyGenerator {
 
   /// PBKDF2.
   ///
-  /// `keyLength` is in Bytes. 
+  /// `keyLength` is in Bytes.
   /// It returns an `Uint8List`.
-  Future<Uint8List> pbkdf2(String password, String salt, {int keyLength: 32, int iteration: 10000, Digest digest: Digest.sha256}) async {
+  Future<Uint8List> pbkdf2(String password, String salt,
+      {int keyLength: 32,
+      int iteration: 10000,
+      Digest digest: Digest.sha256}) async {
     Uint8List key;
 
-    String algo;
-    if (digest == Digest.sha1) algo = 'sha1';
-    if (digest == Digest.sha256) algo = 'sha256';
-    if (digest == Digest.sha512) algo = 'sha512';
-    
+    Map<Digest, String> availableDigests = {
+      Digest.sha1: 'sha1',
+      Digest.sha256: 'sha256',
+      Digest.sha512: 'sha512',
+    };
+
+    String algo = availableDigests[digest];
+
     try {
-      key = await NativeCrypto().pbkdf2( password, salt, keyLength: keyLength, iteration: iteration, algorithm: algo);
-      log(key.toString());
+      key = await NativeCrypto().pbkdf2(password, salt,
+          keyLength: keyLength, iteration: iteration, algorithm: algo);
       log("PBKDF2 KEY LENGTH: ${key.length} | DIGEST: $algo", name: TAG_DEBUG);
     } on PlatformException catch (e) {
       log(e.message, name: TAG_ERROR);
@@ -185,16 +181,18 @@ class AES {
   ///
   /// Takes `Uint8List` **list** as parameter.
   /// And returns plain text data as `Uint8List`.
-  /// 
+  ///
   /// You can pass a different key.
-  Future<Uint8List> decrypt(List<Uint8List> encryptedPayload, {Uint8List key}) async {
+  Future<Uint8List> decrypt(List<Uint8List> encryptedPayload,
+      {Uint8List key}) async {
     if (!this._isInitialized && key == null)
       throw DecryptionException(
           'Instance not initialized. You can pass a key directly in decrypt method.');
 
     Uint8List decryptedPayload;
     try {
-      decryptedPayload = await NativeCrypto().symDecrypt(encryptedPayload, key ?? this.key);
+      decryptedPayload =
+          await NativeCrypto().symDecrypt(encryptedPayload, key ?? this.key);
     } on DecryptionException catch (e) {
       log(e.message, name: TAG_ERROR);
       throw e;
