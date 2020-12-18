@@ -4,8 +4,10 @@
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
+import 'package:native_crypto/src/digest.dart';
 
 import 'cipher.dart';
+import 'utils.dart';
 
 /// Represents a platform, and is usefull to calling
 /// methods from a specific platform.
@@ -16,6 +18,22 @@ class Platform {
   /// Calls native code.
   static Future<T> call<T>(String method, [Map<String, dynamic> arguments]) {
     return _channel.invokeMethod(method, arguments);
+  }
+
+  /// Digests a message with a specific algorithm
+  ///
+  /// Takes message and algorithm as parameters.
+  ///
+  /// Returns a hash as [Uint8List].
+  Future<Uint8List> digest(
+    Uint8List message,
+    HashAlgorithm algorithm,
+  ) async {
+    final Uint8List hash = await call('digest', <String, dynamic>{
+      'message': message,
+      'algorithm': algorithm.name,
+    });
+    return hash;
   }
 
   /// Calls native PBKDF2.
@@ -29,14 +47,14 @@ class Platform {
     String salt, {
     int keyLength: 32,
     int iteration: 10000,
-    String algorithm: 'sha256',
+    HashAlgorithm algorithm: HashAlgorithm.SHA256,
   }) async {
     final Uint8List key = await call('pbkdf2', <String, dynamic>{
       'password': password,
       'salt': salt,
       'keyLength': keyLength,
       'iteration': iteration,
-      'algorithm': algorithm,
+      'algorithm': algorithm.name,
     });
     return key;
   }
@@ -78,15 +96,15 @@ class Platform {
   Future<List<Uint8List>> encrypt(
     Uint8List data,
     Uint8List key,
-    String algorithm,
+    CipherAlgorithm algorithm,
     CipherParameters parameters,
   ) async {
     final List<Uint8List> payload = await call('encrypt', <String, dynamic>{
       'data': data,
       'key': key,
-      'algorithm': algorithm,
-      'mode': parameters.mode.index,
-      'padding': parameters.padding.index,
+      'algorithm': algorithm.name,
+      'mode': parameters.mode.name,
+      'padding': parameters.padding.name,
     });
     return payload;
   }
@@ -98,16 +116,16 @@ class Platform {
   Future<Uint8List> decrypt(
     List<Uint8List> payload,
     Uint8List key,
-    String algorithm,
+    CipherAlgorithm algorithm,
     CipherParameters parameters,
   ) async {
     final Uint8List data =
         await _channel.invokeMethod('decrypt', <String, dynamic>{
       'payload': payload,
       'key': key,
-      'algorithm': algorithm,
-      'mode': parameters.mode.index,
-      'padding': parameters.padding.index,
+      'algorithm': algorithm.name,
+      'mode': parameters.mode.name,
+      'padding': parameters.padding.name,
     });
     return data;
   }
