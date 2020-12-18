@@ -5,11 +5,13 @@ import 'dart:typed_data';
 
 import 'key.dart';
 
+enum KemAlgorithm { RSA, ECDH }
+
 enum KemMode { ENCAPSULATION, DECAPSULATION }
 
 abstract class KeyEncapsulationMechanism {
   /// Returns the standard algorithm name for this kem
-  String get algorithm;
+  KemAlgorithm get algorithm;
 
   /// Returns the parameters used for this kem
   Object get options;
@@ -40,7 +42,7 @@ abstract class KeyEncapsulationMechanism {
 
 abstract class Encapsulation {
   /// Returns the standard algorithm name used for this encapsulation
-  String get algorithm;
+  KemAlgorithm get algorithm;
 
   /// Returns the secret key used in this encapsulation
   SecretKey get secretKey;

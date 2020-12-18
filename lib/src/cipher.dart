@@ -5,6 +5,9 @@ import 'dart:typed_data';
 
 import 'key.dart';
 
+/// Represents different cipher algorithms
+enum CipherAlgorithm { AES, BlowFish }
+
 /// Represents different block cipher modes
 enum BlockCipherMode { ECB, CBC, CFB, GCM, CGM }
 
@@ -18,7 +21,7 @@ enum Padding { ANSI_X923, PKCS5, PKCS7, None }
 /// be followed as a procedure.
 abstract class Cipher {
   /// Returns the standard algorithm name for this cipher
-  String get algorithm;
+  CipherAlgorithm get algorithm;
 
   /// Returns the secret key used for this cipher
   SecretKey get secretKey;
@@ -47,7 +50,7 @@ abstract class Cipher {
 /// It's the result of an encryption.
 abstract class CipherText {
   /// Returns the standard algorithm name used for this ciphertext
-  String get algorithm;
+  CipherAlgorithm get algorithm;
 
   /// Returns the data of this ciphertext
   Uint8List get bytes;

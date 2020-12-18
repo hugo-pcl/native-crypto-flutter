@@ -7,6 +7,7 @@ import '../cipher.dart';
 import '../exceptions.dart';
 import '../key.dart';
 import '../platform.dart';
+import '../utils.dart';
 
 /// Defines all available key sizes.
 enum AESKeySize { bits128, bits192, bits256 }
@@ -21,7 +22,7 @@ class AESCipher implements Cipher {
   ];
 
   @override
-  String get algorithm => "AES";
+  CipherAlgorithm get algorithm => CipherAlgorithm.AES;
 
   @override
   SecretKey get secretKey => _sk;
@@ -70,15 +71,15 @@ class AESCipher implements Cipher {
       throw CipherInitException('Invalid key size.');
     }
     List<Uint8List> c =
-        await Platform().encrypt(data, _sk.encoded, "AES", _params);
+        await Platform().encrypt(data, _sk.encoded, algorithm, _params);
     return AESCipherText(c[0], c[1]);
   }
 
   @override
   Future<Uint8List> decrypt(CipherText cipherText) async {
-    if (cipherText.algorithm != "AES") {
+    if (cipherText.algorithm != CipherAlgorithm.AES) {
       throw DecryptionException("This cipher text's algorithm is not AES: " +
-          cipherText.algorithm +
+          cipherText.algorithm.name +
           "\nYou must use an AESCipherText.");
     } else if (!_isInit) {
       throw CipherInitException('Cipher not properly initialized.');
@@ -87,7 +88,7 @@ class AESCipher implements Cipher {
     }
     List<Uint8List> payload = [cipherText.bytes, cipherText.iv];
     Uint8List d =
-        await Platform().decrypt(payload, _sk.encoded, "AES", _params);
+        await Platform().decrypt(payload, _sk.encoded, algorithm, _params);
     return d;
   }
 }
@@ -97,7 +98,7 @@ class AESCipherText implements CipherText {
   Uint8List _iv;
 
   @override
-  String get algorithm => "AES";
+  CipherAlgorithm get algorithm => CipherAlgorithm.AES;
 
   @override
   Uint8List get bytes => _bytes;

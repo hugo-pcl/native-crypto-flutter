@@ -14,10 +14,10 @@ class RSAKeyEncapsulationMechanism implements KeyEncapsulationMechanism {
   PrivateKey _privateKey;
 
   @override
-  String get algorithm => "RSA";
+  KemAlgorithm get algorithm => KemAlgorithm.RSA;
 
   @override
-  Object get options => throw UnimplementedError();
+  Object get options => null;
 
   @override
   bool get isInitialized => _isInit;
