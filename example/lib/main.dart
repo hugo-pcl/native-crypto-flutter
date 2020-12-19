@@ -4,9 +4,7 @@ import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-
-import 'package:native_crypto/symmetric_crypto.dart';
-import 'package:native_crypto/exceptions.dart';
+import 'package:native_crypto/native_crypto.dart';
 
 void main() => runApp(MyApp());
 
@@ -22,21 +20,24 @@ class _MyAppState extends State<MyApp> {
   String _output = 'none';
   String _bench;
 
-  AES aes = AES();
-  List<Uint8List> encryptedPayload;
-  Uint8List decryptedPayload;
-  Uint8List key;
+  AESCipher aes;
+  CipherText cipherText;
+  Uint8List plainText;
+  SecretKey key;
 
   void _generateKey() async {
-    // You can also generate key before creating aes object.
-    // Uint8List aeskey = await KeyGenerator().secretKey(keySize: KeySize.bits256);
-    // AES aes = AES(key: aeskey);
     var output;
     try {
-      await aes.init(KeySize.bits256);
-      output = 'Key generated. Length: ${aes.key.length}';
+      aes = await AESCipher.generate(
+        AESKeySize.bits256,
+        CipherParameters(
+          BlockCipherMode.CBC,
+          PlainTextPadding.PKCS5,
+        ),
+      );
+      output = 'Key generated. Length: ${aes.secretKey.encoded.length}';
     } catch (e) {
-      // PlatformException or KeyException, both have message property.
+      print(e);
       output = e.message;
     }
 
@@ -52,7 +53,10 @@ class _MyAppState extends State<MyApp> {
     if (password.isEmpty) {
       output = 'Password is empty';
     } else {
-      key = await KeyGenerator().pbkdf2(password, 'salt', digest: Digest.sha512);
+      PBKDF2 _pbkdf2 =
+          PBKDF2(keyLength: 32, iteration: 1000, hash: HashAlgorithm.SHA512);
+      await _pbkdf2.derive(password: password, salt: 'salty');
+      key = _pbkdf2.key;
       output = 'Key successfully derived.';
     }
     setState(() {
@@ -68,9 +72,7 @@ class _MyAppState extends State<MyApp> {
       output = 'Entry is empty';
     } else {
       var stringToBytes = TypeHelper().stringToBytes(plainText);
-      // You can also pass a specific key.
-      // encryptedPayload = await AES().encrypt(stringToBytes, key: aeskey);
-      encryptedPayload = await aes.encrypt(stringToBytes, key: key?? null);
+      cipherText = await aes.encrypt(stringToBytes);
       output = 'String successfully encrypted.';
     }
     setState(() {
@@ -80,11 +82,14 @@ class _MyAppState extends State<MyApp> {
 
   void _alter() async {
     var output;
-    if (encryptedPayload == null || encryptedPayload[0].isEmpty) {
+    if (cipherText == null || cipherText.bytes.isEmpty) {
       output = 'Encrypt before altering payload!';
     } else {
       // Add 1 to the first byte
-      encryptedPayload[0][0] += 1;
+      Uint8List _altered = cipherText.bytes;
+      _altered[0] += 1;
+      // Recreate cipher text with altered data
+      cipherText = AESCipherText(_altered, cipherText.iv);
       output = 'Payload altered.';
     }
     setState(() {
@@ -94,14 +99,12 @@ class _MyAppState extends State<MyApp> {
 
   void _decrypt() async {
     var output;
-    if (encryptedPayload == null || encryptedPayload[0].isEmpty) {
+    if (cipherText == null || cipherText.bytes.isEmpty) {
       output = 'Encrypt before decrypting!';
     } else {
-      // You can also pass a specific key.
-      // decryptedPayload = await AES().decrypt(encryptedPayload, key: aeskey);
       try {
-        decryptedPayload = await aes.decrypt(encryptedPayload, key: key?? null);
-        var bytesToString = TypeHelper().bytesToString(decryptedPayload);
+        plainText = await aes.decrypt(cipherText);
+        var bytesToString = TypeHelper().bytesToString(plainText);
         output = 'String successfully decrypted:\n\n$bytesToString';
       } on DecryptionException catch (e) {
         output = e.message;
@@ -141,18 +144,17 @@ class _MyAppState extends State<MyApp> {
     if (megabytes != null) {
       output = await _benchmark(megabytes);
       setState(() {
-      _output = output;
-    });
+        _output = output;
+      });
     } else {
       setState(() {
         _bench = 'Open the logcat!';
       });
-      for (int i=1;i<=50;i+=10) {
+      for (int i = 1; i <= 50; i += 10) {
         var benchmark = await _benchmark(i);
         log(benchmark, name: 'fr.pointcheval.native_crypto');
       }
     }
-    
   }
 
   @override
