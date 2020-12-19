@@ -7,7 +7,7 @@ import 'exceptions.dart';
 import 'platform.dart';
 import 'utils.dart';
 
-enum HashAlgorithm { SHA1, SHA128, SHA256, SHA512 }
+enum HashAlgorithm { SHA1, SHA224, SHA256, SHA384, SHA512 }
 
 /// Represents message digest, or hash function.
 class MessageDigest {

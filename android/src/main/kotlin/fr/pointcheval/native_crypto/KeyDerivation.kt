@@ -12,7 +12,7 @@ class KeyDerivation {
                 "sha1" to "PBKDF2withHmacSHA1",
                 "sha224" to "PBKDF2withHmacSHA224",
                 "sha256" to "PBKDF2WithHmacSHA256",
-                "sha284" to "PBKDF2withHmacSHA384",
+                "sha384" to "PBKDF2withHmacSHA384",
                 "sha512" to "PBKDF2withHmacSHA512"
         )
 
