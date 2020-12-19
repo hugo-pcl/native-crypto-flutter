@@ -1,45 +1,33 @@
-# NativeCrypto
+# NativeCrypto for Flutter
 
-![native_crypto](/assets/native_crypto.png)
+[![NativeCrypto Logo](/assets/native_crypto.png)](https://hugo.pointcheval.fr/)
+---
 
-Fast crypto functions for Flutter.
+Fast and powerful cryptographic functions thanks to **javax.crypto** and **CommonCrypto**.
 
-* Table of content
-  * [Background](#background)
-  * [Performances](#performances)
-  * [Installation](#installation)
-  * [Usage](#usage)
-  * [Example](#example)
-  * [How](#how)
-  * [Todo](#todo)
+## 📝 Table of Contents
 
-## Background
+- [About](#about)
+- [Getting Started](#getting_started)
+- [Example](#example)
+- [Usage](#usage)
+- [Built Using](#built_using)
+- [Authors](#authors)
 
-🤔 Why I started this project ?
-Because I faced a performance issue when I was using **PointyCastle**.
+## 🧐 About <a name = "about"></a>
 
-It's quite simple, judge for yourself, these are times for AES256 encryption on an Android device (**Huawei P30 Pro**).
+The goal of this plugin is to provide simple access to fast and powerful cryptographic functions by calling native libraries. So on **Android** the plugin uses *javax.crypto* and on **iOS** it uses *CommonCrypto*.
 
-| Size | PointyCastle |
-|------|--------------|
-| 100 kB | 190 ms
-| 200 kB | 314 ms
-| 300 kB | 1138 ms
-| 400 kB | 2781 ms
-| 500 kB | 4691 ms
-| 600 kB | 7225 ms
-| 700 kB | 10264 ms
-| 800 kB | 13582 ms
-| 900 kB | 17607 ms
+I started this project because using **Pointy Castle** I faced big performance issues on smartphone. It's quite simple, an encryption of 1MB of data in AES256 on an Android device takes **20s** with Pointy Castle against **27ms** using NativeCrypto.
 
-> We notice that these times, in addition to being far too big, are **not even linear**.
+![Pointy Castle Benchmark](/assets/benchmark_pointycastle.png)
 
-## Performances
+> We also notice on this benchmark that the AES encryption time does not even increase linearly with size.
 
-⏱ On an **Android 10** device: **Huawei P30 Pro**
+As for NativeCrypto, here is a benchmark realized on an Android device, Huawei P30 Pro.
 
-| Size | NativeCrypto |
-|------|--------------|
+| Size (kB) | NativeCrypto **encryption** time (ms) |
+|-----------|---------------------------------------|
 | 1 mB | 27 ms
 | 2 mB | 43 ms
 | 3 mB | 78 ms
@@ -48,11 +36,25 @@ It's quite simple, judge for yourself, these are times for AES256 encryption on 
 | 10 mB | 229 ms
 | 50 mB | 779 ms
 
-## Installation
+> Less than 1s for 50 mB.
 
-🚧 You can easely setup a Flutter project with this plugin.
+In short, **NativeCrypto** is incomparable to **Pointy Castle** in terms of performance.
 
-Just add these lines in your **pubspec.yaml**:
+## 🏁 Getting Started <a name = "getting_started"></a>
+
+
+
+
+
+### Prerequisites
+
+You'll need:
+
+- Flutter
+
+### Installing
+
+Add these lines in your **pubspec.yaml**:
 
 ```yaml
 native_crypto:
@@ -66,90 +68,82 @@ native_crypto:
 Then in your code:
 
 ```dart
-// Symmetric crypto.
-import 'package:native_crypto/symmetric_crypto.dart';
-
-// To handle exceptions.
-import 'package:native_crypto/exceptions.dart';
+import 'package:native_crypto/native_crypto.dart';
 ```
 
-## Usage
+## 🔍 Example <a name="example"></a>
 
-To create an AES instance, and generate a key.
+Look in **example/lib/** for an example app.
+
+## 🎈 Usage <a name="usage"></a>
+
+To derive a key with **PBKDF2**.
 
 ```dart
-AES aes = AES();
-await aes.init(KeySize.bits256)
+PBKDF2 _pbkdf2 = PBKDF2(keyLength: 32, iteration: 1000, hash: HashAlgorithm.SHA512);
+await _pbkdf2.derive(password: "password123", salt: 'salty');
+SecretKey key = _pbkdf2.key;
 ```
 
-You can also generate key, then use it in AES.
+To generate a key, and create an **AES Cipher** instance.
 
 ```dart
-Uint8List aeskey = await KeyGenerator().secretKey(keySize: KeySize.bits256);
-AES aes = AES(key: aeskey);
+AESCipher aes = await AESCipher.generate(
+  AESKeySize.bits256,
+  CipherParameters(
+    BlockCipherMode.CBC,
+    PlainTextPadding.PKCS5,
+  ),
+);
 ```
 
-You can create a key with PBKDF2.
+You can also generate key, then create **AES Cipher**.
 
 ```dart
-Uint8List key = await KeyGenerator().pbkdf2(password, salt, keyLength: 32, iteration: 10000, digest: Digest.sha256);
-AES aes = AES(key: key);
+SecretKey _key = await SecretKey.generate(256, CipherAlgorithm.AES);
+AESCipher aes = AESCipher(
+  _key,
+  CipherParameters(
+    BlockCipherMode.CBC,
+    PlainTextPadding.PKCS5,
+  ),
+);
 ```
 
-Then you can encrypt/decrypt data with this instance.
+Then you can encrypt/decrypt data with this cipher.
 
 ```dart
-encryptedPayload = await aes.encrypt(data);
-decryptedPayload = await aes.decrypt(encryptedPayload);
+CipherText cipherText = await aes.encrypt(data);
+Uint8List plainText = await aes.decrypt(cipherText);
 ```
 
-Or you can also use AES on the fly with different keys.
+You can easely get encrypted bytes and IV from a CipherText
 
 ```dart
-Uint8List aeskey = await KeyGenerator().secretKey(keySize: KeySize.bits256);
-encryptedPayload = await AES().encrypt(data, key: aeskey);
-decryptedPayload = await AES().decrypt(encryptedPayload, key: aeskey);
+Uint8List bytes = cipherText.bytes;
+Uint8List iv = cipherText.iv;
 ```
 
-Available `enums` are:
+To create a cipher text with custom data.
 
 ```dart
-enum KeySize { bits128, bits192, bits256 }
-enum Digest { sha1, sha256, sha512 }
+CipherText cipherText = AESCipherText(bytes, iv);
 ```
 
-`KeySizes` defines all available key sizes for generation.
+To create a hashed message
 
-`Digest` defines all available digest for PBKDF2.
+```dart
+MessageDigest md = MessageDigest.getInstance("sha256");
+Uint8List hash = md.digest(message);
+```
 
-## Example
+## ⛏️ Built Using <a name = "built_using"></a>
 
-🔍 Look in **example/lib/** for an example app.
+- [Dart](https://dart.dev)
+- [Flutter](https://flutter.dev) - Framework
+- [Kotlin](https://kotlinlang.org) - Android Specific code
+- [Swift](https://www.apple.com/fr/swift/) - iOS Specific code
 
-## How
+## ✍️ Authors <a name = "authors"></a>
 
-🔬 But how it is possible ??
-
-Using the native implementation of crypto libs available on each OS.
-
-For **Android**:
-
-* [javax.crypto](https://docs.oracle.com/javase/7/docs/api/javax/crypto/package-summary.html)
-* [java.security](https://docs.oracle.com/javase/7/docs/api/java/security/package-summary.html)
-
-For **iOS**:
-
-* [CommonCrypto](https://developer.apple.com/library/archive/documentation/Security/Conceptual/cryptoservices/Introduction/Introduction.html)
-
-## Todos
-
-🚀 You can contribute to this project.
-
-* [x] Implement working cross platform AES encryption/decryption.
-* [x] Different key sizes support.
-* [x] Improve performances.
-* [x] Add exceptions.
-* [x] PBKDF2 support.
-* [ ] Add other ciphers.
-* [ ] Clean platform specific code.
-* [ ] Add asym crypto support...
+- [Hugo Pointcheval](https://github.com/hugo-pcl) - Idea & Initial work
