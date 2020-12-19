@@ -1,6 +1,6 @@
 # NativeCrypto for Flutter
 
-[![NativeCrypto Logo](/assets/native_crypto.png)](https://hugo.pointcheval.fr/)
+![NativeCrypto Logo](/assets/native_crypto.png)
 ---
 
 Fast and powerful cryptographic functions thanks to **javax.crypto** and **CommonCrypto**.
