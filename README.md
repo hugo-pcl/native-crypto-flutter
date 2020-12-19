@@ -12,6 +12,7 @@ Fast and powerful cryptographic functions thanks to **javax.crypto** and **Commo
 - [Example](#example)
 - [Usage](#usage)
 - [Built Using](#built_using)
+- [TODOS](#todos)
 - [Authors](#authors)
 
 ## 🧐 About <a name = "about"></a>
@@ -143,6 +144,26 @@ Uint8List hash = md.digest(message);
 - [Flutter](https://flutter.dev) - Framework
 - [Kotlin](https://kotlinlang.org) - Android Specific code
 - [Swift](https://www.apple.com/fr/swift/) - iOS Specific code
+
+## 🚀 TODOS <a name = "todos">
+
+Here you can check major changes, roadmap and todos.
+
+Once the **BlowFish algorithm** is exposed on Android and iOS, I plan to deal with asymmetric cryptography with the implementation of a Key Encapsulation Mechanism.
+
+- [x] Add PBKDF2 support.
+- [x] Implement working cross platform AES encryption/decryption.
+- [x] Add Different key sizes support.
+- [x] Add exceptions.
+- [x] Clean platform specific code.
+- [x] Add digest.
+- [x] Rework exposed API.
+- [ ] Implement BlowFish.
+- [ ] Add KeyPair generation.
+- [ ] Add KEM.
+- [ ] Porting NativeCrypto to other platforms...
+
+You can contribute to this project.
 
 ## ✍️ Authors <a name = "authors"></a>
 
