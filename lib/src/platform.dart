@@ -4,9 +4,10 @@
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
-import 'package:native_crypto/src/digest.dart';
 
 import 'cipher.dart';
+import 'digest.dart';
+import 'exceptions.dart';
 import 'utils.dart';
 
 /// Represents a platform, and is usefull to calling
@@ -20,6 +21,12 @@ class Platform {
     return _channel.invokeMethod(method, arguments);
   }
 
+  /// Calls native code that return list.
+  static Future<List<T>> callList<T>(String method,
+      [Map<String, dynamic> arguments]) {
+    return _channel.invokeListMethod(method, arguments);
+  }
+
   /// Digests a message with a specific algorithm
   ///
   /// Takes message and algorithm as parameters.
@@ -29,11 +36,15 @@ class Platform {
     Uint8List message,
     HashAlgorithm algorithm,
   ) async {
-    final Uint8List hash = await call('digest', <String, dynamic>{
-      'message': message,
-      'algorithm': algorithm.name,
-    });
-    return hash;
+    try {
+      final Uint8List hash = await call('digest', <String, dynamic>{
+        'message': message,
+        'algorithm': algorithm.name,
+      });
+      return hash;
+    } on PlatformException catch (e) {
+      throw DigestException(e.code + " : " + e.message);
+    }
   }
 
   /// Calls native PBKDF2.
@@ -49,14 +60,18 @@ class Platform {
     int iteration: 10000,
     HashAlgorithm algorithm: HashAlgorithm.SHA256,
   }) async {
-    final Uint8List key = await call('pbkdf2', <String, dynamic>{
-      'password': password,
-      'salt': salt,
-      'keyLength': keyLength,
-      'iteration': iteration,
-      'algorithm': algorithm.name,
-    });
-    return key;
+    try {
+      final Uint8List key = await call('pbkdf2', <String, dynamic>{
+        'password': password,
+        'salt': salt,
+        'keyLength': keyLength,
+        'iteration': iteration,
+        'algorithm': algorithm.name,
+      });
+      return key;
+    } on PlatformException catch (e) {
+      throw KeyDerivationException(e.code + " : " + e.message);
+    }
   }
 
   /// Generates a random key.
@@ -65,11 +80,14 @@ class Platform {
   ///
   /// Returns a key as [Uint8List].
   Future<Uint8List> keygen(int size) async {
-    final Uint8List key = await call('keygen', <String, dynamic>{
-      'size': size,
-    });
-
-    return key;
+    try {
+      final Uint8List key = await call('keygen', <String, dynamic>{
+        'size': size,
+      });
+      return key;
+    } on PlatformException catch (e) {
+      throw KeyGenerationException(e.code + " : " + e.message);
+    }
   }
 
   /// Generates an RSA key pair.
@@ -79,12 +97,15 @@ class Platform {
   /// Returns a key pair as list of [Uint8List], the public key is the
   /// first element, and the private is the last.
   Future<List<Uint8List>> rsaKeypairGen(int size) async {
-    final List<Uint8List> keypair =
-        await call('rsaKeypairGen', <String, dynamic>{
-      'size': size,
-    });
-
-    return keypair;
+    try {
+      final List<Uint8List> keypair =
+          await call('rsaKeypairGen', <String, dynamic>{
+        'size': size,
+      });
+      return keypair;
+    } on PlatformException catch (e) {
+      throw KeyPairGenerationException(e.code + " : " + e.message);
+    }
   }
 
   /// Encrypts data with a secret key and algorithm.
@@ -99,14 +120,19 @@ class Platform {
     CipherAlgorithm algorithm,
     CipherParameters parameters,
   ) async {
-    final List<Uint8List> payload = await call('encrypt', <String, dynamic>{
-      'data': data,
-      'key': key,
-      'algorithm': algorithm.name,
-      'mode': parameters.mode.name,
-      'padding': parameters.padding.name,
-    });
-    return payload;
+    try {
+      final List<Uint8List> payload =
+          await callList('encrypt', <String, dynamic>{
+        'data': data,
+        'key': key,
+        'algorithm': algorithm.name,
+        'mode': parameters.mode.name,
+        'padding': parameters.padding.name,
+      });
+      return payload;
+    } on PlatformException catch (e) {
+      throw EncryptionException(e.code + " : " + e.message);
+    }
   }
 
   /// Decrypts a payload with a secret key and algorithm.
@@ -119,14 +145,18 @@ class Platform {
     CipherAlgorithm algorithm,
     CipherParameters parameters,
   ) async {
-    final Uint8List data =
-        await _channel.invokeMethod('decrypt', <String, dynamic>{
-      'payload': payload,
-      'key': key,
-      'algorithm': algorithm.name,
-      'mode': parameters.mode.name,
-      'padding': parameters.padding.name,
-    });
-    return data;
+    try {
+      final Uint8List data =
+          await _channel.invokeMethod('decrypt', <String, dynamic>{
+        'payload': payload,
+        'key': key,
+        'algorithm': algorithm.name,
+        'mode': parameters.mode.name,
+        'padding': parameters.padding.name,
+      });
+      return data;
+    } on PlatformException catch (e) {
+      throw DecryptionException(e.code + " : " + e.message);
+    }
   }
 }
