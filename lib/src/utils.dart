@@ -29,7 +29,7 @@ extension BlockCipherModeExtension on BlockCipherMode {
   String get name => describeEnum(this).toLowerCase();
 }
 
-extension PaddingExtension on Padding {
+extension PlainTextPaddingExtension on PlainTextPadding {
   String get name => describeEnum(this).toLowerCase();
 }
 
@@ -121,13 +121,13 @@ class Utils {
   static CipherParameters getCipherParameters(String parameters) {
     List<String> _query = parameters.toLowerCase().split("/");
     BlockCipherMode _mode;
-    Padding _padding;
+    PlainTextPadding _padding;
     for (BlockCipherMode b in BlockCipherMode.values) {
       if (_query[0] == b.name) {
         _mode = b;
       }
     }
-    for (Padding p in Padding.values) {
+    for (PlainTextPadding p in PlainTextPadding.values) {
       if (_query[1] == p.name) {
         _padding = p;
       }

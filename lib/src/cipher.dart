@@ -6,13 +6,13 @@ import 'dart:typed_data';
 import 'key.dart';
 
 /// Represents different cipher algorithms
-enum CipherAlgorithm { AES, BlowFish }
+enum CipherAlgorithm { AES, BlowFish, None }
 
 /// Represents different block cipher modes
 enum BlockCipherMode { ECB, CBC, CFB, GCM, CGM }
 
 /// Represents different padding
-enum Padding { ANSI_X923, PKCS5, PKCS7, None }
+enum PlainTextPadding { PKCS5, None }
 
 /// Represents a cipher.
 ///
@@ -31,6 +31,9 @@ abstract class Cipher {
 
   /// Returns true if cipher is initialized
   bool get isInitialized;
+
+  /// Returnes list of supported [CipherParameters] for this cipher
+  List<CipherParameters> get supportedParameters;
 
   /// Encrypts data.
   ///
@@ -62,15 +65,15 @@ abstract class CipherText {
 /// Represents a pair of [BlockCipherMode] and [Padding]
 class CipherParameters {
   BlockCipherMode _mode;
-  Padding _padding;
+  PlainTextPadding _padding;
 
   /// Returns mode used in the cipher
   BlockCipherMode get mode => _mode;
 
   /// Returns padding used in the cipher
-  Padding get padding => _padding;
+  PlainTextPadding get padding => _padding;
 
-  CipherParameters(BlockCipherMode mode, Padding padding) {
+  CipherParameters(BlockCipherMode mode, PlainTextPadding padding) {
     _mode = mode;
     _padding = padding;
   }
