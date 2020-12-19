@@ -12,14 +12,28 @@ import '../utils.dart';
 /// Defines all available key sizes.
 enum AESKeySize { bits128, bits192, bits256 }
 
+extension AESKeySizeExtension on AESKeySize {
+  int get length {
+    int l;
+    switch (this) {
+      case AESKeySize.bits128:
+        l = 128;
+        break;
+      case AESKeySize.bits192:
+        l = 192;
+        break;
+      case AESKeySize.bits256:
+        l = 256;
+        break;
+    }
+    return l;
+  }
+}
+
 class AESCipher implements Cipher {
   SecretKey _sk;
   CipherParameters _params;
   bool _isInit;
-
-  List<CipherParameters> _supportedCipherParams = [
-    CipherParameters(BlockCipherMode.CBC, Padding.PKCS5),
-  ];
 
   @override
   CipherAlgorithm get algorithm => CipherAlgorithm.AES;
@@ -33,34 +47,31 @@ class AESCipher implements Cipher {
   @override
   bool get isInitialized => _isInit;
 
+  @override
+  List<CipherParameters> get supportedParameters => [
+        CipherParameters(BlockCipherMode.CBC, PlainTextPadding.PKCS5),
+      ];
+
   /// Creates an AES cipher with specified secretKey and mode/padding
   AESCipher(SecretKey secretKey, CipherParameters parameters) {
-    if (secretKey.algorithm != "AES") {
-      throw CipherInitException("Invalid key type: " + secretKey.algorithm);
-    } else if (!_supportedCipherParams.contains(parameters)) {
+    if (secretKey.algorithm != CipherAlgorithm.AES.name) {
+      List<int> _supportedSizes = [128, 192, 256];
+      if (!_supportedSizes.contains(secretKey.encoded.length)) {
+        throw CipherInitException("Invalid key length!");
+      }
+    } else if (!supportedParameters.contains(parameters)) {
       throw CipherInitException("Invalid cipher parameters.");
     }
+    _sk = secretKey;
     _params = parameters;
     _isInit = true;
   }
 
   /// Generates a secret key of specified size, then creates an AES cipher.
-  AESCipher.generate(AESKeySize size, CipherParameters parameters) {
-    Map<AESKeySize, int> _supportedSizes = {
-      AESKeySize.bits128: 128,
-      AESKeySize.bits192: 192,
-      AESKeySize.bits256: 256
-    };
-
-    if (!_supportedCipherParams.contains(parameters)) {
-      throw CipherInitException("Invalid cipher parameters.");
-    } else if (!_supportedSizes.containsKey(size)) {
-      throw CipherInitException("Invalid key size.");
-    }
-
-    _sk = SecretKey.generate("AES", _supportedSizes[size]);
-    _params = parameters;
-    _isInit = true;
+  static Future<AESCipher> generate(
+      AESKeySize size, CipherParameters parameters) async {
+    SecretKey _sk = await SecretKey.generate(size.length, CipherAlgorithm.AES);
+    return AESCipher(_sk, parameters);
   }
 
   @override

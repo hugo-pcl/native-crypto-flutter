@@ -9,6 +9,8 @@ import 'platform.dart';
 
 import 'exceptions.dart';
 import 'keyspec.dart';
+import 'cipher.dart';
+import 'utils.dart';
 
 /// This is the base class of all key types.
 abstract class Key {
@@ -33,21 +35,21 @@ abstract class Key {
 /// This represents a secret key, usefull in
 /// algorithms like AES or BlowFish.
 class SecretKey extends Key {
-  List<String> _supportedAlgorithms = ["AES", "Blowfish"];
-
   /// Creates a key from raw byte array
-  SecretKey.fromBytes(Uint8List bytes) : super(bytes: bytes);
+  SecretKey.fromBytes(Uint8List bytes,
+      {CipherAlgorithm algorithm: CipherAlgorithm.None})
+      : super(bytes: bytes, algorithm: algorithm.name);
 
   /// Creates a key from a specific size.
-  SecretKey.generate(String algorithm, int size) {
-    if (!_supportedAlgorithms.contains(algorithm)) {
-      throw KeyException(algorithm + " not supported!");
-    } else if (algorithm == "AES") {
-      List<int> supportedSizes = [128, 192, 256];
-      if (!supportedSizes.contains(size)) {
+  static Future<SecretKey> generate(int size, CipherAlgorithm algorithm) async {
+    if (algorithm == null) {
+      throw KeyException("Algorithm can't be null");
+    } else if (algorithm == CipherAlgorithm.AES) {
+      List<int> _supportedSizes = [128, 192, 256];
+      if (!_supportedSizes.contains(size)) {
         throw KeyException("AES must be 128, 192 or 256 bits long.");
       }
-    } else if (algorithm == "Blowfish") {
+    } else if (algorithm == CipherAlgorithm.BlowFish) {
       List<int> supportedSizes =
           List<int>.generate(52, (int index) => (index + 4) * 8);
       if (!supportedSizes.contains(size)) {
@@ -55,15 +57,12 @@ class SecretKey extends Key {
             "Blowfish must be between 4 and 56 bytes (32 and 448 bits) long.");
       }
     }
-    _generate(algorithm, size);
-  }
 
-  Future<void> _generate(String algo, int size) async {
     try {
-      _bytes = await Platform().keygen(size);
-      _algo = algo;
-      log("Generated SecretKey size: ${_bytes.length * 8} bits (${_bytes.length} bytes)",
+      Uint8List _key = await Platform().keygen(size);
+      log("Generated SecretKey size: ${_key.length * 8} bits (${_key.length} bytes)",
           name: "NativeCrypto");
+      return SecretKey.fromBytes(_key, algorithm: algorithm);
     } on PlatformException catch (e) {
       log(e.message, name: "NativeCrypto");
       throw KeyException(e);
