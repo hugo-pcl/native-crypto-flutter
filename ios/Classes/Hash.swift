@@ -42,24 +42,33 @@ class Hash {
         if (data == nil) {
             return nil
         }
-        let digestData = Data(count: algorithm.digestLength)
-        let digestBytes = digestData.withUnsafeBytes { $0.load(as: UnsafeMutablePointer<UInt8>.self) }
         
-        let messageBytes = data!.withUnsafeBytes { $0.load(as: UnsafePointer<UInt8>.self) }
+        let hashBytes = UnsafeMutablePointer<UInt8>.allocate(capacity: algorithm.digestLength)
+        defer { hashBytes.deallocate() }
         
         switch algorithm {
         case .SHA1:
-            CC_SHA1(messageBytes, CC_LONG(data!.count), digestBytes)
+            data!.withUnsafeBytes { (buffer) -> Void in
+                CC_SHA1(buffer.baseAddress!, CC_LONG(buffer.count), hashBytes)
+            }
         case .SHA224:
-            CC_SHA224(messageBytes, CC_LONG(data!.count), digestBytes)
+            data!.withUnsafeBytes { (buffer) -> Void in
+                CC_SHA224(buffer.baseAddress!, CC_LONG(buffer.count), hashBytes)
+            }
         case .SHA256:
-            CC_SHA256(messageBytes, CC_LONG(data!.count), digestBytes)
+            data!.withUnsafeBytes { (buffer) -> Void in
+                CC_SHA256(buffer.baseAddress!, CC_LONG(buffer.count), hashBytes)
+            }
         case .SHA384:
-            CC_SHA384(messageBytes, CC_LONG(data!.count), digestBytes)
+            data!.withUnsafeBytes { (buffer) -> Void in
+                CC_SHA384(buffer.baseAddress!, CC_LONG(buffer.count), hashBytes)
+            }
         case .SHA512:
-            CC_SHA512(messageBytes, CC_LONG(data!.count), digestBytes)
+            data!.withUnsafeBytes { (buffer) -> Void in
+                CC_SHA512(buffer.baseAddress!, CC_LONG(buffer.count), hashBytes)
+            }
         }
         
-        return digestData
+        return Data(bytes: hashBytes, count: algorithm.digestLength)
     }
 }
