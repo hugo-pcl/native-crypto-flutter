@@ -135,7 +135,7 @@ To create a hashed message
 
 ```dart
 MessageDigest md = MessageDigest.getInstance("sha256");
-Uint8List hash = md.digest(message);
+Uint8List hash = await md.digest(message);
 ```
 
 ## ⛏️ Built Using <a name = "built_using"></a>
