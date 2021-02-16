@@ -1,4 +1,4 @@
-// Copyright (c) 2020
+// Copyright (c) 2021
 // Author: Hugo Pointcheval
 
 import 'dart:typed_data';
@@ -52,14 +52,23 @@ abstract class Cipher {
 ///
 /// It's the result of an encryption.
 abstract class CipherText {
-  /// Returns the standard algorithm name used for this ciphertext
+  /// Returns the standard algorithm name used for this ciphertext.
   CipherAlgorithm get algorithm;
 
-  /// Returns the data of this ciphertext
-  Uint8List get bytes;
+  /// Returns the data of this ciphertext (in chunks).
+  List<Uint8List> get bytes;
 
-  /// Returns the IV of this cipertext
-  Uint8List get iv;
+  /// Returns the IV of this cipertext (in chunks).
+  List<Uint8List> get iv;
+
+  /// Returns the chunk number of this cipherText.
+  int get size;
+
+  /// Returns this ciphertext in simple Byte Array format.
+  Uint8List encode();
+
+  /// Transforms a simple Byte Array to a NativeCrypto cipherText.
+  void decode(Uint8List src);
 }
 
 /// Represents a pair of [BlockCipherMode] and [Padding]
