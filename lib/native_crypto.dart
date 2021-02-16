@@ -1,4 +1,4 @@
-// Copyright (c) 2020
+// Copyright (c) 2021
 // Author: Hugo Pointcheval
 export './src/exceptions.dart';
 export './src/key.dart';
@@ -13,6 +13,7 @@ export './src/utils.dart';
 export './src/sym/AES.dart';
 //export './src/asym/RSA.dart';
 
-const String version = "0.0.5";
+const String version = "0.0.6";
 const String author = "Hugo Pointcheval";
 const String website = "https://hugo.pointcheval.fr/";
+const String repository = "https://github.com/hugo-pcl/native-crypto-flutter";

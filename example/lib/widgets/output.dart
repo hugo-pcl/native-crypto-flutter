@@ -1,5 +1,7 @@
 // Copyright (c) 2020
 // Author: Hugo Pointcheval
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 class Output extends StatelessWidget {
@@ -15,14 +17,17 @@ class Output extends StatelessWidget {
   final bool editable;
 
   void print(String message) {
+    log(message, name: "NativeCrypto Example");
     textEditingController.text = message;
   }
 
   void append(String message) {
+    log(message, name: "NativeCrypto Example");
     textEditingController.text += message;
   }
 
   void appendln(String message) {
+    log(message, name: "NativeCrypto Example");
     textEditingController.text += message + "\n";
   }
 
@@ -41,7 +46,7 @@ class Output extends StatelessWidget {
         enableInteractiveSelection: true,
         readOnly: editable ? false : true,
         minLines: large ? 3 : 1,
-        maxLines: large ? 50 : 5,
+        maxLines: large ? 500 : 5,
         decoration: InputDecoration(border: OutlineInputBorder()),
         controller: textEditingController,
       ),

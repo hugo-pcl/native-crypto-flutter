@@ -1,7 +1,6 @@
-// Copyright (c) 2020
+// Copyright (c) 2021
 // Author: Hugo Pointcheval
 
-import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
@@ -60,11 +59,8 @@ class SecretKey extends Key {
 
     try {
       Uint8List _key = await Platform().keygen(size);
-      log("Generated SecretKey size: ${_key.length * 8} bits (${_key.length} bytes)",
-          name: "NativeCrypto");
       return SecretKey.fromBytes(_key, algorithm: algorithm);
     } on PlatformException catch (e) {
-      log(e.message, name: "NativeCrypto");
       throw KeyException(e);
     }
   }
@@ -109,10 +105,7 @@ class KeyPair extends Key {
         _publicKey = PublicKey.fromBytes(kp.first);
         _privateKey = PrivateKey.fromBytes(kp.last);
         _algo = "RSA";
-        log("Generated public and private keys size: ${_publicKey.encoded.length * 8} bits (${_publicKey.encoded.length} bytes)",
-            name: "NativeCrypto");
       } on PlatformException catch (e) {
-        log(e.message, name: "NativeCrypto");
         throw KeyException(e);
       }
     } else {
