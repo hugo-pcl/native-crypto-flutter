@@ -1,5 +1,6 @@
-// Copyright (c) 2020
+// Copyright (c) 2021
 // Author: Hugo Pointcheval
+import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -36,23 +37,50 @@ class _BenchmarkPageState extends State<BenchmarkPage> {
       return;
     }
 
-    benchmarkStatus.print("Benchmark 1/5/10/25/50MB\n");
-    List<int> testedSizes = [1, 5, 10, 25, 50];
+    benchmarkStatus.print("Benchmark 2/4/8/16/32/64/128/256MB\n");
+    List<int> testedSizes = [2, 4, 8, 16, 32, 64, 128, 256];
+    String csv =
+        "size;encryption time;encode time;decryption time;crypto time\n";
 
     var beforeBench = DateTime.now();
     for (int size in testedSizes) {
       var bigFile = Uint8List(size * 1000000);
+      csv += "${size * 1000000};";
+      var cryptoTime = 0;
+
+      // Encryption
       var before = DateTime.now();
       var encryptedBigFile = await Session.aesCipher.encrypt(bigFile);
       var after = DateTime.now();
+
       var benchmark =
           after.millisecondsSinceEpoch - before.millisecondsSinceEpoch;
       benchmarkStatus.append('[$size MB] Encryption took $benchmark ms\n');
+
+      csv += "$benchmark;";
+      cryptoTime += benchmark;
+
+      // Encoding
+      before = DateTime.now();
+      encryptedBigFile.encode();
+      after = DateTime.now();
+
+      benchmark = after.millisecondsSinceEpoch - before.millisecondsSinceEpoch;
+      benchmarkStatus.append('[$size MB] Encoding took $benchmark ms\n');
+
+      csv += "$benchmark;";
+
+      // Decryption
       before = DateTime.now();
       await Session.aesCipher.decrypt(encryptedBigFile);
       after = DateTime.now();
+
       benchmark = after.millisecondsSinceEpoch - before.millisecondsSinceEpoch;
-      benchmarkStatus.append('[$size MB] Decryption took $benchmark ms\n\n');
+      benchmarkStatus.append('[$size MB] Decryption took $benchmark ms\n');
+
+      csv += "$benchmark;";
+      cryptoTime += benchmark;
+      csv += "$cryptoTime\n";
     }
     var afterBench = DateTime.now();
     var benchmark =
@@ -60,6 +88,7 @@ class _BenchmarkPageState extends State<BenchmarkPage> {
     var sum = testedSizes.reduce((a, b) => a + b);
     benchmarkStatus.append(
         'Benchmark finished.\nGenerated, encrypted and decrypted $sum MB in $benchmark ms');
+    log(csv, name: "Benchmark");
   }
 
   void _clear() {

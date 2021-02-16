@@ -1,4 +1,4 @@
-// Copyright (c) 2020
+// Copyright (c) 2021
 // Author: Hugo Pointcheval
 import 'dart:typed_data';
 
