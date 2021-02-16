@@ -63,10 +63,10 @@ class _CipherPageState extends State<CipherPage> {
       decryptionStatus.print('Encrypt before altering CipherText!');
     } else {
       // Add 1 to the first byte
-      Uint8List _altered = cipherText.bytes;
-      _altered[0] += 1;
+      List<Uint8List> _altered = cipherText.bytes;
+      _altered[0][0] += 1;
       // Recreate cipher text with altered data
-      cipherText = AESCipherText(_altered, cipherText.iv);
+      cipherText = AESCipherText.from(_altered, cipherText.iv);
       encryptionStatus.print('String successfully encrypted.\n');
       encryptionStatus.append("IV: " +
           cipherText.iv.toString() +
@@ -101,7 +101,8 @@ class _CipherPageState extends State<CipherPage> {
     if (cipherText == null) {
       decryptionStatus.print('Encrypt data before export!');
     } else {
-      Uint8List payload = Uint8List.fromList(cipherText.iv + cipherText.bytes);
+      // TODO: fix export format to support chunks !
+      Uint8List payload = cipherText.encode();
       String data = TypeHelper.bytesToBase64(payload);
       decryptionStatus.print('CipherText successfully exported');
       cipherExport.print(data);
@@ -114,9 +115,8 @@ class _CipherPageState extends State<CipherPage> {
       encryptionStatus.print('CipherText import failed');
     } else {
       Uint8List payload = TypeHelper.base64ToBytes(data);
-      Uint8List iv = payload.sublist(0, 16);
-      Uint8List bytes = payload.sublist(16);
-      cipherText = AESCipherText(bytes, iv);
+      cipherText = AESCipherText.empty();
+      cipherText.decode(payload);
       encryptionStatus.print('CipherText successfully imported\n');
       encryptionStatus.append("IV: " +
           cipherText.iv.toString() +
