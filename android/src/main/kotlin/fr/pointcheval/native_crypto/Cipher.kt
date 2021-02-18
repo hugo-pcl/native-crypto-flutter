@@ -5,6 +5,13 @@ import javax.crypto.Cipher
 import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
+import javax.crypto.CipherOutputStream
+import javax.crypto.CipherInputStream
+import java.io.*;
+import java.nio.file.Files;
+import java.security.*;
+import java.util.Arrays;
+
 
 enum class CipherAlgorithm(val spec: String) {
     AES("AES"),
@@ -96,6 +103,66 @@ class Cipher {
             decryptedContent
         } else {
             null;
+        }
+    }
+    suspend fun encryptFile(inputFilePath:String, outputFilePath: String,algorithm: String,key: ByteArray, mode: String, padding: String) : ByteArray? {
+        val algo = getCipherAlgorithm(algorithm);
+        val params = getInstance(mode,padding);
+        val keySpecification = algo.spec + "/" + params.toString();
+        val sk = SecretKeySpec(key, algo.spec);
+        val cipher = Cipher.getInstance(keySpecification);
+        cipher.init(Cipher.ENCRYPT_MODE,sk);
+        var len: Int;
+        val buffer: ByteArray = ByteArray(8192);
+        val inputFile = FileInputStream(inputFilePath);
+        val outputFile = FileOutputStream(outputFilePath);
+        val encryptedStream = CipherOutputStream(outputFile,cipher);
+        while(true){
+            len = inputFile.read(buffer);
+            if(len > 0){
+                encryptedStream.write(buffer,0,len);
+            } else {
+                break;
+            }
+        }
+        encryptedStream.flush();
+        encryptedStream.close();
+        inputFile.close();
+        return if (File(outputFilePath).exists() && cipher.iv != null){
+            cipher.iv;
+        } else {
+            null;
+        }
+    }
+    suspend fun decryptFile(inputFilePath: String, outputFilePath: String, algorithm: String, key: ByteArray, iv: ByteArray, mode: String, padding: String):Boolean {
+        val algo = getCipherAlgorithm(algorithm);
+        val params = getInstance(mode,padding);
+        val keySpecification = algo.spec + "/" + params.toString();
+        val sk = SecretKeySpec(key, algo.spec);
+        val ivSpec = IvParameterSpec(iv);
+        val cipher = Cipher.getInstance(keySpecification);
+        var len: Int;
+        val ibuffer: ByteArray? = ByteArray(8192);
+        var obuffer: ByteArray?;
+        cipher.init(Cipher.DECRYPT_MODE, sk, ivSpec);
+        val outputFile = FileOutputStream(outputFilePath);
+        val inputFile = FileInputStream(inputFilePath);
+        var decryptedStream = CipherOutputStream(outputFile,cipher)
+        while (true) {
+            len = inputFile.read(ibuffer);
+            if(len > 0){
+                decryptedStream.write(ibuffer,0, len);
+            } else {
+                break;
+            }
+        }
+        decryptedStream.flush();
+        decryptedStream.close();
+        inputFile.close();
+        return if (File(outputFilePath).exists()){
+            true;
+        } else {
+            false;
         }
     }
 }

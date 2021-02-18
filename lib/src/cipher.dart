@@ -46,6 +46,21 @@ abstract class Cipher {
   /// Takes [CipherText] as parameter.
   /// And returns plain text data as [Uint8List].
   Future<Uint8List> decrypt(CipherText cipherText);
+
+  /// encrypts large files in chunks
+  /// first parameter is the path to the file you want to encrypt
+  /// second parameter is the path to the file where the output -
+  /// (encrypted cipher) will be stored.
+  /// returns initialization vector used in the encryption
+  Future<Uint8List> encryptFile(String inputFilePath,String outputFilePath);
+
+  ///decrypts files (both large and small ones) in chunks
+  ///first parameter 'inputFilePath' is the path to the encrypted file
+  ///second parameter is the path to store the decrypted file
+  ///third parameter is the initialization vector created during encryption
+  ///in form of bytes
+  ///returns true on success and false on failure
+  Future<bool> decryptFile(String inputFilePath,String outputFilePath,Uint8List iv);
 }
 
 /// Represents a cipher text.

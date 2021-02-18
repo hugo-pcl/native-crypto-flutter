@@ -102,7 +102,35 @@ class AESCipher implements Cipher {
         await Platform().decrypt(payload, _sk.encoded, algorithm, _params);
     return d;
   }
+
+  ///encrypts files (both large and small)
+  @override 
+  Future<Uint8List> encryptFile(String inputFilePath,String outputFilePath)async{
+    if(!_isInit){
+      throw CipherInitException('Cipher not initialized.');
+    }
+    if(_sk == null || _sk.isEmpty){
+      throw CipherInitException('secret key is required');
+    }
+    Uint8List result = await Platform().encryptFile(inputFilePath, outputFilePath, _sk.encoded, algorithm, parameters);
+    return result;
+  }
+
+  @override 
+  Future<bool> decryptFile(String inputFilePath,String outputFilePath, Uint8List iv)async{
+    if(!_isInit){
+      throw CipherInitException('Cipher not initialized.');
+    }
+    if(_sk == null || _sk.isEmpty){
+      throw CipherInitException('secret key is required');
+    }
+    bool result = await Platform().decryptFile(inputFilePath, outputFilePath, _sk.encoded, iv, algorithm, parameters);
+    return result;
+  }
+
+
 }
+
 
 class AESCipherText implements CipherText {
   Uint8List _bytes;
