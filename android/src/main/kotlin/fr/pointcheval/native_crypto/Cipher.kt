@@ -7,11 +7,13 @@ import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 import javax.crypto.CipherOutputStream
 import javax.crypto.CipherInputStream
+import androidx.documentfile.provider.DocumentFile
 import java.io.*;
 import java.nio.file.Files;
 import java.security.*;
 import java.util.Arrays;
-
+import android.content.Context;
+import android.net.Uri;
 
 enum class CipherAlgorithm(val spec: String) {
     AES("AES"),
@@ -37,8 +39,11 @@ class CipherParameters(private val mode: BlockCipherMode, private val padding: P
     }
 }
 
-class Cipher {
-
+class Cipher(contextp:Context) {
+    public var context: Context;
+    init {
+        this.context = contextp;
+    }
     fun getCipherAlgorithm(dartAlgorithm: String) : CipherAlgorithm {
         return when (dartAlgorithm) {
             "aes" -> CipherAlgorithm.AES
@@ -105,6 +110,57 @@ class Cipher {
             null;
         }
     }
+
+    public fun getUri(): Uri? {
+        val persistedUriPermissions = context.getContentResolver().getPersistedUriPermissions();
+        if (persistedUriPermissions.size > 0) {
+          val uriPermission = persistedUriPermissions.get(0);
+          return uriPermission.getUri();
+        }
+        return null;
+    }
+
+    public fun getDocumentFileByPath(docPath: String):DocumentFile? {
+        try{
+            if (docPath == null) throw Exception("Arguments Not found");
+            var documentFile = DocumentFile.fromTreeUri(context, getUri()!!);
+            val parts = docPath.split("/");
+            for (i in parts.indices) {
+              var nextfile = documentFile?.findFile(parts[i]); 
+              if(nextfile != null){
+                documentFile = nextfile;
+              }
+            }
+            if(documentFile != null){
+              return documentFile;
+            }else{
+              throw Exception("File Not Found");
+            }
+          } catch (e:Exception){
+            e.printStackTrace();
+            return null;
+          }
+    }
+    private fun getFileOutputStream(path: String): OutputStream? {
+        return try{
+            FileOutputStream(path);
+        } catch(e: IOException){
+            val documentFile: DocumentFile? = this.getDocumentFileByPath(path);
+            var documentUri = documentFile?.getUri();
+            context.getContentResolver().openOutputStream(documentUri!!);
+        }
+    }
+
+    private fun getFileInputStream(path: String): InputStream? {
+        return try{
+            FileInputStream(path);
+        } catch(e: IOException){
+            val documentFile: DocumentFile? = this.getDocumentFileByPath(path);
+            var documentUri = documentFile?.getUri();
+            context.getContentResolver().openInputStream(documentUri!!);
+        }
+    }
+
     suspend fun encryptFile(inputFilePath:String, outputFilePath: String,algorithm: String,key: ByteArray, mode: String, padding: String) : ByteArray? {
         val algo = getCipherAlgorithm(algorithm);
         val params = getInstance(mode,padding);
@@ -112,22 +168,22 @@ class Cipher {
         val sk = SecretKeySpec(key, algo.spec);
         val cipher = Cipher.getInstance(keySpecification);
         cipher.init(Cipher.ENCRYPT_MODE,sk);
-        var len: Int;
+        var len: Int?;
         val buffer: ByteArray = ByteArray(8192);
-        val inputFile = FileInputStream(inputFilePath);
-        val outputFile = FileOutputStream(outputFilePath);
-        val encryptedStream = CipherOutputStream(outputFile,cipher);
+        val inputFile = getFileInputStream(inputFilePath);
+        val outputFile = getFileOutputStream(outputFilePath);
+        val encryptedStream = CipherOutputStream(outputFile!!,cipher);
         while(true){
-            len = inputFile.read(buffer);
-            if(len > 0){
-                encryptedStream.write(buffer,0,len);
+            len = inputFile?.read(buffer);
+            if(len != null && len > 0){
+                encryptedStream.write(buffer,0,len!!);
             } else {
                 break;
             }
         }
         encryptedStream.flush();
         encryptedStream.close();
-        inputFile.close();
+        inputFile?.close();
         return if (File(outputFilePath).exists() && cipher.iv != null){
             cipher.iv;
         } else {
@@ -141,24 +197,24 @@ class Cipher {
         val sk = SecretKeySpec(key, algo.spec);
         val ivSpec = IvParameterSpec(iv);
         val cipher = Cipher.getInstance(keySpecification);
-        var len: Int;
+        var len: Int?;
         val ibuffer: ByteArray? = ByteArray(8192);
         var obuffer: ByteArray?;
         cipher.init(Cipher.DECRYPT_MODE, sk, ivSpec);
-        val outputFile = FileOutputStream(outputFilePath);
-        val inputFile = FileInputStream(inputFilePath);
-        var decryptedStream = CipherOutputStream(outputFile,cipher)
+        val outputFile = getFileOutputStream(outputFilePath);
+        val inputFile = getFileInputStream(inputFilePath);
+        var decryptedStream = CipherOutputStream(outputFile!!,cipher)
         while (true) {
-            len = inputFile.read(ibuffer);
-            if(len > 0){
-                decryptedStream.write(ibuffer,0, len);
+            len = inputFile?.read(ibuffer);
+            if(len != null && len > 0){
+                decryptedStream.write(ibuffer,0, len!!);
             } else {
                 break;
             }
         }
         decryptedStream.flush();
         decryptedStream.close();
-        inputFile.close();
+        inputFile?.close();
         return if (File(outputFilePath).exists()){
             true;
         } else {

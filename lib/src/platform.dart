@@ -177,6 +177,7 @@ class Platform {
       });
       return iv;
     } on PlatformException catch(e){
+        print(e.message);
         throw EncryptionException(e.code+" : "+e.message);
     }
   }
@@ -201,6 +202,7 @@ class Platform {
       return result;
     }
     on PlatformException catch(e){
+      print(e.message);
       throw DecryptionException(e.code+" : "+e.message);
     }
   }

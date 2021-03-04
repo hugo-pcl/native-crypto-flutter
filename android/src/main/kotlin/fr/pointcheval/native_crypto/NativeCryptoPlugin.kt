@@ -3,7 +3,7 @@
  * Author: Hugo Pointcheval
  */
 package fr.pointcheval.native_crypto
-
+import android.content.Context
 import androidx.annotation.NonNull
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
@@ -15,18 +15,24 @@ import kotlinx.coroutines.*
 import kotlin.coroutines.*
 
 /** NativeCryptoPlugin */
-class NativeCryptoPlugin : FlutterPlugin, MethodCallHandler {
-    private val mainScope = CoroutineScope(Dispatchers.Main);
+class NativeCryptoPlugin(contextm: Context? = null) : FlutterPlugin, MethodCallHandler {
+    public var context: Context?;
+    init {
+        context = contextm;
+    }
+    public val mainScope = CoroutineScope(Dispatchers.Main);
+    //public lateinit var context: Context;
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+        //context = flutterPluginBinding.applicationContext;
         val channel = MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "native.crypto")
-        channel.setMethodCallHandler(NativeCryptoPlugin());
+        channel.setMethodCallHandler(NativeCryptoPlugin(flutterPluginBinding.applicationContext));
     }
 
     companion object {
         @JvmStatic
         fun registerWith(registrar: Registrar) {
             val channel = MethodChannel(registrar.messenger(), "native.crypto")
-            channel.setMethodCallHandler(NativeCryptoPlugin())
+            channel.setMethodCallHandler(NativeCryptoPlugin(registrar.context()))
         }
     }
 
@@ -102,7 +108,7 @@ class NativeCryptoPlugin : FlutterPlugin, MethodCallHandler {
                 val padding = call.argument<String>("padding")
 
                 try {
-                    val payload = Cipher().encrypt(data!!, key!!, algorithm!!, mode!!, padding!!)
+                    val payload = Cipher(context!!).encrypt(data!!, key!!, algorithm!!, mode!!, padding!!)
 
                     if (payload.isNotEmpty()) {
                         result.success(payload)
@@ -125,7 +131,7 @@ class NativeCryptoPlugin : FlutterPlugin, MethodCallHandler {
                 var decryptedPayload : ByteArray? = null
 
                 try {
-                    decryptedPayload = Cipher().decrypt(payload!!, key!!, algorithm!!, mode!!, padding!!)
+                    decryptedPayload = Cipher(context!!).decrypt(payload!!, key!!, algorithm!!, mode!!, padding!!)
                     if (decryptedPayload != null && decryptedPayload.isNotEmpty()) {
                         result.success(decryptedPayload)
                     } else {
@@ -145,7 +151,7 @@ class NativeCryptoPlugin : FlutterPlugin, MethodCallHandler {
                     val algorithm = call.argument<String>("algorithm");
                     try {
                         val encryptionIv: ByteArray? = withContext(Dispatchers.Default) {
-                            Cipher().encryptFile(inputFilePath!!,outputFilePath!!,algorithm!!,key!!,mode!!,padding!!);
+                            Cipher(context!!).encryptFile(inputFilePath!!,outputFilePath!!,algorithm!!,key!!,mode!!,padding!!);
                         }
                         if (encryptionIv != null){
                             result.success(encryptionIv)
@@ -169,7 +175,7 @@ class NativeCryptoPlugin : FlutterPlugin, MethodCallHandler {
                     val iv = call.argument<ByteArray>("iv");
                     try {
                         val decryption: Boolean = withContext(Dispatchers.Default) {
-                            Cipher().decryptFile(inputFilePath!!,outputFilePath!!,algorithm!!,key!!,iv!!,mode!!,padding!!);
+                            Cipher(context!!).decryptFile(inputFilePath!!,outputFilePath!!,algorithm!!,key!!,iv!!,mode!!,padding!!);
                         }
                         if (decryption == true) {
                             result.success(decryption);
