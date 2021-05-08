@@ -6,10 +6,10 @@ import 'dart:typed_data';
 import 'key.dart';
 
 /// Represents different cipher algorithms
-enum CipherAlgorithm { AES, BlowFish, None }
+enum CipherAlgorithm { AES, None }
 
 /// Represents different block cipher modes
-enum BlockCipherMode { ECB, CBC, CFB, GCM, CGM }
+enum BlockCipherMode { CBC, GCM }
 
 /// Represents different padding
 enum PlainTextPadding { PKCS5, None }

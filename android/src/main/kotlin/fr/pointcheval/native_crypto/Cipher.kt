@@ -8,15 +8,11 @@ import javax.crypto.spec.SecretKeySpec
 
 enum class CipherAlgorithm(val spec: String) {
     AES("AES"),
-    BlowFish("BLOWFISH")
 }
 
 enum class BlockCipherMode(val instance: String) {
-    ECB("ECB"),
     CBC("CBC"),
-    CFB("CFB"),
     GCM("GCM"),
-    CGM("CGM"),
 }
 
 enum class Padding(val instance: String) {
@@ -35,18 +31,14 @@ class Cipher {
     fun getCipherAlgorithm(dartAlgorithm: String) : CipherAlgorithm {
         return when (dartAlgorithm) {
             "aes" -> CipherAlgorithm.AES
-            "blowfish" -> CipherAlgorithm.BlowFish
             else -> CipherAlgorithm.AES
         }
     }
 
     fun getInstance(mode : String, padding : String) : CipherParameters {
         val m = when (mode) {
-            "ecb" -> BlockCipherMode.ECB
             "cbc" -> BlockCipherMode.CBC
-            "cfb" -> BlockCipherMode.CFB
             "gcm" -> BlockCipherMode.GCM
-            "cgm" -> BlockCipherMode.CGM
             else -> throw Exception()
         }
         val p = when (padding) {

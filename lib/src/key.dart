@@ -48,13 +48,6 @@ class SecretKey extends Key {
       if (!_supportedSizes.contains(size)) {
         throw KeyException("AES must be 128, 192 or 256 bits long.");
       }
-    } else if (algorithm == CipherAlgorithm.BlowFish) {
-      List<int> supportedSizes =
-          List<int>.generate(52, (int index) => (index + 4) * 8);
-      if (!supportedSizes.contains(size)) {
-        throw KeyException(
-            "Blowfish must be between 4 and 56 bytes (32 and 448 bits) long.");
-      }
     }
 
     try {
@@ -69,8 +62,6 @@ class SecretKey extends Key {
 /// This represents a keypair, usefull in
 /// algorithms like RSA.
 class KeyPair extends Key {
-  List<String> _supportedAlgorithms = ["RSA"];
-
   PublicKey _publicKey;
   PrivateKey _privateKey;
 
@@ -84,27 +75,25 @@ class KeyPair extends Key {
   bool get isComplete => (_publicKey != null && _privateKey != null);
 
   /// Creates a key pair from public and private keys.
-  KeyPair.from(PublicKey publicKey, PrivateKey privateKey) {
+  KeyPair.from(PublicKey publicKey, PrivateKey privateKey, {String algorithm}) {
     _publicKey = publicKey;
     _privateKey = privateKey;
+    _algo = algorithm;
   }
 
   /// Creates a key pair from a specific size.
-  KeyPair.generate(KeySpec keySpec) {
+  static Future<KeyPair> generate(KeySpec keySpec) async {
+    List<String> _supportedAlgorithms = ["RSA"];
     if (!_supportedAlgorithms.contains(keySpec.algorithm)) {
       throw KeyException(keySpec.algorithm + " not supported!");
     }
-    _generate(keySpec);
-  }
-
-  Future<void> _generate(KeySpec keySpec) async {
     if (keySpec.algorithm == "RSA") {
       RSAKeySpec spec = keySpec;
       try {
         List<Uint8List> kp = await Platform().rsaKeypairGen(spec.size);
-        _publicKey = PublicKey.fromBytes(kp.first);
-        _privateKey = PrivateKey.fromBytes(kp.last);
-        _algo = "RSA";
+        PublicKey _publicKey = PublicKey.fromBytes(kp.first, "RSA");
+        PrivateKey _privateKey = PrivateKey.fromBytes(kp.last, "RSA");
+        return KeyPair.from(_publicKey, _privateKey, algorithm: "RSA");
       } on PlatformException catch (e) {
         throw KeyException(e);
       }
@@ -117,11 +106,13 @@ class KeyPair extends Key {
 /// This represents a public key
 class PublicKey extends Key {
   /// Creates a public key from raw byte array
-  PublicKey.fromBytes(Uint8List bytes) : super(bytes: bytes);
+  PublicKey.fromBytes(Uint8List bytes, String algorithm)
+      : super(bytes: bytes, algorithm: algorithm);
 }
 
 /// This represents a private key
 class PrivateKey extends Key {
   /// Creates a private key from raw byte array
-  PrivateKey.fromBytes(Uint8List bytes) : super(bytes: bytes);
+  PrivateKey.fromBytes(Uint8List bytes, String algorithm)
+      : super(bytes: bytes, algorithm: algorithm);
 }
