@@ -25,27 +25,24 @@ I started this project because using **Pointy Castle** I faced big performance i
 
 > We also notice on this benchmark that the AES encryption time does not even increase linearly with size.
 
-As for NativeCrypto, here is a benchmark realized on an Android device, Huawei P30 Pro.
+As for NativeCrypto, here is a benchmark realized on an iPhone 11.
 
 | Size (kB) | NativeCrypto **encryption** time (ms) |
 |-----------|---------------------------------------|
-| 1 mB | 27 ms
-| 2 mB | 43 ms
-| 3 mB | 78 ms
-| 4 mB | 93 ms
-| 5 mB | 100 ms
-| 10 mB | 229 ms
-| 50 mB | 779 ms
+| 2 mB | 13 ms
+| 4 mB | 17 ms
+| 8 mB | 56 ms
+| 16 mB | 73 ms
+| 32 mB | 120 ms
+| 64 mB | 243 ms
+| 128 mB | 509 ms
+| 256 mB | 1057 ms
 
-> Less than 1s for 50 mB.
+> ~1s for 256 mB !
 
 In short, **NativeCrypto** is incomparable to **Pointy Castle** in terms of performance.
 
 ## 🏁 Getting Started <a name = "getting_started"></a>
-
-
-
-
 
 ### Prerequisites
 
@@ -60,7 +57,7 @@ Add these lines in your **pubspec.yaml**:
 ```yaml
 native_crypto:
     git:
-        url: https://gogs.pointcheval.fr/hugo/native-crypto-flutter.git
+        url: https://github.com/hugo-pcl/native-crypto-flutter.git
         ref: v0.0.x
 ```
 
@@ -149,7 +146,7 @@ Uint8List hash = await md.digest(message);
 
 Here you can check major changes, roadmap and todos.
 
-Once the **BlowFish algorithm** is exposed on Android and iOS, I plan to deal with asymmetric cryptography with the implementation of a Key Encapsulation Mechanism.
+I plan to deal with asymmetric cryptography with the implementation of a Key Encapsulation Mechanism.
 
 - [x] Add PBKDF2 support.
 - [x] Implement working cross platform AES encryption/decryption.
@@ -158,8 +155,7 @@ Once the **BlowFish algorithm** is exposed on Android and iOS, I plan to deal wi
 - [x] Clean platform specific code.
 - [x] Add digest.
 - [x] Rework exposed API.
-- [ ] Implement BlowFish.
-- [ ] Add KeyPair generation.
+- [x] Add KeyPair generation.
 - [ ] Add KEM.
 - [ ] Porting NativeCrypto to other platforms...
 
@@ -168,3 +164,4 @@ You can contribute to this project.
 ## ✍️ Authors <a name = "authors"></a>
 
 - [Hugo Pointcheval](https://github.com/hugo-pcl) - Idea & Initial work
+- [Chisom Maxwell](https://github.com/maxcotech) - For the chunks idea [#2](https://github.com/hugo-pcl/native-crypto-flutter/issues/2)
