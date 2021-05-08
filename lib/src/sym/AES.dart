@@ -16,19 +16,12 @@ enum AESKeySize { bits128, bits192, bits256 }
 
 extension AESKeySizeExtension on AESKeySize {
   int get length {
-    int l;
-    switch (this) {
-      case AESKeySize.bits128:
-        l = 128;
-        break;
-      case AESKeySize.bits192:
-        l = 192;
-        break;
-      case AESKeySize.bits256:
-        l = 256;
-        break;
-    }
-    return l;
+    Map<AESKeySize, int> table = <AESKeySize, int>{
+      AESKeySize.bits128: 128,
+      AESKeySize.bits192: 192,
+      AESKeySize.bits256: 256,
+    };
+    return table[this];
   }
 }
 
