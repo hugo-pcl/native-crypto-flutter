@@ -79,6 +79,31 @@ public class SwiftNativeCryptoPlugin: NSObject, FlutterPlugin {
                                 message: "GENERATED KEY IS NIL.",
                                 details: nil))
         }
+    case "rsaKeypairGen":
+        let args = call.arguments as! NSDictionary
+        
+        let size = args["size"] as! NSNumber
+        
+        let keypair : [Data]?
+        
+        if #available(iOS 10.0, *) {
+            do {
+                keypair = try KeyGeneration().rsaKeypairGen(size: size)
+            } catch {
+                keypair = nil
+            }
+        } else {
+            // Fallback on earlier versions
+            keypair = nil
+        }
+        
+        if keypair != nil {
+            result(keypair)
+        } else {
+            result(FlutterError(code: "KEYPAIRGENERROR",
+                                message: "GENERATED KEYPAIR IS EMPTY.",
+                                details: nil))
+        }
     case "encrypt":
         let args = call.arguments as! NSDictionary
         

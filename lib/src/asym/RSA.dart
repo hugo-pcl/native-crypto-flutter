@@ -61,7 +61,7 @@ class RSAKeyEncapsulationMechanism implements KeyEncapsulationMechanism {
 
   @override
   Future<Encapsulation> encapsulate() {
-    if (!_isInit) {
+    if (!_isInit || _mode == KemMode.DECAPSULATION) {
       throw KemInitException("KEM not properly initialized.");
     }
     throw UnimplementedError();
@@ -69,6 +69,9 @@ class RSAKeyEncapsulationMechanism implements KeyEncapsulationMechanism {
 
   @override
   Future<SecretKey> decapsulate(Encapsulation encapsulation) {
+    if (!_isInit || _mode == KemMode.ENCAPSULATION) {
+      throw KemInitException("KEM not properly initialized.");
+    }
     throw UnimplementedError();
   }
 }

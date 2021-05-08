@@ -99,7 +99,7 @@ class Platform {
   Future<List<Uint8List>> rsaKeypairGen(int size) async {
     try {
       final List<Uint8List> keypair =
-          await call('rsaKeypairGen', <String, dynamic>{
+          await callList('rsaKeypairGen', <String, dynamic>{
         'size': size,
       });
       return keypair;
@@ -146,8 +146,7 @@ class Platform {
     CipherParameters parameters,
   ) async {
     try {
-      final Uint8List data =
-          await _channel.invokeMethod('decrypt', <String, dynamic>{
+      final Uint8List data = await call('decrypt', <String, dynamic>{
         'payload': payload,
         'key': key,
         'algorithm': algorithm.name,
