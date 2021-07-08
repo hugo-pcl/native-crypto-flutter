@@ -3,7 +3,7 @@
  * Author: Hugo Pointcheval
  */
 package fr.pointcheval.native_crypto
-
+import android.content.Context
 import androidx.annotation.NonNull
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
@@ -11,20 +11,28 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
-
+import kotlinx.coroutines.*
+import kotlin.coroutines.*
 
 /** NativeCryptoPlugin */
-class NativeCryptoPlugin : FlutterPlugin, MethodCallHandler {
+class NativeCryptoPlugin(contextm: Context? = null) : FlutterPlugin, MethodCallHandler {
+    public var context: Context?;
+    init {
+        context = contextm;
+    }
+    public val mainScope = CoroutineScope(Dispatchers.Main);
+    //public lateinit var context: Context;
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+        //context = flutterPluginBinding.applicationContext;
         val channel = MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "native.crypto")
-        channel.setMethodCallHandler(NativeCryptoPlugin());
+        channel.setMethodCallHandler(NativeCryptoPlugin(flutterPluginBinding.applicationContext));
     }
 
     companion object {
         @JvmStatic
         fun registerWith(registrar: Registrar) {
             val channel = MethodChannel(registrar.messenger(), "native.crypto")
-            channel.setMethodCallHandler(NativeCryptoPlugin())
+            channel.setMethodCallHandler(NativeCryptoPlugin(registrar.context()))
         }
     }
 
@@ -100,7 +108,7 @@ class NativeCryptoPlugin : FlutterPlugin, MethodCallHandler {
                 val padding = call.argument<String>("padding")
 
                 try {
-                    val payload = Cipher().encrypt(data!!, key!!, algorithm!!, mode!!, padding!!)
+                    val payload = Cipher(context!!).encrypt(data!!, key!!, algorithm!!, mode!!, padding!!)
 
                     if (payload.isNotEmpty()) {
                         result.success(payload)
@@ -123,15 +131,63 @@ class NativeCryptoPlugin : FlutterPlugin, MethodCallHandler {
                 var decryptedPayload : ByteArray? = null
 
                 try {
-                    decryptedPayload = Cipher().decrypt(payload!!, key!!, algorithm!!, mode!!, padding!!)
+                    decryptedPayload = Cipher(context!!).decrypt(payload!!, key!!, algorithm!!, mode!!, padding!!)
                     if (decryptedPayload != null && decryptedPayload.isNotEmpty()) {
                         result.success(decryptedPayload)
                     } else {
-                        result.error("DECRYPTIONERROR", "DECRYPTED PAYLOAD IS NULL. MAYBE VERIFICATION MAC IS UNVALID.", null)
+                        result.error("DECRYPTIONERROR", "DECRYPTED PAYLOAD IS NULL. MAYBE VERIFICATION MAC IS INVALID.", null)
                     }
                 } catch (e : Exception) {
-                    result.error("DECRYPTIONEXCEPTION", e.message, null)
+                    result.error("DECRYPTIONEXCEPTION", e.message, null);
                 }
+            }
+            "encryptFile" -> {
+                mainScope.launch {
+                    val outputFilePath = call.argument<String>("outputFilePath");
+                    val inputFilePath = call.argument<String>("inputFilePath");
+                    val key = call.argument<ByteArray>("key");
+                    val mode = call.argument<String>("mode");
+                    val padding = call.argument<String>("padding");
+                    val algorithm = call.argument<String>("algorithm");
+                    try {
+                        val encryptionIv: ByteArray? = withContext(Dispatchers.Default) {
+                            Cipher(context!!).encryptFile(inputFilePath!!,outputFilePath!!,algorithm!!,key!!,mode!!,padding!!);
+                        }
+                        if (encryptionIv != null){
+                            result.success(encryptionIv)
+                        } else {
+                            result.error("FILEDECRYPTIONERROR","the decryption process failed",null);
+                        }
+                    } catch (e: Exception) {
+                        result.error("FILEENCRYPTIONEXCEPTION",e.message,null);
+                    }
+                }
+                
+            }
+            "decryptFile" -> {
+                mainScope.launch {
+                    val outputFilePath = call.argument<String>("outputFilePath");
+                    val inputFilePath = call.argument<String>("inputFilePath");
+                    val key = call.argument<ByteArray>("key");
+                    val mode = call.argument<String>("mode");
+                    val padding = call.argument<String>("padding");
+                    val algorithm = call.argument<String>("algorithm");
+                    val iv = call.argument<ByteArray>("iv");
+                    try {
+                        val decryption: Boolean = withContext(Dispatchers.Default) {
+                            Cipher(context!!).decryptFile(inputFilePath!!,outputFilePath!!,algorithm!!,key!!,iv!!,mode!!,padding!!);
+                        }
+                        if (decryption == true) {
+                            result.success(decryption);
+                        } else {
+                            result.error("FILEDECRYPTIONERROR","failed to decrypt file",null);
+                        }
+                    } catch (e: Exception) {
+                        result.error("FILEDECRYPTIONEXCEPTION",e.message,null);
+                    }
+                }
+                
+
             }
             else -> result.notImplemented()
         }

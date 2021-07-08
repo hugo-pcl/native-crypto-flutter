@@ -158,4 +158,51 @@ class Platform {
       throw DecryptionException(e.code + " : " + e.message);
     }
   }
+  Future<Uint8List> encryptFile(
+    String inputFilePath,
+    String outputFilePath,
+    Uint8List key,
+    CipherAlgorithm algorithm,
+    CipherParameters parameters
+  ) async {
+    try{
+      final Uint8List iv = await _channel.invokeMethod('encryptFile',<String,dynamic>{
+        'inputFilePath':inputFilePath,
+        'outputFilePath':outputFilePath,
+        'key':key,
+        'algorithm':algorithm.name,
+        'mode':parameters.mode.name,
+        'padding':parameters.padding.name
+      });
+      return iv;
+    } on PlatformException catch(e){
+        print(e.message);
+        throw EncryptionException(e.code+" : "+e.message);
+    }
+  }
+  Future<bool> decryptFile(
+    String inputFilePath,
+    String outputFilePath,
+    Uint8List key,
+    Uint8List iv,
+    CipherAlgorithm algorithm,
+    CipherParameters parameters
+  ) async {
+    try{
+      final bool result = await _channel.invokeMethod('decryptFile',<String,dynamic>{
+        'inputFilePath':inputFilePath,
+        'outputFilePath':outputFilePath,
+        'key':key,
+        'algorithm':algorithm.name,
+        'mode':parameters.mode.name,
+        'padding':parameters.padding.name,
+        'iv':iv
+      });
+      return result;
+    }
+    on PlatformException catch(e){
+      print(e.message);
+      throw DecryptionException(e.code+" : "+e.message);
+    }
+  }
 }
