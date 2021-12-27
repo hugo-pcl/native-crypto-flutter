@@ -1,0 +1,17 @@
+name: native_crypto_platform_interface
+description: A common interface for NativeCrypto plugin.
+version: 0.0.7
+
+environment:
+  sdk: ">=2.15.0 <3.0.0"
+  flutter: ">=2.5.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^1.0.4

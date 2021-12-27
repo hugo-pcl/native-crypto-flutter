@@ -1,0 +1,22 @@
+PODS:
+  - Flutter (1.0.0)
+  - native_crypto_ios (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - native_crypto_ios (from `.symlinks/plugins/native_crypto_ios/ios`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  native_crypto_ios:
+    :path: ".symlinks/plugins/native_crypto_ios/ios"
+
+SPEC CHECKSUMS:
+  Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
+  native_crypto_ios: 01f5aa926eb715d08259fd20bb951ba0f69c4e74
+
+PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
+
+COCOAPODS: 1.10.1
