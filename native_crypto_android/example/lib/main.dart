@@ -1,74 +1,84 @@
+// Author: Hugo Pointcheval
+// Email: git@pcl.ovh
+// -----
+// File: main.dart
+// Created Date: 27/12/2021 22:43:20
+// Last Modified: 28/12/2021 18:18:44
+// -----
+// Copyright (c) 2021
+
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'dart:async';
-
-import 'package:flutter/services.dart';
 import 'package:native_crypto_platform_interface/native_crypto_platform_interface.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
+void run() async {
+  NativeCryptoPlatform _nativeCryptoPlatform = NativeCryptoPlatform.instance;
+  
+  debugPrint("Benchmark");
+
+  int size = 25;
+  int iterations = 25;
+  int totalEnc = 0;
+  int totalDec = 0;
+
+  debugPrint("Size: $size MB");
+  Uint8List? secretKey = await _nativeCryptoPlatform.generateSecretKey(128);
+
+  debugPrint("Generate random data...");
+  var before = DateTime.now();
+  Uint8List data = Uint8List(size * 1024 * 1024);
+  var after = DateTime.now();
+  debugPrint("Generate random data: ${after.difference(before).inMilliseconds} ms");
+
+  for (var _ in List.generate(iterations, (index) => index)) {
+    debugPrint("Encrypt data...");
+    before = DateTime.now();
+    Uint8List? encrypted = await _nativeCryptoPlatform.encrypt(data, secretKey!, "aes");
+    after = DateTime.now();
+    debugPrint("Encrypt data: ${after.difference(before).inMilliseconds} ms");
+    totalEnc += after.difference(before).inMilliseconds;
+
+    debugPrint("Decrypt data...");
+    before = DateTime.now();
+    data = (await _nativeCryptoPlatform.decrypt(encrypted!, secretKey, "aes"))!;
+    after = DateTime.now();
+    debugPrint("Decrypt data: ${after.difference(before).inMilliseconds} ms");
+    totalDec += after.difference(before).inMilliseconds;
+  }
+
+  debugPrint("Average Encrypt: ${totalEnc/iterations} ms for $size MB");
+  debugPrint("Average Decrypt: ${totalDec/iterations} ms for $size MB");
+  
+}
+
+class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      home: MyHomePage(),
+    );
+  }
 }
 
-class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
-
-  @override
-  void initState() {
-    super.initState();
-    initPlatformState();
-  }
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    NativeCryptoPlatform _nativeCryptoPlatform = NativeCryptoPlatform.instance;
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
-    Uint8List? sk = await _nativeCryptoPlatform.generateSecretKey(256);
-    print(sk ?? 'null');
-
-    Uint8List? ciphertext = await _nativeCryptoPlatform.encrypt(
-        Uint8List.fromList("abc".codeUnits), sk!, "aes");
-    print(ciphertext ?? 'null');
-
-    Uint8List? plaintext =
-        await _nativeCryptoPlatform.decrypt(ciphertext!, sk, "aes");
-    print(plaintext ?? 'null');
-
-    try {
-      platformVersion = 'Unknown platform version';
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
-  }
+class MyHomePage extends StatelessWidget {
+  const MyHomePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
-        ),
-        body: Center(
-          child: Text('Running on: $_platformVersion\n'),
-        ),
+    run();
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Plugin example app'),
+      ),
+      body: const Center(
+        child: Text("Check the console"),
       ),
     );
   }

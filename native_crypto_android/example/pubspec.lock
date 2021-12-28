@@ -108,7 +108,7 @@ packages:
       path: "../../native_crypto_platform_interface"
       relative: true
     source: path
-    version: "0.0.7"
+    version: "0.1.0"
   path:
     dependency: transitive
     description:
