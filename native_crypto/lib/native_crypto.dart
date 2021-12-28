@@ -1,17 +1,27 @@
-// You have generated a new plugin project without
-// specifying the `--platforms` flag. A plugin project supports no platforms is generated.
-// To add platforms, run `flutter create -t plugin --platforms <platforms> .` under the same
-// directory. You can also find a detailed instruction on how to add platforms in the `pubspec.yaml` at https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.
+// Author: Hugo Pointcheval
+// Email: git@pcl.ovh
+// -----
+// File: native_crypto.dart
+// Created Date: 16/12/2021 16:28:00
+// Last Modified: 28/12/2021 15:06:48
+// -----
+// Copyright (c) 2021
 
-import 'dart:async';
+export 'src/byte_array.dart';
+export 'src/cipher.dart';
+export 'src/cipher_text.dart';
+export 'src/ciphers/aes.dart';
+export 'src/exceptions.dart';
+export 'src/hasher.dart';
+export 'src/hashers/sha256.dart';
+export 'src/hashers/sha384.dart';
+export 'src/hashers/sha512.dart';
+export 'src/kdf/pbkdf2.dart';
+export 'src/keyderivation.dart';
+export 'src/keys/secret_key.dart';
+export 'src/utils.dart';
 
-import 'package:flutter/services.dart';
-
-class NativeCrypto {
-  static const MethodChannel _channel = MethodChannel('native_crypto');
-
-  static Future<String?> get platformVersion async {
-    final String? version = await _channel.invokeMethod('getPlatformVersion');
-    return version;
-  }
-}
+const String version = "0.1.0";
+const String author = "Hugo Pointcheval";
+const String website = "https://hugo.pointcheval.fr/";
+const List<String> repositories = ["https://github.com/hugo-pcl/native-crypto-flutter", "https://git.pointcheval.fr/NativeCrypto/native-crypto-flutter"];

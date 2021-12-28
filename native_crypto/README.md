@@ -1,6 +1,6 @@
-# native_crypto
+# NativeCrypto
 
-A new flutter plugin project.
+Fast and powerful cryptographic functions thanks to **javax.crypto** and **CryptoKit**.
 
 ## Getting Started
 

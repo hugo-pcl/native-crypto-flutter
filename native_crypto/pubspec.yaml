@@ -1,6 +1,6 @@
 name: native_crypto
 description: Fast and secure cryptography for Flutter.
-version: 0.0.7
+version: 0.1.0
 publish_to: 'none'
 
 environment:
@@ -11,8 +11,14 @@ dependencies:
   flutter:
     sdk: flutter
   
+  native_crypto_android:
+    path: ../native_crypto_android
+
   native_crypto_ios:
     path: ../native_crypto_ios
+
+  native_crypto_platform_interface:
+    path: ../native_crypto_platform_interface
 
 dev_dependencies:
   flutter_test:
@@ -22,7 +28,7 @@ dev_dependencies:
 flutter:
   plugin:
     platforms:
-      # android:
-      #   default_package: native_crypto_android
+      android:
+        default_package: native_crypto_android
       ios:
         default_package: native_crypto_ios
