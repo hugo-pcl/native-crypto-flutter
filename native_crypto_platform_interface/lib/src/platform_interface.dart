@@ -3,7 +3,7 @@
 // -----
 // File: platform_interface.dart
 // Created Date: 25/12/2021 16:52:56
-// Last Modified: 25/12/2021 16:53:36
+// Last Modified: 27/12/2021 21:25:39
 // -----
 // Copyright (c) 2021
 
@@ -20,18 +20,18 @@ import 'package:meta/meta.dart';
 /// Sample usage:
 ///
 /// ```dart
-/// abstract class UrlLauncherPlatform extends PlatformInterface {
-///   UrlLauncherPlatform() : super(token: _token);
+/// abstract class NativeCryptoPlatform extends PlatformInterface {
+///   NativeCryptoPlatform() : super(token: _token);
 ///
-///   static UrlLauncherPlatform _instance = MethodChannelUrlLauncher();
+///   static NativeCryptoPlatform _instance = MethodChannelNativeCrypto();
 ///
 ///   static const Object _token = Object();
 ///
-///   static UrlLauncherPlatform get instance => _instance;
+///   static NativeCryptoPlatform get instance => _instance;
 ///
 ///   /// Platform-specific plugins should set this with their own platform-specific
-///   /// class that extends [UrlLauncherPlatform] when they register themselves.
-///   static set instance(UrlLauncherPlatform instance) {
+///   /// class that extends [NativeCryptoPlatform] when they register themselves.
+///   static set instance(NativeCryptoPlatform instance) {
 ///     PlatformInterface.verifyToken(instance, _token);
 ///     _instance = instance;
 ///   }
@@ -86,12 +86,12 @@ abstract class PlatformInterface {
 ///
 /// This class is intended for use in tests only.
 ///
-/// Sample usage (assuming UrlLauncherPlatform extends [PlatformInterface]:
+/// Sample usage (assuming NativeCryptoPlatform extends [PlatformInterface]:
 ///
 /// ```dart
-/// class UrlLauncherPlatformMock extends Mock
+/// class NativeCryptoPlatformMock extends Mock
 ///    with MockPlatformInterfaceMixin
-///    implements UrlLauncherPlatform {}
+///    implements NativeCryptoPlatform {}
 /// ```
 @visibleForTesting
 abstract class MockPlatformInterfaceMixin implements PlatformInterface {}

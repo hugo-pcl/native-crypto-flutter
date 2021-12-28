@@ -1,6 +1,6 @@
-# native_crypto_ios
+# NativeCrypto - iOS Implementation
 
-A new flutter plugin project.
+iOS Implementation of NativeCrypto Plugin.
 
 ## Getting Started
 

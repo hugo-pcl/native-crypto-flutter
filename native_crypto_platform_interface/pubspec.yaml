@@ -1,6 +1,6 @@
 name: native_crypto_platform_interface
 description: A common interface for NativeCrypto plugin.
-version: 0.0.7
+version: 0.1.0
 
 environment:
   sdk: ">=2.15.0 <3.0.0"

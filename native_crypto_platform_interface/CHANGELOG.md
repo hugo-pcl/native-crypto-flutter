@@ -1,3 +1,1 @@
-## 0.0.1
-
-* TODO: Describe initial release.
+Check [`native_crypto`](../native_crypto/CHANGELOG.md) plugin's changelog.

@@ -1,18 +1,12 @@
-# native_crypto_platform_interface
+# NativeCrypto - Platform Interface
 
-A new flutter plugin project.
+A common platform interface for the [`native_crypto`][1] plugin.
 
-## Getting Started
+This interface allows platform-specific implementations of the `native_crypto` plugin, as well as the plugin itself, to ensure they are supporting the same interface.
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/developing-packages/),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+## Usage
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+To implement a new platform-specific implementation of `native_crypto`, extend [`NativeCryptoPlatform`][2] with an implementation that performs the platform-specific behavior, and when you register your plugin, set the default `NativeCryptoPlatform` by calling `NativeCryptoPlatform.instance = MyNativeCryptoPlatform()`.
 
-The plugin project was generated without specifying the `--platforms` flag, no platforms are currently supported.
-To add platforms, run `flutter create -t plugin --platforms <platforms> .` under the same
-directory. You can also find a detailed instruction on how to add platforms in the `pubspec.yaml` at https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.
+[1]: ../native_crypto
+[2]: lib/native_crypto_platform_interface.dart
