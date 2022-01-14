@@ -3,7 +3,7 @@
 // -----
 // File: main.dart
 // Created Date: 27/12/2021 22:43:20
-// Last Modified: 28/12/2021 18:19:37
+// Last Modified: 28/12/2021 18:32:25
 // -----
 // Copyright (c) 2021
 
@@ -21,7 +21,7 @@ void run() async {
   
   debugPrint("Benchmark");
 
-  int size = 25;
+  int size = 256;
   int iterations = 25;
   int totalEnc = 0;
   int totalDec = 0;
