@@ -3,23 +3,25 @@
 // -----
 // File: byte_array.dart
 // Created Date: 16/12/2021 17:54:16
-// Last Modified: 23/05/2022 21:44:38
+// Last Modified: 23/05/2022 23:07:03
 // -----
 // Copyright (c) 2021
 
 import 'dart:convert' as convert;
 import 'dart:typed_data';
 
-import 'package:native_crypto/src/utils.dart';
+import 'package:flutter/foundation.dart';
+import 'package:native_crypto/src/utils/convert.dart';
 
-class ByteArray {
-  Uint8List _bytes;
+@immutable
+abstract class ByteArray {
+  final Uint8List _bytes;
 
-  ByteArray(this._bytes);
+  const ByteArray(this._bytes);
 
   /// Creates an ByteArray object from a hexdecimal string.
   ByteArray.fromBase16(String encoded)
-      : _bytes = Utils.decodeHexString(encoded);
+      : _bytes = Convert.decodeHexString(encoded);
 
   /// Creates an ByteArray object from a Base64 string.
   ByteArray.fromBase64(String encoded)
@@ -35,9 +37,6 @@ class ByteArray {
   /// Gets the ByteArray bytes.
   // ignore: unnecessary_getters_setters
   Uint8List get bytes => _bytes;
-
-  /// Sets the ByteArray bytes.
-  set bytes(Uint8List value) => _bytes = value;
 
   /// Gets the ByteArray bytes as a Hexadecimal representation.
   String get base16 =>

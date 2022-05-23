@@ -3,13 +3,13 @@
 // -----
 // File: cipher_text.dart
 // Created Date: 16/12/2021 16:59:53
-// Last Modified: 23/05/2022 21:48:27
+// Last Modified: 23/05/2022 23:02:10
 // -----
 // Copyright (c) 2021
 
 import 'dart:typed_data';
 
-import 'package:native_crypto/src/byte_array.dart';
+import 'package:native_crypto/src/interfaces/byte_array.dart';
 
 class CipherText extends ByteArray {
   final int _ivLength;
@@ -42,19 +42,4 @@ class CipherText extends ByteArray {
 
   /// Gets the CipherText tag length.
   int get tagLength => _tagLength;
-}
-
-class CipherTextList extends CipherText {
-  static const int chunkSize = 33554432;
-  final List<CipherText> _list;
-
-  CipherTextList()
-      : _list = [],
-        super(Uint8List(0), Uint8List(0), Uint8List(0));
-
-  void add(CipherText cipherText) {
-    _list.add(cipherText);
-  }
-
-  List<CipherText> get list => _list;
 }

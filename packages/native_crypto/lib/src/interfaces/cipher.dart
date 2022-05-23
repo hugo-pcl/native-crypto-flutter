@@ -3,16 +3,14 @@
 // -----
 // File: cipher.dart
 // Created Date: 16/12/2021 16:28:00
-// Last Modified: 28/12/2021 12:25:38
+// Last Modified: 23/05/2022 23:06:20
 // -----
 // Copyright (c) 2021
 
 import 'dart:typed_data';
 
-import 'cipher_text.dart';
-
-/// Represents different cipher algorithms
-enum CipherAlgorithm { aes, rsa }
+import 'package:native_crypto/src/core/cipher_text.dart';
+import 'package:native_crypto/src/utils/cipher_algorithm.dart';
 
 /// Represents a cipher.
 ///

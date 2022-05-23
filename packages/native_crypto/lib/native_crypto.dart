@@ -3,28 +3,27 @@
 // -----
 // File: native_crypto.dart
 // Created Date: 16/12/2021 16:28:00
-// Last Modified: 23/05/2022 21:43:54
+// Last Modified: 23/05/2022 23:09:10
 // -----
 // Copyright (c) 2021
 
-export 'src/byte_array.dart';
-export 'src/cipher.dart';
-export 'src/cipher_text.dart';
-export 'src/ciphers/aes.dart';
-export 'src/exceptions.dart';
-export 'src/hasher.dart';
-export 'src/hashers/sha256.dart';
-export 'src/hashers/sha384.dart';
-export 'src/hashers/sha512.dart';
-export 'src/kdf/pbkdf2.dart';
-export 'src/keyderivation.dart';
-export 'src/keys/secret_key.dart';
-export 'src/utils.dart';
+/// Fast and powerful cryptographic functions
+/// thanks to javax.crypto, CommonCrypto and CryptoKit.
+///
+/// Author: Hugo Pointcheval
+library native_crypto;
 
-const String version = '0.1.0';
-const String author = 'Hugo Pointcheval';
-const String website = 'https://hugo.pointcheval.fr/';
-const List<String> repositories = [
-  'https://github.com/hugo-pcl/native-crypto-flutter',
-  'https://git.pointcheval.fr/NativeCrypto/native-crypto-flutter'
-];
+export 'src/builders/builders.dart';
+export 'src/ciphers/ciphers.dart';
+export 'src/core/core.dart';
+export 'src/interfaces/interfaces.dart';
+export 'src/kdf/kdf.dart';
+export 'src/keys/keys.dart';
+// Utils
+export 'src/utils/cipher_algorithm.dart';
+export 'src/utils/convert.dart';
+export 'src/utils/hash_algorithm.dart';
+export 'src/utils/kdf_algorithm.dart';
+
+// ignore: constant_identifier_names
+const String AUTHOR = 'Hugo Pointcheval';

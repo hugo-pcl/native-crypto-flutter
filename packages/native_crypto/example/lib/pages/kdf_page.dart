@@ -3,7 +3,7 @@
 // -----
 // File: kdf_page.dart
 // Created Date: 28/12/2021 13:40:34
-// Last Modified: 28/12/2021 15:14:12
+// Last Modified: 23/05/2022 22:49:06
 // -----
 // Copyright (c) 2021
 
@@ -50,7 +50,7 @@ class KdfPage extends ConsumerWidget {
     if (password.isEmpty) {
       pbkdf2Status.print('Password is empty');
     } else {
-      PBKDF2 _pbkdf2 = PBKDF2(32, 1000, algorithm: HashAlgorithm.sha512);
+      Pbkdf2 _pbkdf2 = Pbkdf2(32, 1000, algorithm: HashAlgorithm.sha512);
       SecretKey sk = await _pbkdf2.derive(password: password, salt: 'salt');
       state.setKey(sk);
       pbkdf2Status.print('Key successfully derived.');
@@ -59,14 +59,14 @@ class KdfPage extends ConsumerWidget {
     }
   }
 
-  Future<void> _hash(Hasher hasher) async {
+  Future<void> _hash(HashAlgorithm hasher) async {
     final message = _messageTextController.text.trim();
     if (message.isEmpty) {
       hashStatus.print('Message is empty');
     } else {
       Uint8List hash = await hasher.digest(message.toBytes());
       hashStatus.print(
-          'Message successfully hashed with ${hasher.algorithm} :${hash.toStr(to: Encoding.hex)}');
+          'Message successfully hashed with $hasher :${hash.toStr(to: Encoding.hex)}');
     }
   }
 
@@ -108,15 +108,15 @@ class KdfPage extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Button(
-                  () => _hash(SHA256()),
+                  () => _hash(HashAlgorithm.sha256),
                   "SHA256",
                 ),
                 Button(
-                  () => _hash(SHA384()),
+                  () => _hash(HashAlgorithm.sha384),
                   "SHA384",
                 ),
                 Button(
-                  () => _hash(SHA512()),
+                  () => _hash(HashAlgorithm.sha512),
                   "SHA512",
                 ),
               ],
