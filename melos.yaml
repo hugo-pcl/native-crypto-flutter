@@ -1,5 +1,5 @@
 name: NativeCrypto
-repository: https://git.pointcheval.fr/NativeCrypto/native-crypto-flutter
+# repository: https://git.pointcheval.fr/NativeCrypto/native-crypto-flutter
 
 packages:
   - packages/**
@@ -9,7 +9,7 @@ command:
     updateGitTagRefs: true
     linkToCommits: false # Gitea not support this
     workspaceChangelog: true
-    branch: master
+    # branch: master
 
 scripts:
   lint:all:
