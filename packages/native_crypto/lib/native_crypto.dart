@@ -3,7 +3,7 @@
 // -----
 // File: native_crypto.dart
 // Created Date: 16/12/2021 16:28:00
-// Last Modified: 28/12/2021 15:06:48
+// Last Modified: 23/05/2022 21:43:54
 // -----
 // Copyright (c) 2021
 
@@ -21,7 +21,10 @@ export 'src/keyderivation.dart';
 export 'src/keys/secret_key.dart';
 export 'src/utils.dart';
 
-const String version = "0.1.0";
-const String author = "Hugo Pointcheval";
-const String website = "https://hugo.pointcheval.fr/";
-const List<String> repositories = ["https://github.com/hugo-pcl/native-crypto-flutter", "https://git.pointcheval.fr/NativeCrypto/native-crypto-flutter"];
+const String version = '0.1.0';
+const String author = 'Hugo Pointcheval';
+const String website = 'https://hugo.pointcheval.fr/';
+const List<String> repositories = [
+  'https://github.com/hugo-pcl/native-crypto-flutter',
+  'https://git.pointcheval.fr/NativeCrypto/native-crypto-flutter'
+];

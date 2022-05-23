@@ -3,14 +3,14 @@
 // -----
 // File: aes_builder.dart
 // Created Date: 28/12/2021 12:03:11
-// Last Modified: 28/12/2021 13:39:23
+// Last Modified: 23/05/2022 21:46:33
 // -----
 // Copyright (c) 2021
 
-import '../builder.dart';
-import '../ciphers/aes.dart';
-import '../exceptions.dart';
-import '../keys/secret_key.dart';
+import 'package:native_crypto/src/builder.dart';
+import 'package:native_crypto/src/ciphers/aes.dart';
+import 'package:native_crypto/src/exceptions.dart';
+import 'package:native_crypto/src/keys/secret_key.dart';
 
 class AESBuilder implements Builder<AES> {
   SecretKey? _sk;
@@ -36,7 +36,7 @@ class AESBuilder implements Builder<AES> {
   Future<AES> build() async {
     if (_sk == null) {
       if (_fsk == null) {
-        throw CipherInitException("You must specify or generate a secret key.");
+        throw CipherInitException('You must specify or generate a secret key.');
       } else {
         _sk = await _fsk;
       }

@@ -3,39 +3,39 @@
 // -----
 // File: exceptions.dart
 // Created Date: 16/12/2021 16:28:00
-// Last Modified: 27/12/2021 23:28:31
+// Last Modified: 23/05/2022 21:51:55
 // -----
 // Copyright (c) 2021
 
 class NativeCryptoException implements Exception {
-  String message;
-  NativeCryptoException(this.message);
+  final String message;
+  const NativeCryptoException(this.message);
 }
 
 class UtilsException extends NativeCryptoException {
-  UtilsException(message) : super(message);
+  UtilsException(String message) : super(message);
 }
 
 class KeyException extends NativeCryptoException {
-  KeyException(message) : super(message);
+  KeyException(String message) : super(message);
 }
 
 class KeyDerivationException extends NativeCryptoException {
-  KeyDerivationException(message) : super(message);
+  KeyDerivationException(String message) : super(message);
 }
 
 class CipherInitException extends NativeCryptoException {
-  CipherInitException(message) : super(message);
+  CipherInitException(String message) : super(message);
 }
 
 class EncryptionException extends NativeCryptoException {
-  EncryptionException(message) : super(message);
+  EncryptionException(String message) : super(message);
 }
 
 class DecryptionException extends NativeCryptoException {
-  DecryptionException(message) : super(message);
+  DecryptionException(String message) : super(message);
 }
 
 class NotImplementedException extends NativeCryptoException {
-  NotImplementedException(message) : super(message);
+  NotImplementedException(String message) : super(message);
 }

@@ -3,7 +3,7 @@
 // -----
 // File: secret_key.dart
 // Created Date: 28/12/2021 13:36:54
-// Last Modified: 28/12/2021 13:37:45
+// Last Modified: 23/05/2022 21:52:05
 // -----
 // Copyright (c) 2021
 
@@ -11,9 +11,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 
-import '../exceptions.dart';
-import '../key.dart';
-import '../platform.dart';
+import 'package:native_crypto/src/exceptions.dart';
+import 'package:native_crypto/src/key.dart';
+import 'package:native_crypto/src/platform.dart';
 
 /// A class representing a secret key.
 /// A secret key is a key that is not accessible by anyone else.
@@ -26,11 +26,12 @@ class SecretKey extends Key {
 
   static Future<SecretKey> fromSecureRandom(int bitsCount) async {
     try {
-      Uint8List _key = (await platform.generateSecretKey(bitsCount)) ?? Uint8List(0);
-      
+      final Uint8List _key =
+          (await platform.generateSecretKey(bitsCount)) ?? Uint8List(0);
+
       return SecretKey(_key);
     } on PlatformException catch (e) {
-      throw KeyException(e);
+      throw KeyException(e.toString());
     }
   }
 }

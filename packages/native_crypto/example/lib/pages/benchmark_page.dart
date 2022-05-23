@@ -34,21 +34,22 @@ class BenchmarkPage extends ConsumerWidget {
 
     int size = 64;
     benchmarkStatus.print("Benchmark Test\n");
-    
+
     // Encryption
     var before = DateTime.now();
     var encryptedBigFile = await cipher.encrypt(Uint8List(size * 1000000));
     var after = DateTime.now();
     var benchmark =
-          after.millisecondsSinceEpoch - before.millisecondsSinceEpoch;
-      benchmarkStatus.append('[$size MB] Encryption took $benchmark ms\n');
-    
+        after.millisecondsSinceEpoch - before.millisecondsSinceEpoch;
+    benchmarkStatus.append('[$size MB] Encryption took $benchmark ms\n');
+
     // Decryption
     var befored = DateTime.now();
     await cipher.decrypt(encryptedBigFile);
     var afterd = DateTime.now();
-    var benchmarkd = afterd.millisecondsSinceEpoch - befored.millisecondsSinceEpoch;
-      benchmarkStatus.append('[$size MB] Decryption took $benchmarkd ms\n');
+    var benchmarkd =
+        afterd.millisecondsSinceEpoch - befored.millisecondsSinceEpoch;
+    benchmarkStatus.append('[$size MB] Decryption took $benchmarkd ms\n');
   }
 
   Future<void> _benchmark(WidgetRef ref, Cipher cipher) async {

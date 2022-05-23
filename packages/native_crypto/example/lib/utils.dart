@@ -23,12 +23,12 @@ extension StringX on String {
         bytes = base64.decode(this);
         break;
       case Encoding.hex:
-      bytes = Uint8List.fromList(
-        List.generate(
-          length ~/ 2,
-          (i) => int.parse(substring(i * 2, (i * 2) + 2), radix: 16),
-        ).toList(),
-      );
+        bytes = Uint8List.fromList(
+          List.generate(
+            length ~/ 2,
+            (i) => int.parse(substring(i * 2, (i * 2) + 2), radix: 16),
+          ).toList(),
+        );
     }
     return bytes;
   }

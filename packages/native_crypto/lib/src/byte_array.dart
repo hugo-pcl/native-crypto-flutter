@@ -3,14 +3,14 @@
 // -----
 // File: byte_array.dart
 // Created Date: 16/12/2021 17:54:16
-// Last Modified: 27/12/2021 21:51:36
+// Last Modified: 23/05/2022 21:44:38
 // -----
 // Copyright (c) 2021
 
+import 'dart:convert' as convert;
 import 'dart:typed_data';
 
-import 'utils.dart';
-import 'dart:convert' as convert;
+import 'package:native_crypto/src/utils.dart';
 
 class ByteArray {
   Uint8List _bytes;
@@ -18,7 +18,8 @@ class ByteArray {
   ByteArray(this._bytes);
 
   /// Creates an ByteArray object from a hexdecimal string.
-  ByteArray.fromBase16(String encoded) : _bytes = Utils.decodeHexString(encoded);
+  ByteArray.fromBase16(String encoded)
+      : _bytes = Utils.decodeHexString(encoded);
 
   /// Creates an ByteArray object from a Base64 string.
   ByteArray.fromBase64(String encoded)
@@ -46,17 +47,17 @@ class ByteArray {
   String get base64 => convert.base64.encode(_bytes);
 
   @override
-  bool operator ==(other) {
+  bool operator ==(Object other) {
     if (other is ByteArray) {
       for (int i = 0; i < _bytes.length; i++) {
         if (_bytes[i] != other._bytes[i]) {
           return false;
         }
       }
-      
+
       return true;
     }
-    
+
     return false;
   }
 
@@ -66,7 +67,7 @@ class ByteArray {
     for (int i = 0; i < _bytes.length; i++) {
       hash = _bytes[i] + (hash << 6) + (hash << 16) - hash;
     }
-    
+
     return hash;
   }
 }

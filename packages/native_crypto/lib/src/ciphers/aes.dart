@@ -3,18 +3,18 @@
 // -----
 // File: aes.dart
 // Created Date: 16/12/2021 16:28:00
-// Last Modified: 28/12/2021 13:39:00
+// Last Modified: 23/05/2022 21:47:08
 // -----
 // Copyright (c) 2021
 
 import 'dart:typed_data';
 
-import '../cipher.dart';
-import '../cipher_text.dart';
-import '../exceptions.dart';
-import '../keys/secret_key.dart';
-import '../platform.dart';
-import '../utils.dart';
+import 'package:native_crypto/src/cipher.dart';
+import 'package:native_crypto/src/cipher_text.dart';
+import 'package:native_crypto/src/exceptions.dart';
+import 'package:native_crypto/src/keys/secret_key.dart';
+import 'package:native_crypto/src/platform.dart';
+import 'package:native_crypto/src/utils.dart';
 
 /// Defines the AES modes of operation.
 enum AESMode { gcm }
@@ -47,31 +47,37 @@ class AES implements Cipher {
 
   AES(this.key, this.mode, {this.padding = AESPadding.none}) {
     if (!AESKeySizeExtension.supportedSizes.contains(key.bytes.length * 8)) {
-      throw CipherInitException("Invalid key length!");
+      throw CipherInitException('Invalid key length!');
     }
 
-    Map<AESMode, List<AESPadding>> _supported = {
+    final Map<AESMode, List<AESPadding>> _supported = {
       AESMode.gcm: [AESPadding.none],
     };
 
     if (!_supported[mode]!.contains(padding)) {
-      throw CipherInitException("Invalid padding!");
+      throw CipherInitException('Invalid padding!');
     }
   }
 
   @override
   Future<Uint8List> decrypt(CipherText cipherText) async {
-    BytesBuilder decryptedData = BytesBuilder(copy: false);
+    final BytesBuilder decryptedData = BytesBuilder(copy: false);
     if (cipherText is CipherTextList) {
-      for (CipherText ct in cipherText.list) {
-        Uint8List d = await platform.decrypt(
-                ct.bytes, key.bytes, Utils.enumToStr(algorithm)) ??
+      for (final CipherText ct in cipherText.list) {
+        final Uint8List d = await platform.decrypt(
+              ct.bytes,
+              key.bytes,
+              Utils.enumToStr(algorithm),
+            ) ??
             Uint8List(0);
         decryptedData.add(d);
       }
     } else {
-      Uint8List d = await platform.decrypt(
-              cipherText.bytes, key.bytes, Utils.enumToStr(algorithm)) ??
+      final Uint8List d = await platform.decrypt(
+            cipherText.bytes,
+            key.bytes,
+            Utils.enumToStr(algorithm),
+          ) ??
           Uint8List(0);
       decryptedData.add(d);
     }
@@ -82,29 +88,41 @@ class AES implements Cipher {
   @override
   Future<CipherText> encrypt(Uint8List data) async {
     Uint8List dataToEncrypt;
-    CipherTextList cipherTextList = CipherTextList();
+    final CipherTextList cipherTextList = CipherTextList();
     // If data is bigger than 32mB -> split in chunks
     if (data.length > CipherTextList.chunkSize) {
-      int chunkNb = (data.length / CipherTextList.chunkSize).ceil();
+      final int chunkNb = (data.length / CipherTextList.chunkSize).ceil();
       for (var i = 0; i < chunkNb; i++) {
         dataToEncrypt = i < (chunkNb - 1)
-            ? data.sublist(i * CipherTextList.chunkSize, (i + 1) * CipherTextList.chunkSize)
+            ? data.sublist(
+                i * CipherTextList.chunkSize,
+                (i + 1) * CipherTextList.chunkSize,
+              )
             : data.sublist(i * CipherTextList.chunkSize);
-        Uint8List c = await platform.encrypt(
-          dataToEncrypt,
-          key.bytes,
-          Utils.enumToStr(algorithm)
-        ) ?? Uint8List(0);
-        cipherTextList.add(CipherText(c.sublist(0, 12), c.sublist(12, c.length - 16), c.sublist(c.length - 16, c.length))); // TODO: generify this
+        final Uint8List c = await platform.encrypt(
+              dataToEncrypt,
+              key.bytes,
+              Utils.enumToStr(algorithm),
+            ) ??
+            Uint8List(0);
+        cipherTextList.add(
+          CipherText(
+            c.sublist(0, 12),
+            c.sublist(12, c.length - 16),
+            c.sublist(c.length - 16, c.length),
+          ),
+        ); // TODO(hpcl): generify this
       }
     } else {
-      Uint8List c = await platform.encrypt(
-        data,
-        key.bytes,
-        Utils.enumToStr(algorithm)
-      ) ?? Uint8List(0);
+      final Uint8List c =
+          await platform.encrypt(data, key.bytes, Utils.enumToStr(algorithm)) ??
+              Uint8List(0);
 
-      return CipherText(c.sublist(0, 12), c.sublist(12, c.length - 16), c.sublist(c.length - 16, c.length)); // TODO: generify this
+      return CipherText(
+        c.sublist(0, 12),
+        c.sublist(12, c.length - 16),
+        c.sublist(c.length - 16, c.length),
+      ); // TODO(hpcl): generify this
     }
 
     return cipherTextList;

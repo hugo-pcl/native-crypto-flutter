@@ -16,7 +16,9 @@ class Session {
   SecretKey secretKey;
   Session() : secretKey = SecretKey(Uint8List(0));
 
-  void setKey(SecretKey sk) { secretKey = sk; }
+  void setKey(SecretKey sk) {
+    secretKey = sk;
+  }
 }
 
 // Providers

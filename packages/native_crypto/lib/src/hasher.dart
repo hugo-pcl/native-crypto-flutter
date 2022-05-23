@@ -20,8 +20,10 @@ abstract class Hasher {
 
   /// Hashes a message
   Future<Uint8List> digest(Uint8List data) async {
-    Uint8List hash = (await platform.digest(data, Utils.enumToStr(algorithm))) ?? Uint8List(0);
-    
+    Uint8List hash =
+        (await platform.digest(data, Utils.enumToStr(algorithm))) ??
+            Uint8List(0);
+
     return hash;
   }
 }
