@@ -3,7 +3,7 @@
 // -----
 // File: benchmark_page.dart
 // Created Date: 28/12/2021 15:12:39
-// Last Modified: 28/12/2021 17:01:41
+// Last Modified: 24/05/2022 17:23:33
 // -----
 // Copyright (c) 2021
 
@@ -12,6 +12,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_crypto/native_crypto.dart';
+import 'package:native_crypto_example/pointycastle/aes_gcm.dart';
 import 'package:native_crypto_example/widgets/button.dart';
 
 import '../session.dart';
@@ -23,37 +24,10 @@ class BenchmarkPage extends ConsumerWidget {
   final Output keyContent = Output();
   final Output benchmarkStatus = Output(large: true);
 
-  Future<void> _test(WidgetRef ref, Cipher cipher) async {
+  Future<void> _benchmark(WidgetRef ref, Cipher cipher,
+      {bool usePc = false}) async {
     Session state = ref.read(sessionProvider.state).state;
-
-    if (state.secretKey.bytes.isEmpty) {
-      benchmarkStatus
-          .print('No SecretKey!\nGo in Key tab and generate or derive one.');
-      return;
-    }
-
-    int size = 64;
-    benchmarkStatus.print("Benchmark Test\n");
-
-    // Encryption
-    var before = DateTime.now();
-    var encryptedBigFile = await cipher.encrypt(Uint8List(size * 1000000));
-    var after = DateTime.now();
-    var benchmark =
-        after.millisecondsSinceEpoch - before.millisecondsSinceEpoch;
-    benchmarkStatus.append('[$size MB] Encryption took $benchmark ms\n');
-
-    // Decryption
-    var befored = DateTime.now();
-    await cipher.decrypt(encryptedBigFile);
-    var afterd = DateTime.now();
-    var benchmarkd =
-        afterd.millisecondsSinceEpoch - befored.millisecondsSinceEpoch;
-    benchmarkStatus.append('[$size MB] Decryption took $benchmarkd ms\n');
-  }
-
-  Future<void> _benchmark(WidgetRef ref, Cipher cipher) async {
-    Session state = ref.read(sessionProvider.state).state;
+    AesGcm pc = AesGcm();
 
     if (state.secretKey.bytes.isEmpty) {
       benchmarkStatus
@@ -75,7 +49,13 @@ class BenchmarkPage extends ConsumerWidget {
 
       // Encryption
       var before = DateTime.now();
-      var encryptedBigFile = await cipher.encrypt(b.buffer.asUint8List());
+      Object encryptedBigFile;
+      if (usePc) {
+        encryptedBigFile =
+            pc.encrypt(b.buffer.asUint8List(), state.secretKey.bytes);
+      } else {
+        encryptedBigFile = await cipher.encrypt(b.buffer.asUint8List());
+      }
       var after = DateTime.now();
 
       var benchmark =
@@ -87,7 +67,11 @@ class BenchmarkPage extends ConsumerWidget {
 
       // Decryption
       before = DateTime.now();
-      await cipher.decrypt(encryptedBigFile);
+      if (usePc) {
+        pc.decrypt(encryptedBigFile as Uint8List, state.secretKey.bytes);
+      } else {
+        await cipher.decrypt(encryptedBigFile as CipherText);
+      }
       after = DateTime.now();
 
       benchmark = after.millisecondsSinceEpoch - before.millisecondsSinceEpoch;
@@ -150,11 +134,11 @@ class BenchmarkPage extends ConsumerWidget {
               children: [
                 Button(
                   () => _benchmark(ref, cipher),
-                  "Launch benchmark",
+                  "NativeCrypto",
                 ),
                 Button(
-                  () => _test(ref, cipher),
-                  "Test benchmark",
+                  () => _benchmark(ref, cipher, usePc: true),
+                  "PointyCastle",
                 ),
                 Button(
                   _clear,
