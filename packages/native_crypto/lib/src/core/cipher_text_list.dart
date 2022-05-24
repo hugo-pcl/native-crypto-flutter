@@ -3,7 +3,7 @@
 // -----
 // File: cipher_text_list.dart
 // Created Date: 23/05/2022 22:59:02
-// Last Modified: 23/05/2022 23:05:02
+// Last Modified: 24/05/2022 20:18:26
 // -----
 // Copyright (c) 2022
 
@@ -12,7 +12,6 @@ import 'dart:typed_data';
 import 'package:native_crypto/src/core/cipher_text.dart';
 
 class CipherTextList extends CipherText {
-  static const int chunkSize = 33554432;
   final List<CipherText> _list;
 
   CipherTextList()

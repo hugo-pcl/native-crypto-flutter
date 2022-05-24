@@ -11,6 +11,10 @@ class AES : Cipher {
     override val algorithm: CipherAlgorithm
         get() = CipherAlgorithm.aes
 
+    var forEncryption: Boolean = true
+    var cipherInstance: javax.crypto.Cipher? = null;
+    var secretKey: SecretKeySpec? = null;
+
 /*    override fun encrypt(data: ByteArray, key: ByteArray): ByteArray {
         val sk: SecretKey = SecretKeySpec(key, "AES")
         val cipher = javax.crypto.Cipher.getInstance("AES/GCM/NoPadding")
@@ -35,25 +39,46 @@ class AES : Cipher {
     }*/
 
     override fun encrypt(data: ByteArray, key: ByteArray): ByteArray {
-        val sk: SecretKey = SecretKeySpec(key, "AES")
-        val cipher = javax.crypto.Cipher.getInstance("AES/CBC/PKCS5Padding")
-        cipher.init(javax.crypto.Cipher.ENCRYPT_MODE, sk)
+        val list : List<ByteArray> = encryptAsList(data, key)
+        return list.first().plus(list.last())
+    }
+
+    override fun encryptAsList(data: ByteArray, key: ByteArray): List<ByteArray> {
+        val sk = SecretKeySpec(key, "AES")
+        if (cipherInstance == null || !forEncryption || secretKey != sk) {
+            secretKey = sk
+            forEncryption = true
+            // native.crypto representation = [IV(16) || CIPHERTEXT(n-16)]
+            // javax.crypto representation = [CIPHERTEXT(n-16)]
+            cipherInstance = javax.crypto.Cipher.getInstance("AES/CBC/PKCS5Padding")
+            cipherInstance!!.init(javax.crypto.Cipher.ENCRYPT_MODE, sk)
+        }
         // javax.crypto representation = [CIPHERTEXT(n-16)]
-        val bytes = cipher.doFinal(data)
-        val iv = cipher.iv
+        val bytes: ByteArray = cipherInstance!!.doFinal(data)
+        val iv: ByteArray = cipherInstance!!.iv
         // native.crypto representation = [IV(16) || CIPHERTEXT(n-16)]
-        return iv.plus(bytes)
+        return listOf(iv, bytes)
     }
 
     override fun decrypt(data: ByteArray, key: ByteArray): ByteArray {
-        val sk: SecretKey = SecretKeySpec(key, "AES")
-        // native.crypto representation = [IV(16) || CIPHERTEXT(n-16)]
-        val iv: ByteArray = data.take(16).toByteArray()
         // javax.crypto representation = [CIPHERTEXT(n-16)]
+        val iv: ByteArray = data.take(16).toByteArray()
         val payload: ByteArray = data.drop(16).toByteArray()
+        return decryptAsList(listOf(iv, payload), key)
+    }
+
+    override fun decryptAsList(data: List<ByteArray>, key: ByteArray): ByteArray {
+        if (cipherInstance == null) {
+            // native.crypto representation = [IV(16) || CIPHERTEXT(n-16)]
+            // javax.crypto representation = [CIPHERTEXT(n-16)]
+            cipherInstance = javax.crypto.Cipher.getInstance("AES/CBC/PKCS5Padding")
+        }
+        val sk = SecretKeySpec(key, "AES")
+        val iv: ByteArray = data.first()
         val ivSpec = IvParameterSpec(iv)
-        val cipher = javax.crypto.Cipher.getInstance("AES/CBC/PKCS5Padding")
-        cipher.init(javax.crypto.Cipher.DECRYPT_MODE, sk, ivSpec)
-        return cipher.doFinal(payload)
+        cipherInstance!!.init(javax.crypto.Cipher.DECRYPT_MODE, sk, ivSpec)
+        forEncryption = false
+        val payload: ByteArray = data.last()
+        return cipherInstance!!.doFinal(payload)
     }
 }

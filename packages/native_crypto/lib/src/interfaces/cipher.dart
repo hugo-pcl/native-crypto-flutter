@@ -3,7 +3,7 @@
 // -----
 // File: cipher.dart
 // Created Date: 16/12/2021 16:28:00
-// Last Modified: 23/05/2022 23:06:20
+// Last Modified: 24/05/2022 19:55:38
 // -----
 // Copyright (c) 2021
 
@@ -18,8 +18,19 @@ import 'package:native_crypto/src/utils/cipher_algorithm.dart';
 /// or decryption - a series of well-defined steps that can
 /// be followed as a procedure.
 abstract class Cipher {
+  /// Returns the size of a chunk of data 
+  /// that can be processed by the cipher.
+  static int _bytesCountPerChunk = 33554432;
+
+  static int get bytesCountPerChunk => Cipher._bytesCountPerChunk;
+
+  static set bytesCountPerChunk(int bytesCount) {
+    _bytesCountPerChunk = bytesCount;
+  }
+  
   /// Returns the standard algorithm name for this cipher
   CipherAlgorithm get algorithm;
+
 
   /// Encrypts data.
   ///

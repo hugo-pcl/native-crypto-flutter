@@ -3,7 +3,7 @@
 // -----
 // File: aes.dart
 // Created Date: 16/12/2021 16:28:00
-// Last Modified: 23/05/2022 23:06:05
+// Last Modified: 24/05/2022 23:29:42
 // -----
 // Copyright (c) 2022
 
@@ -39,6 +39,7 @@ class AES implements Cipher {
 
     final Map<AESMode, List<AESPadding>> _supported = {
       AESMode.gcm: [AESPadding.none],
+      AESMode.cbc: [AESPadding.pkcs5],
     };
 
     if (!_supported[mode]!.contains(padding)) {
@@ -46,27 +47,35 @@ class AES implements Cipher {
     }
   }
 
+  Future<Uint8List> _decrypt(CipherText cipherText) async {
+    return await platform.decryptAsList(
+          [cipherText.iv, cipherText.payload],
+          key.bytes,
+          algorithm.name,
+        ) ??
+        Uint8List(0);
+  }
+
+  Future<CipherText> _encrypt(Uint8List data) async {
+    final List<Uint8List> cipherText =
+        await platform.encryptAsList(data, key.bytes, algorithm.name) ??
+            List.empty();
+    return CipherText.fromPairIvAndBytes(
+      cipherText,
+      dataLength: cipherText.last.length,
+    );
+  }
+
   @override
   Future<Uint8List> decrypt(CipherText cipherText) async {
     final BytesBuilder decryptedData = BytesBuilder(copy: false);
+
     if (cipherText is CipherTextList) {
       for (final CipherText ct in cipherText.list) {
-        final Uint8List d = await platform.decrypt(
-              ct.bytes,
-              key.bytes,
-              algorithm.name,
-            ) ??
-            Uint8List(0);
-        decryptedData.add(d);
+        decryptedData.add(await _decrypt(ct));
       }
     } else {
-      final Uint8List d = await platform.decrypt(
-            cipherText.bytes,
-            key.bytes,
-            algorithm.name,
-          ) ??
-          Uint8List(0);
-      decryptedData.add(d);
+      decryptedData.add(await _decrypt(cipherText));
     }
 
     return decryptedData.toBytes();
@@ -75,43 +84,23 @@ class AES implements Cipher {
   @override
   Future<CipherText> encrypt(Uint8List data) async {
     Uint8List dataToEncrypt;
+
     final CipherTextList cipherTextList = CipherTextList();
-    // If data is bigger than 32mB -> split in chunks
-    if (data.length > CipherTextList.chunkSize) {
-      final int chunkNb = (data.length / CipherTextList.chunkSize).ceil();
+
+    if (data.length > Cipher.bytesCountPerChunk) {
+      final int chunkNb = (data.length / Cipher.bytesCountPerChunk).ceil();
       for (var i = 0; i < chunkNb; i++) {
         dataToEncrypt = i < (chunkNb - 1)
             ? data.sublist(
-                i * CipherTextList.chunkSize,
-                (i + 1) * CipherTextList.chunkSize,
+                i * Cipher.bytesCountPerChunk,
+                (i + 1) * Cipher.bytesCountPerChunk,
               )
-            : data.sublist(i * CipherTextList.chunkSize);
-        final Uint8List c = await platform.encrypt(
-              dataToEncrypt,
-              key.bytes,
-              algorithm.name,
-            ) ??
-            Uint8List(0);
-        cipherTextList.add(
-          CipherText(
-            c.sublist(0, 12),
-            c.sublist(12, c.length - 16),
-            c.sublist(c.length - 16, c.length),
-          ),
-        ); // TODO(hpcl): generify this
+            : data.sublist(i * Cipher.bytesCountPerChunk);
+        cipherTextList.add(await _encrypt(dataToEncrypt));
       }
     } else {
-      final Uint8List c =
-          await platform.encrypt(data, key.bytes, algorithm.name) ??
-              Uint8List(0);
-
-      return CipherText(
-        c.sublist(0, 12),
-        c.sublist(12, c.length - 16),
-        c.sublist(c.length - 16, c.length),
-      ); // TODO(hpcl): generify this
+      return _encrypt(data);
     }
-
     return cipherTextList;
   }
 }

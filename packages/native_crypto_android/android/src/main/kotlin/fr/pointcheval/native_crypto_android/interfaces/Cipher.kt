@@ -7,4 +7,6 @@ interface Cipher {
 
     fun encrypt(data: ByteArray, key: ByteArray): ByteArray
     fun decrypt(data: ByteArray, key: ByteArray): ByteArray
+    fun encryptAsList(data: ByteArray, key: ByteArray): List<ByteArray>
+    fun decryptAsList(data: List<ByteArray>, key: ByteArray): ByteArray
 }
