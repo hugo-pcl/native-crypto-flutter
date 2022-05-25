@@ -1,0 +1,28 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "native_crypto",
+            "cwd": "packages/native_crypto/example",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "native_crypto (profile mode)",
+            "cwd": "packages/native_crypto/example",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "native_crypto (release mode)",
+            "cwd": "packages/native_crypto/example",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+    ]
+}

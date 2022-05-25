@@ -3,7 +3,7 @@
 // -----
 // File: native_crypto.dart
 // Created Date: 16/12/2021 16:28:00
-// Last Modified: 23/05/2022 23:09:10
+// Last Modified: 25/05/2022 10:48:20
 // -----
 // Copyright (c) 2021
 
@@ -12,6 +12,8 @@
 ///
 /// Author: Hugo Pointcheval
 library native_crypto;
+
+export 'package:native_crypto_platform_interface/src/utils/exception.dart';
 
 export 'src/builders/builders.dart';
 export 'src/ciphers/ciphers.dart';

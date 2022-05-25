@@ -3,7 +3,7 @@
 // -----
 // File: cipher_page.dart
 // Created Date: 28/12/2021 13:33:15
-// Last Modified: 28/12/2021 15:20:43
+// Last Modified: 25/05/2022 10:49:30
 // -----
 // Copyright (c) 2021
 
@@ -85,8 +85,8 @@ class CipherPage extends ConsumerWidget {
         var bytesToString = plainText.toStr();
         decryptionStatus
             .print('String successfully decrypted:\n\n$bytesToString');
-      } on DecryptionException catch (e) {
-        decryptionStatus.print(e.message);
+      } on NativeCryptoException catch (e) {
+        decryptionStatus.print(e.message ?? 'Decryption failed!');
       }
     }
   }

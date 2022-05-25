@@ -3,7 +3,7 @@
 // -----
 // File: aes.dart
 // Created Date: 16/12/2021 16:28:00
-// Last Modified: 24/05/2022 23:29:42
+// Last Modified: 25/05/2022 10:44:25
 // -----
 // Copyright (c) 2022
 
@@ -14,11 +14,11 @@ import 'package:native_crypto/src/ciphers/aes/aes_mode.dart';
 import 'package:native_crypto/src/ciphers/aes/aes_padding.dart';
 import 'package:native_crypto/src/core/cipher_text.dart';
 import 'package:native_crypto/src/core/cipher_text_list.dart';
-import 'package:native_crypto/src/core/exceptions.dart';
 import 'package:native_crypto/src/interfaces/cipher.dart';
 import 'package:native_crypto/src/keys/secret_key.dart';
 import 'package:native_crypto/src/platform.dart';
 import 'package:native_crypto/src/utils/cipher_algorithm.dart';
+import 'package:native_crypto_platform_interface/native_crypto_platform_interface.dart';
 
 export 'package:native_crypto/src/ciphers/aes/aes_key_size.dart';
 export 'package:native_crypto/src/ciphers/aes/aes_mode.dart';
@@ -34,16 +34,21 @@ class AES implements Cipher {
 
   AES(this.key, this.mode, {this.padding = AESPadding.none}) {
     if (!AESKeySize.supportedSizes.contains(key.bytes.length * 8)) {
-      throw CipherInitException('Invalid key length!');
+      throw const CipherInitException(
+        message: 'Invalid key length!',
+        code: 'invalid_key_length',
+      );
     }
 
     final Map<AESMode, List<AESPadding>> _supported = {
       AESMode.gcm: [AESPadding.none],
-      AESMode.cbc: [AESPadding.pkcs5],
     };
 
     if (!_supported[mode]!.contains(padding)) {
-      throw CipherInitException('Invalid padding!');
+      throw const CipherInitException(
+        message: 'Invalid padding!',
+        code: 'invalid_padding',
+      );
     }
   }
 

@@ -3,18 +3,18 @@
 // -----
 // File: pbkdf2.dart
 // Created Date: 17/12/2021 14:50:42
-// Last Modified: 23/05/2022 23:07:19
+// Last Modified: 25/05/2022 10:45:00
 // -----
 // Copyright (c) 2021
 
 import 'dart:typed_data';
 
-import 'package:native_crypto/src/core/exceptions.dart';
 import 'package:native_crypto/src/interfaces/keyderivation.dart';
 import 'package:native_crypto/src/keys/secret_key.dart';
 import 'package:native_crypto/src/platform.dart';
 import 'package:native_crypto/src/utils/hash_algorithm.dart';
 import 'package:native_crypto/src/utils/kdf_algorithm.dart';
+import 'package:native_crypto_platform_interface/native_crypto_platform_interface.dart';
 
 class Pbkdf2 extends KeyDerivation {
   final int _keyBytesCount;
@@ -35,7 +35,10 @@ class Pbkdf2 extends KeyDerivation {
   @override
   Future<SecretKey> derive({String? password, String? salt}) async {
     if (password == null || salt == null) {
-      throw KeyDerivationException("Password or Salt can't be null!");
+      throw const KeyDerivationException(
+        message: "Password or Salt can't be null!",
+        code: 'invalid_password_or_salt',
+      );
     }
 
     final Uint8List derivation = (await platform.pbkdf2(

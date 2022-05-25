@@ -3,9 +3,9 @@
 // -----
 // File: aes_padding.dart
 // Created Date: 23/05/2022 22:10:17
-// Last Modified: 24/05/2022 23:17:25
+// Last Modified: 25/05/2022 09:23:49
 // -----
 // Copyright (c) 2022
 
 /// Represents different paddings.
-enum AESPadding { none, pkcs5 }
+enum AESPadding { none }
