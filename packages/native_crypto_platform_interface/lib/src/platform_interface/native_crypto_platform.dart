@@ -3,7 +3,7 @@
 // -----
 // File: native_crypto_platform_interface.dart
 // Created Date: 25/12/2021 16:43:49
-// Last Modified: 24/05/2022 22:58:31
+// Last Modified: 25/05/2022 22:11:02
 // -----
 // Copyright (c) 2021
 
@@ -36,7 +36,7 @@ abstract class NativeCryptoPlatform extends PlatformInterface {
   /// Platform-specific plugins should set this with their own platform-specific
   /// class that extends [NativeCryptoPlatform] when they register themselves.
   static set instance(NativeCryptoPlatform instance) {
-    PlatformInterface.verifyToken(instance, _token);
+    PlatformInterface.verify(instance, _token);
     _instance = instance;
   }
 
