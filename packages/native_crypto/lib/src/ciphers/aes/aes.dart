@@ -3,7 +3,7 @@
 // -----
 // File: aes.dart
 // Created Date: 16/12/2021 16:28:00
-// Last Modified: 25/05/2022 15:40:07
+// Last Modified: 25/05/2022 21:17:10
 // -----
 // Copyright (c) 2022
 
@@ -67,7 +67,8 @@ class AES implements Cipher {
             List.empty();
     return CipherText.fromPairIvAndBytes(
       cipherText,
-      dataLength: cipherText.last.length,
+      dataLength: cipherText.last.length - 16,
+      tagLength: 16,
     );
   }
 
