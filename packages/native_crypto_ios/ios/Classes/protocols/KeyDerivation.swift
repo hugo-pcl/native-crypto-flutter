@@ -6,3 +6,8 @@
 //
 
 import Foundation
+
+protocol KeyDerivation {
+    var algorithm : KdfAlgorithm { get }
+    func derive() throws -> SecretKey
+}

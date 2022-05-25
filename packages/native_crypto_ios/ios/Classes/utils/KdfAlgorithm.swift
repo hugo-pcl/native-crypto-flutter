@@ -6,3 +6,7 @@
 //
 
 import Foundation
+
+enum KdfAlgorithm {
+    case pbkdf2
+}

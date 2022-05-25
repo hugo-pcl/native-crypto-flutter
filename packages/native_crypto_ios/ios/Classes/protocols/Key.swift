@@ -6,3 +6,7 @@
 //
 
 import Foundation
+
+protocol Key {
+    var bytes: Data { get set }
+}

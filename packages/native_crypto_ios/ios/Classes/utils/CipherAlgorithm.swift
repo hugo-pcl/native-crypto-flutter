@@ -6,3 +6,13 @@
 //
 
 import Foundation
+
+enum CipherAlgorithm : String {
+    case aes = "aes"
+    
+    var getCipher: Cipher {
+        switch self {
+        case .aes: return AESCipher()
+        }
+    }
+}
