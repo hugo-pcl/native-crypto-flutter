@@ -3,7 +3,7 @@
 // -----
 // File: benchmark_page.dart
 // Created Date: 28/12/2021 15:12:39
-// Last Modified: 24/05/2022 23:43:59
+// Last Modified: 25/05/2022 15:26:42
 // -----
 // Copyright (c) 2021
 
@@ -107,7 +107,7 @@ class BenchmarkPage extends ConsumerWidget {
           after.millisecondsSinceEpoch - before.millisecondsSinceEpoch;
       benchmarkStatus.append('[$size MB] Encryption took $benchmark ms\n');
 
-      csv += "$benchmark";
+      csv += "$benchmark;";
       cryptoTime += benchmark;
 
       // Decryption
@@ -188,10 +188,6 @@ class BenchmarkPage extends ConsumerWidget {
                       () => _benchmark(ref, cipher, usePc: true),
                       "PointyCastle",
                     ),
-                    Button(
-                      _clear,
-                      "Clear",
-                    ),
                   ],
                 ),
                 Row(
@@ -200,6 +196,10 @@ class BenchmarkPage extends ConsumerWidget {
                     Button(
                       () => _benchmarkEncryptionOnly(ref, cipher),
                       "NC Persistence",
+                    ),
+                    Button(
+                      _clear,
+                      "Clear",
                     ),
                   ],
                 ),
