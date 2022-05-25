@@ -1,3 +1,13 @@
+## 0.1.1
+
+ - **REFACTOR**: change file organization.
+ - **PERF**: x10 perfomance improvement on android with better list management.
+ - **FIX**: benchmark output.
+ - **FIX**: update and fix code.
+ - **FEAT**: export new exceptions.
+ - **FEAT**: add PointyCastle benchmark.
+ - **DOCS**: add link to readme file.
+
 ## 0.1.0
 
 > Breaking changes !

@@ -15,6 +15,33 @@ Packages with breaking changes:
 
 Packages with other changes:
 
+ - [`native_crypto` - `v0.1.1`](#native_crypto---v011)
+
+---
+
+#### `native_crypto` - `v0.1.1`
+
+ - **REFACTOR**: change file organization.
+ - **PERF**: x10 perfomance improvement on android with better list management.
+ - **FIX**: benchmark output.
+ - **FIX**: update and fix code.
+ - **FEAT**: export new exceptions.
+ - **FEAT**: add PointyCastle benchmark.
+ - **DOCS**: add link to readme file.
+
+
+## 2022-05-25
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
  - [`native_crypto_ios` - `v0.1.1`](#native_crypto_ios---v011)
  - [`native_crypto_android` - `v0.1.1`](#native_crypto_android---v011)
  - [`native_crypto_platform_interface` - `v0.1.1`](#native_crypto_platform_interface---v011)
