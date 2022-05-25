@@ -1,3 +1,8 @@
+## 0.1.1
+
+ - **PERF**: x10 perfomance improvement on android with better list management.
+ - **FEAT**: export new exceptions.
+
 ## 0.1.0
 
 > Breaking changes !

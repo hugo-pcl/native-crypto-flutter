@@ -1,3 +1,8 @@
+## 0.1.1
+
+ - **REFACTOR**: rework swift part.
+ - **PERF**: optimize swift code.
+
 ## 0.1.0
 
 > Breaking changes !
