@@ -2,7 +2,7 @@ name: native_crypto
 description: Fast and secure cryptography for Flutter.
 version: 0.1.1
 
-# publish_to: 'none'
+publish_to: 'none'
 
 environment:
   sdk: ">=2.17.0 <3.0.0"
@@ -33,6 +33,9 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+  mockito: ^5.2.0
+  plugin_platform_interface: ^2.1.2
 
   wyatt_analysis:
     git:
