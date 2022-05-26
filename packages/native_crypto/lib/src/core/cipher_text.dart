@@ -3,7 +3,7 @@
 // -----
 // File: cipher_text.dart
 // Created Date: 16/12/2021 16:59:53
-// Last Modified: 26/05/2022 19:43:57
+// Last Modified: 26/05/2022 22:20:40
 // -----
 // Copyright (c) 2021
 
@@ -27,7 +27,7 @@ import 'package:native_crypto_platform_interface/native_crypto_platform_interfac
 /// - IV's length is [CipherText.ivLength] bytes.
 /// - MESSAGE's length is [CipherText.messageLength] bytes.
 /// - TAG's length is [CipherText.tagLength] bytes.
-/// 
+///
 /// Check [CipherTextWrapper] for more information.
 class CipherText extends ByteArray {
   final int _ivLength;
@@ -45,16 +45,33 @@ class CipherText extends ByteArray {
   );
 
   factory CipherText.fromBytes(
-    int ivLength,
-    int messageLength,
-    int tagLength,
+    Uint8List bytes, {
+    required int ivLength,
+    required int messageLength,
+    required int tagLength,
     CipherAlgorithm? cipherAlgorithm,
-    Uint8List bytes,
-  ) {
+  }) {
+    if (ivLength.isNegative ||
+        messageLength.isNegative ||
+        tagLength.isNegative) {
+      throw NativeCryptoException(
+        message: 'Invalid length! Must be positive.',
+        code: NativeCryptoExceptionCode.invalid_argument.code,
+      );
+    }
+
+    if (bytes.isEmpty) {
+      throw NativeCryptoException(
+        message: 'Passed data is empty!',
+        code: NativeCryptoExceptionCode.invalid_argument.code,
+      );
+    }
+
     if (bytes.length != ivLength + messageLength + tagLength) {
       throw NativeCryptoException(
         message: 'Invalid cipher text length! '
-            'Expected: ${ivLength + messageLength + tagLength} bytes',
+            'Expected: ${ivLength + messageLength + tagLength} bytes '
+            'got: ${bytes.length} bytes.',
         code: NativeCryptoExceptionCode.invalid_argument.code,
       );
     }

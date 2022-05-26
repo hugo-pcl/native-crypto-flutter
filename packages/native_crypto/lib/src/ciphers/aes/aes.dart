@@ -3,7 +3,7 @@
 // -----
 // File: aes.dart
 // Created Date: 16/12/2021 16:28:00
-// Last Modified: 26/05/2022 19:43:22
+// Last Modified: 26/05/2022 21:07:01
 // -----
 // Copyright (c) 2022
 
@@ -20,6 +20,10 @@ import 'package:native_crypto/src/platform.dart';
 import 'package:native_crypto/src/utils/cipher_algorithm.dart';
 import 'package:native_crypto/src/utils/extensions.dart';
 import 'package:native_crypto_platform_interface/native_crypto_platform_interface.dart';
+
+export 'aes_key_size.dart';
+export 'aes_mode.dart';
+export 'aes_padding.dart';
 
 /// An AES cipher.
 ///
@@ -94,11 +98,11 @@ class AES implements Cipher {
       );
     } else {
       return CipherText.fromBytes(
-        12,
-        encrypted.length - 28,
-        16,
-        CipherAlgorithm.aes,
         encrypted,
+        ivLength: 12,
+        messageLength: encrypted.length - 28,
+        tagLength: 16,
+        cipherAlgorithm: CipherAlgorithm.aes,
       );
     }
   }

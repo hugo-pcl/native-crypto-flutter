@@ -3,7 +3,7 @@
 // -----
 // File: extensions.dart
 // Created Date: 26/05/2022 12:12:48
-// Last Modified: 26/05/2022 18:52:48
+// Last Modified: 26/05/2022 22:15:33
 // -----
 // Copyright (c) 2022
 
@@ -19,7 +19,7 @@ extension ObjectX on Object? {
 
   /// Returns `true` if the object is **not** `null`.
   bool get isNotNull => this != null;
-  
+
   /// Prints the object to the console.
   void log() => developer.log(toString());
 }
@@ -30,14 +30,10 @@ extension ListIntX on List<int> {
 }
 
 extension ListUint8ListX on List<Uint8List> {
-  
   /// Reduce a [List] of [Uint8List] to a [Uint8List].
-  Uint8List sum() {
-    for (var i = 1; i < length; i++) {
-      first.addAll(this[i]);
-      removeAt(i);
-    }
-    return first;
+  Uint8List combine() {
+    if (isEmpty) return Uint8List(0);
+    return reduce((value, element) => value.plus(element));
   }
 }
 
@@ -90,6 +86,5 @@ extension Uint8ListX on Uint8List {
   }
 
   /// Returns a concatenation of this with the other [Uint8List].
-  Uint8List operator +(final Uint8List other) =>
-      [...this, ...other].toTypedList();
+  Uint8List plus(final Uint8List other) => [...this, ...other].toTypedList();
 }

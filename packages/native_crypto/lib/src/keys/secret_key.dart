@@ -3,7 +3,7 @@
 // -----
 // File: secret_key.dart
 // Created Date: 28/12/2021 13:36:54
-// Last Modified: 26/05/2022 19:26:35
+// Last Modified: 26/05/2022 23:13:10
 // -----
 // Copyright (c) 2021
 
@@ -28,6 +28,10 @@ class SecretKey extends BaseKey {
 
   static Future<SecretKey> fromSecureRandom(int bitsCount) async {
     Uint8List? key;
+    if (bitsCount == 0) {
+      return SecretKey(Uint8List(0));
+    }
+
     try {
       key = await platform.generateSecretKey(bitsCount);
     } catch (e, s) {

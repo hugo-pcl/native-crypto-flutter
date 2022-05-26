@@ -3,7 +3,7 @@
 // -----
 // File: pbkdf2.dart
 // Created Date: 17/12/2021 14:50:42
-// Last Modified: 26/05/2022 18:51:59
+// Last Modified: 26/05/2022 23:19:46
 // -----
 // Copyright (c) 2021
 
@@ -29,31 +29,64 @@ class Pbkdf2 extends KeyDerivation {
   @override
   KdfAlgorithm get algorithm => KdfAlgorithm.pbkdf2;
 
-  Pbkdf2(
-    int keyBytesCount,
-    int iterations, {
+  Pbkdf2({
+    required int keyBytesCount,
+    required int iterations,
     HashAlgorithm algorithm = HashAlgorithm.sha256,
   })  : _keyBytesCount = keyBytesCount,
         _iterations = iterations,
-        _hash = algorithm;
-
-  @override
-  Future<SecretKey> derive({String? password, String? salt}) async {
-    if (password == null || salt == null) {
+        _hash = algorithm {
+    if (keyBytesCount < 0) {
       throw NativeCryptoException(
-        message: 'Password and salt cannot be null. '
-            'Here is the password: $password, here is the salt: $salt',
+        message: 'keyBytesCount must be positive.',
         code: NativeCryptoExceptionCode.invalid_argument.code,
       );
     }
 
-    final Uint8List? derivation = await platform.pbkdf2(
-      password,
-      salt,
-      _keyBytesCount,
-      _iterations,
-      _hash.name,
-    );
+    if (iterations <= 0) {
+      throw NativeCryptoException(
+        message: 'iterations must be strictly positive.',
+        code: NativeCryptoExceptionCode.invalid_argument.code,
+      );
+    }
+  }
+
+  @override
+  Future<SecretKey> derive({String? password, String? salt}) async {
+    Uint8List? derivation;
+
+    if (_keyBytesCount == 0) {
+      return SecretKey(Uint8List(0));
+    }
+    if (password.isNull) {
+      throw NativeCryptoException(
+        message: 'Password cannot be null.',
+        code: NativeCryptoExceptionCode.invalid_argument.code,
+      );
+    }
+
+    if (salt.isNull) {
+      throw NativeCryptoException(
+        message: 'Salt cannot be null.',
+        code: NativeCryptoExceptionCode.invalid_argument.code,
+      );
+    }
+
+    try {
+      derivation = await platform.pbkdf2(
+        password!,
+        salt!,
+        _keyBytesCount,
+        _iterations,
+        _hash.name,
+      );
+    } catch (e, s) {
+      throw NativeCryptoException(
+        message: '$e',
+        code: NativeCryptoExceptionCode.platform_throws.code,
+        stackTrace: s,
+      );
+    }
 
     if (derivation.isNull) {
       throw NativeCryptoException(

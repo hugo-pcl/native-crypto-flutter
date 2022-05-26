@@ -3,7 +3,7 @@
 // -----
 // File: cipher_page.dart
 // Created Date: 28/12/2021 13:33:15
-// Last Modified: 26/05/2022 20:39:37
+// Last Modified: 26/05/2022 21:07:54
 // -----
 // Copyright (c) 2021
 
@@ -26,7 +26,8 @@ class CipherPage extends ConsumerWidget {
   final Output encryptionStatus = Output();
   final Output decryptionStatus = Output();
 
-  final TextEditingController _plainTextController = TextEditingController()..text = 'PlainText';
+  final TextEditingController _plainTextController = TextEditingController()
+    ..text = 'PlainText';
   CipherTextWrapper? cipherText;
 
   Future<void> _encrypt(WidgetRef ref, Cipher cipher) async {
@@ -58,9 +59,10 @@ class CipherPage extends ConsumerWidget {
       // Recreate cipher text with altered data
       cipherText = CipherTextWrapper.fromBytes(
         _altered,
-        12,
-        _altered.length - 28,
-        16,
+        ivLength: AESMode.gcm.ivLength,
+        messageLength:
+            _altered.length - (AESMode.gcm.ivLength + AESMode.gcm.tagLength),
+        tagLength: AESMode.gcm.tagLength,
       );
       encryptionStatus.print('String successfully encrypted:\n');
 

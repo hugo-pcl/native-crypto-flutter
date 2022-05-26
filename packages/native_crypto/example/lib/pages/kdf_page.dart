@@ -3,7 +3,7 @@
 // -----
 // File: kdf_page.dart
 // Created Date: 28/12/2021 13:40:34
-// Last Modified: 26/05/2022 20:30:31
+// Last Modified: 26/05/2022 21:09:47
 // -----
 // Copyright (c) 2021
 
@@ -26,8 +26,10 @@ class KdfPage extends ConsumerWidget {
   final Output pbkdf2Status = Output();
   final Output hashStatus = Output(large: true);
 
-  final TextEditingController _pwdTextController = TextEditingController()..text = 'Password';
-  final TextEditingController _messageTextController = TextEditingController()..text = 'Message';
+  final TextEditingController _pwdTextController = TextEditingController()
+    ..text = 'Password';
+  final TextEditingController _messageTextController = TextEditingController()
+    ..text = 'Message';
 
   Future<void> _generate(WidgetRef ref) async {
     Session state = ref.read(sessionProvider.state).state;
@@ -50,7 +52,11 @@ class KdfPage extends ConsumerWidget {
     if (password.isEmpty) {
       pbkdf2Status.print('Password is empty');
     } else {
-      Pbkdf2 _pbkdf2 = Pbkdf2(32, 1000, algorithm: HashAlgorithm.sha512);
+      Pbkdf2 _pbkdf2 = Pbkdf2(
+        keyBytesCount: 32,
+        iterations: 1000,
+        algorithm: HashAlgorithm.sha512,
+      );
       SecretKey sk = await _pbkdf2.derive(password: password, salt: 'salt');
       state.setKey(sk);
       pbkdf2Status.print('Key successfully derived.');

@@ -3,7 +3,7 @@
 // -----
 // File: cipher.dart
 // Created Date: 16/12/2021 16:28:00
-// Last Modified: 26/05/2022 17:38:26
+// Last Modified: 26/05/2022 21:21:07
 // -----
 // Copyright (c) 2021
 
@@ -20,7 +20,11 @@ import 'package:native_crypto/src/utils/cipher_algorithm.dart';
 /// 
 /// This interface is implemented by all the ciphers in NativeCrypto.
 abstract class Cipher {
-  static int _bytesCountPerChunk = 33554432;
+  static const int _bytesCountPerChunkDefault = 33554432;
+  static int _bytesCountPerChunk = _bytesCountPerChunkDefault;
+
+  /// Returns the default number of bytes per chunk.
+  static int get defaultBytesCountPerChunk => _bytesCountPerChunkDefault;
 
   /// Returns the size of a chunk of data 
   /// that can be processed by the [Cipher].

@@ -3,7 +3,7 @@
 // -----
 // File: cipher_text_wrapper.dart
 // Created Date: 26/05/2022 14:27:32
-// Last Modified: 26/05/2022 20:32:38
+// Last Modified: 26/05/2022 22:11:42
 // -----
 // Copyright (c) 2022
 
@@ -49,10 +49,10 @@ class CipherTextWrapper {
   /// [NativeCryptoExceptionCode.invalid_argument] if the [Uint8List] is
   /// not a valid [CipherText] or a [List] of [CipherText].
   factory CipherTextWrapper.fromBytes(
-    Uint8List bytes,
-    int ivLength,
-    int messageLength,
-    int tagLength, {
+    Uint8List bytes, {
+    required int ivLength,
+    required int messageLength,
+    required int tagLength,
     CipherAlgorithm? cipherAlgorithm,
     int? chunkSize,
   }) {
@@ -62,11 +62,11 @@ class CipherTextWrapper {
     if (bytes.length <= chunkSize) {
       return CipherTextWrapper.single(
         CipherText.fromBytes(
-          ivLength,
-          messageLength,
-          tagLength,
-          cipherAlgorithm,
           bytes,
+          ivLength: ivLength,
+          messageLength: messageLength,
+          tagLength: tagLength,
+          cipherAlgorithm: cipherAlgorithm,
         ),
       );
     } else {
@@ -75,11 +75,11 @@ class CipherTextWrapper {
         final chunk = bytes.sublist(i, i + chunkSize);
         cipherTexts.add(
           CipherText.fromBytes(
-            ivLength,
-            messageLength,
-            tagLength,
-            cipherAlgorithm,
             chunk,
+            ivLength: ivLength,
+            messageLength: messageLength,
+            tagLength: tagLength,
+            cipherAlgorithm: cipherAlgorithm,
           ),
         );
       }
@@ -128,7 +128,7 @@ class CipherTextWrapper {
     if (isSingle) {
       return single.bytes;
     } else {
-      return list.map((cipherText) => cipherText.bytes).toList().sum();
+      return list.map((cipherText) => cipherText.bytes).toList().combine();
     }
   }
 
