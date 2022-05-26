@@ -3,7 +3,7 @@
 // -----
 // File: exception.dart
 // Created Date: 24/05/2022 18:54:48
-// Last Modified: 26/05/2022 15:36:56
+// Last Modified: 26/05/2022 20:36:04
 // -----
 // Copyright (c) 2022
 
@@ -25,6 +25,7 @@ enum NativeCryptoExceptionCode {
   invalid_cipher,
   invalid_data,
   platform_not_supported,
+  platform_throws,
   platform_returned_invalid_data,
   platform_returned_empty_data,
   platform_returned_null;
@@ -51,7 +52,7 @@ class NativeCryptoException implements Exception {
 
   @override
   String toString() {
-    String output = '[NativeException/$code] $message';
+    String output = '[NativeCryptoException/$code] $message';
 
     if (stackTrace != null) {
       output += '\n\n${stackTrace.toString()}';
