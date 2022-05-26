@@ -3,21 +3,41 @@
 // -----
 // File: exception.dart
 // Created Date: 24/05/2022 18:54:48
-// Last Modified: 25/05/2022 10:43:29
+// Last Modified: 26/05/2022 15:36:56
 // -----
 // Copyright (c) 2022
+
+// ignore_for_file: constant_identifier_names
 
 import 'dart:developer';
 
 import 'package:flutter/services.dart';
 
+enum NativeCryptoExceptionCode {
+  unknown,
+  not_implemented,
+  invalid_argument,
+  invalid_key,
+  invalid_key_length,
+  invalid_algorithm,
+  invalid_padding,
+  invalid_mode,
+  invalid_cipher,
+  invalid_data,
+  platform_not_supported,
+  platform_returned_invalid_data,
+  platform_returned_empty_data,
+  platform_returned_null;
+
+  String get code => toString().split('.').last.toLowerCase();
+}
+
 class NativeCryptoException implements Exception {
-  const NativeCryptoException({
+  NativeCryptoException({
     this.message,
     String? code,
     this.stackTrace,
-    // ignore: unnecessary_this
-  }) : this.code = code ?? 'unknown';
+  }) : code = code ?? NativeCryptoExceptionCode.unknown.code;
 
   /// The long form message of the exception.
   final String? message;
@@ -73,7 +93,7 @@ class NativeCryptoException implements Exception {
           )
         : null;
 
-    String code = 'unknown';
+    String code = NativeCryptoExceptionCode.unknown.code;
     String message = platformException.message ?? '';
 
     if (details != null) {
@@ -102,52 +122,4 @@ class NativeCryptoException implements Exception {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   int get hashCode => message.hashCode ^ code.hashCode ^ stackTrace.hashCode;
-}
-
-class KeyException extends NativeCryptoException {
-  const KeyException({
-    super.message,
-    super.code,
-    super.stackTrace,
-  });
-}
-
-class KeyDerivationException extends NativeCryptoException {
-  const KeyDerivationException({
-    super.message,
-    super.code,
-    super.stackTrace,
-  });
-}
-
-class CipherInitException extends NativeCryptoException {
-  const CipherInitException({
-    super.message,
-    super.code,
-    super.stackTrace,
-  });
-}
-
-class EncryptionException extends NativeCryptoException {
-  const EncryptionException({
-    super.message,
-    super.code,
-    super.stackTrace,
-  });
-}
-
-class DecryptionException extends NativeCryptoException {
-  const DecryptionException({
-    super.message,
-    super.code,
-    super.stackTrace,
-  });
-}
-
-class NotImplementedException extends NativeCryptoException {
-  const NotImplementedException({
-    super.message,
-    super.code,
-    super.stackTrace,
-  });
 }

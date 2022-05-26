@@ -3,7 +3,7 @@
 // -----
 // File: native_crypto.dart
 // Created Date: 16/12/2021 16:28:00
-// Last Modified: 25/05/2022 10:48:20
+// Last Modified: 26/05/2022 12:10:42
 // -----
 // Copyright (c) 2021
 
@@ -23,7 +23,6 @@ export 'src/kdf/kdf.dart';
 export 'src/keys/keys.dart';
 // Utils
 export 'src/utils/cipher_algorithm.dart';
-export 'src/utils/convert.dart';
 export 'src/utils/hash_algorithm.dart';
 export 'src/utils/kdf_algorithm.dart';
 
