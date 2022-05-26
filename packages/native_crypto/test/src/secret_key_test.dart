@@ -3,7 +3,7 @@
 // -----
 // File: secret_key_test.dart
 // Created Date: 26/05/2022 10:52:41
-// Last Modified: 26/05/2022 12:07:33
+// Last Modified: 26/05/2022 19:24:44
 // -----
 // Copyright (c) 2022
 
@@ -42,10 +42,10 @@ void main() {
       await expectLater(
         () => SecretKey.fromSecureRandom(5),
         throwsA(
-          isA<KeyException>().having(
+          isA<NativeCryptoException>().having(
             (e) => e.code,
             'code',
-            'platform_returned_null',
+            'platform_returned_empty_data',
           ),
         ),
       );
@@ -59,7 +59,7 @@ void main() {
       await expectLater(
         () => SecretKey.fromSecureRandom(5),
         throwsA(
-          isA<KeyException>().having(
+          isA<NativeCryptoException>().having(
             (e) => e.code,
             'code',
             'platform_returned_null',
@@ -81,7 +81,7 @@ void main() {
       await expectLater(
         () => SecretKey.fromSecureRandom(5),
         throwsA(
-          isA<KeyException>()
+          isA<NativeCryptoException>()
               .having(
                 (e) => e.message,
                 'message',
@@ -90,7 +90,7 @@ void main() {
               .having(
                 (e) => e.code,
                 'code',
-                'failed_to_generate_secret_key',
+                'platform_throws',
               ),
         ),
       );

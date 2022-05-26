@@ -3,7 +3,7 @@
 // -----
 // File: byte_array.dart
 // Created Date: 16/12/2021 17:54:16
-// Last Modified: 26/05/2022 14:25:05
+// Last Modified: 26/05/2022 17:13:27
 // -----
 // Copyright (c) 2021
 
@@ -13,6 +13,9 @@ import 'package:flutter/foundation.dart';
 import 'package:native_crypto/src/utils/encoding.dart';
 import 'package:native_crypto/src/utils/extensions.dart';
 
+/// Represents a byte array.
+///
+/// [ByteArray] wraps a [Uint8List] and provides some useful conversion methods.
 @immutable
 abstract class ByteArray {
   final Uint8List _bytes;
@@ -55,6 +58,12 @@ abstract class ByteArray {
 
   /// Gets the [ByteArray] bytes as an UTF-16 representation.
   String get utf16 => _bytes.toStr();
+
+  /// Gets the [ByteArray] length in bytes.
+  int get length => _bytes.length;
+
+  /// Gets the [ByteArray] length in bits.
+  int get bitLength => _bytes.length * 8;
 
   @override
   bool operator ==(Object other) {

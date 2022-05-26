@@ -3,7 +3,7 @@
 // -----
 // File: extensions.dart
 // Created Date: 26/05/2022 12:12:48
-// Last Modified: 26/05/2022 15:49:38
+// Last Modified: 26/05/2022 18:52:48
 // -----
 // Copyright (c) 2022
 
@@ -30,8 +30,8 @@ extension ListIntX on List<int> {
 }
 
 extension ListUint8ListX on List<Uint8List> {
+  
   /// Reduce a [List] of [Uint8List] to a [Uint8List].
-
   Uint8List sum() {
     for (var i = 1; i < length; i++) {
       first.addAll(this[i]);

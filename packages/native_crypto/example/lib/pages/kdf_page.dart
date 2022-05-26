@@ -3,7 +3,7 @@
 // -----
 // File: kdf_page.dart
 // Created Date: 28/12/2021 13:40:34
-// Last Modified: 23/05/2022 22:49:06
+// Last Modified: 26/05/2022 20:30:31
 // -----
 // Copyright (c) 2021
 
@@ -12,10 +12,10 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_crypto/native_crypto.dart';
+import 'package:native_crypto/native_crypto_ext.dart';
 import 'package:native_crypto_example/widgets/button.dart';
 
 import '../session.dart';
-import '../utils.dart';
 import '../widgets/output.dart';
 
 class KdfPage extends ConsumerWidget {
@@ -26,8 +26,8 @@ class KdfPage extends ConsumerWidget {
   final Output pbkdf2Status = Output();
   final Output hashStatus = Output(large: true);
 
-  final TextEditingController _pwdTextController = TextEditingController();
-  final TextEditingController _messageTextController = TextEditingController();
+  final TextEditingController _pwdTextController = TextEditingController()..text = 'Password';
+  final TextEditingController _messageTextController = TextEditingController()..text = 'Message';
 
   Future<void> _generate(WidgetRef ref) async {
     Session state = ref.read(sessionProvider.state).state;
@@ -66,7 +66,7 @@ class KdfPage extends ConsumerWidget {
     } else {
       Uint8List hash = await hasher.digest(message.toBytes());
       hashStatus.print(
-          'Message successfully hashed with $hasher :${hash.toStr(to: Encoding.hex)}');
+          'Message successfully hashed with $hasher :${hash.toStr(to: Encoding.base16)}');
     }
   }
 

@@ -3,7 +3,7 @@
 // -----
 // File: benchmark_page.dart
 // Created Date: 28/12/2021 15:12:39
-// Last Modified: 25/05/2022 17:16:12
+// Last Modified: 26/05/2022 20:19:28
 // -----
 // Copyright (c) 2021
 
@@ -40,7 +40,7 @@ class BenchmarkPage extends ConsumerWidget {
       return;
     }
 
-    List<int> testedSizes = [2, 6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 50];
+    List<int> testedSizes = [2, 4, 8, 16, 32, 64, 128, 256];
     int multiplier = pow(2, 20).toInt(); // MiB
 
     benchmarkStatus.print("[Benchmark] Sizes: ${testedSizes.join('/')}MiB\n");
@@ -86,7 +86,7 @@ class BenchmarkPage extends ConsumerWidget {
         if (usePc) {
           pc.decrypt(encryptedBigFile as Uint8List, state.secretKey.bytes);
         } else {
-          await cipher.decrypt(encryptedBigFile as CipherText);
+          await cipher.decrypt(encryptedBigFile as CipherTextWrapper);
         }
         after = DateTime.now();
         benchmark =
@@ -105,7 +105,7 @@ class BenchmarkPage extends ConsumerWidget {
         .appendln('[Benchmark] Finished: ${sum}MiB in $benchmark ms');
     benchmarkStatus.appendln('[Benchmark] Check the console for csv data');
     benchmarkStatus.appendln(csv);
-    print(csv);
+    debugPrint(csv);
   }
 
   void _clear() {
@@ -135,7 +135,7 @@ class BenchmarkPage extends ConsumerWidget {
     }
     keyContent.print(state.secretKey.bytes.toString());
 
-    AES cipher = AES(state.secretKey, AESMode.gcm);
+    AES cipher = AES(state.secretKey);
 
     return SingleChildScrollView(
       child: Padding(
