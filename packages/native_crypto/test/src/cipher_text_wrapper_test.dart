@@ -3,7 +3,7 @@
 // -----
 // File: cipher_text_wrapper_test.dart
 // Created Date: 26/05/2022 21:35:41
-// Last Modified: 26/05/2022 22:27:31
+// Last Modified: 27/05/2022 13:46:54
 // -----
 // Copyright (c) 2022
 
@@ -293,7 +293,6 @@ void main() {
       final wrapper = CipherTextWrapper.fromBytes(
         Uint8List.fromList([1, 2, 3]),
         ivLength: 1,
-        messageLength: 1,
         tagLength: 1,
       );
       expect(wrapper.isSingle, isTrue);
@@ -301,11 +300,10 @@ void main() {
     });
 
     test('creates list from bytes when too big', () {
-      Cipher.bytesCountPerChunk = 3;
+      Cipher.bytesCountPerChunk = 1;
       final wrapper = CipherTextWrapper.fromBytes(
         Uint8List.fromList([1, 2, 3, 4, 5, 6]),
         ivLength: 1,
-        messageLength: 1,
         tagLength: 1,
       );
       expect(wrapper.isList, isTrue);
@@ -317,11 +315,35 @@ void main() {
       CipherTextWrapper.fromBytes(
         Uint8List.fromList([1, 2, 3]),
         ivLength: 1,
-        messageLength: 1,
         tagLength: 1,
         chunkSize: 3,
       );
       expect(Cipher.bytesCountPerChunk, 3);
+    });
+
+    test('throws if trying to build list with bad parameters', () {
+      Cipher.bytesCountPerChunk = 1; // length of a message
+
+      expect(
+        () => CipherTextWrapper.fromBytes(
+          Uint8List.fromList([1, 2, 3, 4, 5, 6]),
+          ivLength: 2,
+          tagLength: 1,
+        ),
+        throwsA(
+          isA<NativeCryptoException>()
+              .having(
+                (e) => e.code,
+                'code',
+                'invalid_argument',
+              )
+              .having(
+                (e) => e.message,
+                'message',
+                contains('on chunk #'),
+              ),
+        ),
+      );
     });
   });
 }
