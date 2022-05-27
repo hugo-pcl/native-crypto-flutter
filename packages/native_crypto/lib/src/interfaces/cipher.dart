@@ -17,7 +17,7 @@ import 'package:native_crypto/src/utils/cipher_algorithm.dart';
 /// In cryptography, a [Cipher] is an algorithm for performing encryption
 /// or decryption - a series of well-defined steps that can
 /// be followed as a procedure.
-/// 
+///
 /// This interface is implemented by all the ciphers in NativeCrypto.
 abstract class Cipher {
   static const int _bytesCountPerChunkDefault = 33554432;
@@ -26,7 +26,7 @@ abstract class Cipher {
   /// Returns the default number of bytes per chunk.
   static int get defaultBytesCountPerChunk => _bytesCountPerChunkDefault;
 
-  /// Returns the size of a chunk of data 
+  /// Returns the size of a chunk of data
   /// that can be processed by the [Cipher].
   static int get bytesCountPerChunk => Cipher._bytesCountPerChunk;
 
@@ -35,10 +35,9 @@ abstract class Cipher {
   static set bytesCountPerChunk(int bytesCount) {
     _bytesCountPerChunk = bytesCount;
   }
-  
+
   /// Returns the standard algorithm for this [Cipher].
   CipherAlgorithm get algorithm;
-
 
   /// Encrypts the [data].
   ///

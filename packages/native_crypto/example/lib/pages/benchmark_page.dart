@@ -91,8 +91,8 @@ class BenchmarkPage extends ConsumerWidget {
         after = DateTime.now();
         benchmark =
             after.millisecondsSinceEpoch - before.millisecondsSinceEpoch;
-        benchmarkStatus
-            .appendln('[Benchmark] ${size}MiB => Decryption took $benchmark ms');
+        benchmarkStatus.appendln(
+            '[Benchmark] ${size}MiB => Decryption took $benchmark ms');
         csvLine.write(';$benchmark');
       }
       csv += csvLine.toString() + '\n';

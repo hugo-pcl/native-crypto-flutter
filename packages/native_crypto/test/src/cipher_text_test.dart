@@ -157,7 +157,7 @@ void main() {
       expect(cipherText.cipherAlgorithm, CipherAlgorithm.aes);
     });
   });
-  
+
   group('Lengths', () {
     test('get.ivLength returns the expected value', () {
       final CipherText cipherText = CipherText.fromBytes(

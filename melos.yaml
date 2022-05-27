@@ -15,6 +15,24 @@ scripts:
   lint:all:
     run: melos run analyze && melos run format
     description: Run all static analysis checks.
+  
+  test:all:
+    run: |
+      melos run test --no-select
+    description: |
+      Run all tests available.
+  
+  test:
+    run: |
+      melos exec -c 6 --fail-fast -- \
+        "flutter test --no-pub --no-test-assets"
+    description: Run `flutter test` for a specific package.
+    select-package:
+      dir-exists:
+        - test
+      ignore:
+        - "*web*"
+        - "*example*"
 
   analyze:
     run: |

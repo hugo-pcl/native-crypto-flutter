@@ -150,7 +150,7 @@ void main() {
         ],
       );
     });
-    
+
     test('decrypt', () async {
       await nativeCrypto.decrypt(
         Uint8List(0),
@@ -171,6 +171,5 @@ void main() {
         ],
       );
     });
-
   });
 }

@@ -52,7 +52,7 @@ class CipherText extends ByteArray {
     CipherAlgorithm? cipherAlgorithm,
   }) {
     messageLength ??= bytes.length - ivLength - tagLength;
-    
+
     if (ivLength.isNegative ||
         messageLength.isNegative ||
         tagLength.isNegative) {

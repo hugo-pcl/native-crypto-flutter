@@ -11,8 +11,8 @@ import 'package:native_crypto/src/keys/secret_key.dart';
 import 'package:native_crypto/src/utils/kdf_algorithm.dart';
 
 /// Represents a Key Derivation Function (KDF) in NativeCrypto.
-/// 
-/// [KeyDerivation] function is a function that takes some 
+///
+/// [KeyDerivation] function is a function that takes some
 /// parameters and returns a [SecretKey].
 abstract class KeyDerivation {
   /// Returns the standard algorithm for this key derivation function

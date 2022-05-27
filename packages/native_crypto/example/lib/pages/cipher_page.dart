@@ -3,7 +3,7 @@
 // -----
 // File: cipher_page.dart
 // Created Date: 28/12/2021 13:33:15
-// Last Modified: 26/05/2022 21:07:54
+// Last Modified: 27/05/2022 16:42:10
 // -----
 // Copyright (c) 2021
 
@@ -60,8 +60,6 @@ class CipherPage extends ConsumerWidget {
       cipherText = CipherTextWrapper.fromBytes(
         _altered,
         ivLength: AESMode.gcm.ivLength,
-        messageLength:
-            _altered.length - (AESMode.gcm.ivLength + AESMode.gcm.tagLength),
         tagLength: AESMode.gcm.tagLength,
       );
       encryptionStatus.print('String successfully encrypted:\n');
