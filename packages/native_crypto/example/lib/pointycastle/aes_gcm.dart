@@ -3,9 +3,11 @@
 // -----
 // File: aes_gcm.dart
 // Created Date: 24/05/2022 16:34:54
-// Last Modified: 24/05/2022 17:15:22
+// Last Modified: 27/05/2022 17:36:31
 // -----
 // Copyright (c) 2022
+
+// ignore_for_file: implementation_imports
 
 import 'dart:typed_data';
 
