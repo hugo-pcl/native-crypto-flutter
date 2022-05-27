@@ -3,7 +3,7 @@
 // -----
 // File: extensions.dart
 // Created Date: 26/05/2022 12:12:48
-// Last Modified: 26/05/2022 22:15:33
+// Last Modified: 27/05/2022 12:26:55
 // -----
 // Copyright (c) 2022
 
@@ -87,4 +87,15 @@ extension Uint8ListX on Uint8List {
 
   /// Returns a concatenation of this with the other [Uint8List].
   Uint8List plus(final Uint8List other) => [...this, ...other].toTypedList();
+
+  /// Returns a sublist of this from the [start] index to the [end] index.
+  /// If [end] is greater than the length of the list, it is set to the length
+  Uint8List trySublist(int start, [int? end]) {
+    if (isEmpty) return this;
+
+    int ending = end ?? length;
+    if (ending > length) ending = length;
+
+    return sublist(start, ending);
+  }
 }

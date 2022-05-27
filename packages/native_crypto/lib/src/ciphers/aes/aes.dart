@@ -3,7 +3,7 @@
 // -----
 // File: aes.dart
 // Created Date: 16/12/2021 16:28:00
-// Last Modified: 26/05/2022 21:07:01
+// Last Modified: 27/05/2022 12:13:28
 // -----
 // Copyright (c) 2022
 
@@ -46,7 +46,6 @@ class AES implements Cipher {
       );
     }
 
-
     if (!mode.supportedPaddings.contains(padding)) {
       throw NativeCryptoException(
         message: 'Invalid padding! '
@@ -56,13 +55,25 @@ class AES implements Cipher {
     }
   }
 
-  Future<Uint8List> _decrypt(CipherText cipherText,
-      {int chunkCount = 0,}) async {
-    final Uint8List? decrypted = await platform.decrypt(
-      cipherText.bytes,
-      _key.bytes,
-      algorithm.name,
-    );
+  Future<Uint8List> _decrypt(
+    CipherText cipherText, {
+    int chunkCount = 0,
+  }) async {
+    Uint8List? decrypted;
+
+    try {
+      decrypted = await platform.decrypt(
+        cipherText.bytes,
+        _key.bytes,
+        algorithm.name,
+      );
+    } catch (e, s) {
+      throw NativeCryptoException(
+        message: '$e',
+        code: NativeCryptoExceptionCode.platform_throws.code,
+        stackTrace: s,
+      );
+    }
 
     if (decrypted.isNull) {
       throw NativeCryptoException(
@@ -80,11 +91,21 @@ class AES implements Cipher {
   }
 
   Future<CipherText> _encrypt(Uint8List data, {int chunkCount = 0}) async {
-    final Uint8List? encrypted = await platform.encrypt(
-      data,
-      _key.bytes,
-      algorithm.name,
-    );
+    Uint8List? encrypted;
+
+    try {
+      encrypted = await platform.encrypt(
+        data,
+        _key.bytes,
+        algorithm.name,
+      );
+    } catch (e, s) {
+      throw NativeCryptoException(
+        message: '$e on chunk #$chunkCount',
+        code: NativeCryptoExceptionCode.platform_throws.code,
+        stackTrace: s,
+      );
+    }
 
     if (encrypted.isNull) {
       throw NativeCryptoException(
@@ -97,13 +118,21 @@ class AES implements Cipher {
         code: NativeCryptoExceptionCode.platform_returned_empty_data.code,
       );
     } else {
-      return CipherText.fromBytes(
-        encrypted,
-        ivLength: 12,
-        messageLength: encrypted.length - 28,
-        tagLength: 16,
-        cipherAlgorithm: CipherAlgorithm.aes,
-      );
+      try {
+        return CipherText.fromBytes(
+          encrypted,
+          ivLength: 12,
+          messageLength: encrypted.length - 28,
+          tagLength: 16,
+          cipherAlgorithm: CipherAlgorithm.aes,
+        );
+      } on NativeCryptoException catch (e, s) {
+        throw NativeCryptoException(
+          message: '${e.message} on chunk #$chunkCount',
+          code: e.code,
+          stackTrace: s,
+        );
+      }
     }
   }
 
@@ -125,6 +154,9 @@ class AES implements Cipher {
 
   @override
   Future<CipherTextWrapper> encrypt(Uint8List data) async {
+    if (data.isEmpty) {
+      return CipherTextWrapper.empty();
+    }
     CipherTextWrapper cipherTextWrapper;
     Uint8List dataToEncrypt;
     final int chunkNb = (data.length / Cipher.bytesCountPerChunk).ceil();

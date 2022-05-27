@@ -3,7 +3,7 @@
 // -----
 // File: cipher_text_wrapper.dart
 // Created Date: 26/05/2022 14:27:32
-// Last Modified: 26/05/2022 22:11:42
+// Last Modified: 27/05/2022 13:43:29
 // -----
 // Copyright (c) 2022
 
@@ -51,7 +51,6 @@ class CipherTextWrapper {
   factory CipherTextWrapper.fromBytes(
     Uint8List bytes, {
     required int ivLength,
-    required int messageLength,
     required int tagLength,
     CipherAlgorithm? cipherAlgorithm,
     int? chunkSize,
@@ -59,29 +58,38 @@ class CipherTextWrapper {
     chunkSize ??= Cipher.bytesCountPerChunk;
     Cipher.bytesCountPerChunk = chunkSize;
 
-    if (bytes.length <= chunkSize) {
+    final int messageLength = bytes.length - ivLength - tagLength;
+
+    if (messageLength <= chunkSize) {
       return CipherTextWrapper.single(
         CipherText.fromBytes(
           bytes,
           ivLength: ivLength,
-          messageLength: messageLength,
           tagLength: tagLength,
           cipherAlgorithm: cipherAlgorithm,
         ),
       );
     } else {
       final cipherTexts = <CipherText>[];
-      for (var i = 0; i < bytes.length; i += chunkSize) {
-        final chunk = bytes.sublist(i, i + chunkSize);
-        cipherTexts.add(
-          CipherText.fromBytes(
-            chunk,
-            ivLength: ivLength,
-            messageLength: messageLength,
-            tagLength: tagLength,
-            cipherAlgorithm: cipherAlgorithm,
-          ),
-        );
+      for (var i = 0; i < bytes.length; i += chunkSize + ivLength + tagLength) {
+        final chunk = bytes.trySublist(i, i + chunkSize + ivLength + tagLength);
+
+        try {
+          cipherTexts.add(
+            CipherText.fromBytes(
+              chunk,
+              ivLength: ivLength,
+              tagLength: tagLength,
+              cipherAlgorithm: cipherAlgorithm,
+            ),
+          );
+        } on NativeCryptoException catch (e, s) {
+          throw NativeCryptoException(
+            message: '${e.message} on chunk #$i',
+            code: e.code,
+            stackTrace: s,
+          );
+        }
       }
       return CipherTextWrapper.list(cipherTexts);
     }

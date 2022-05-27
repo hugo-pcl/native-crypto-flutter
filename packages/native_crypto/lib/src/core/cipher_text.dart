@@ -3,7 +3,7 @@
 // -----
 // File: cipher_text.dart
 // Created Date: 16/12/2021 16:59:53
-// Last Modified: 26/05/2022 22:20:40
+// Last Modified: 27/05/2022 12:09:47
 // -----
 // Copyright (c) 2021
 
@@ -47,10 +47,12 @@ class CipherText extends ByteArray {
   factory CipherText.fromBytes(
     Uint8List bytes, {
     required int ivLength,
-    required int messageLength,
     required int tagLength,
+    int? messageLength,
     CipherAlgorithm? cipherAlgorithm,
   }) {
+    messageLength ??= bytes.length - ivLength - tagLength;
+    
     if (ivLength.isNegative ||
         messageLength.isNegative ||
         tagLength.isNegative) {
