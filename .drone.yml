@@ -11,3 +11,7 @@ steps:
     - flutter pub global activate melos
     - melos bs
     - melos run test:all
+
+trigger:
+  branch:
+  - master

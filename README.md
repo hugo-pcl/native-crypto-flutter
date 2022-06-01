@@ -11,6 +11,10 @@
 <a href="https://github.com/invertase/melos">
 <img src="https://img.shields.io/badge/Maintained%20with-melos-f700ff.svg?style=flat-square" alt="Maintained with Melos" />
 </a>
+
+<a href="https://drone.wyatt-studio.fr/hugo/native-crypto">
+<img src="https://drone.wyatt-studio.fr/api/badges/hugo/native-crypto/status.svg" alt="Build Status" />
+</a>
 </p>
 
 ---
