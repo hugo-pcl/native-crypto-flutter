@@ -47,8 +47,6 @@ To digest a message, you can use the following function:
 Uint8List hash = await HashAlgorithm.sha256.digest(message);
 ```
 
-Note that you can find a `toBytes()` method in the example app, to convert a `String` to a `Uint8List`.
-
 > In NativeCrypto, you can use the following hash functions: SHA-256, SHA-384, SHA-512
 
 #### Keys
@@ -70,7 +68,11 @@ You can derive a `SecretKey` using **PBKDF2**.
 First, you need to initialize a `Pbkdf2` object.
 
 ```dart
-Pbkdf2 pbkdf2 = Pbkdf2(32, 1000, algorithm: HashAlgorithm.sha512);
+Pbkdf2 pbkdf2 = Pbkdf2(
+    keyBytesCount: 32,
+    iterations: 1000,
+    algorithm: HashAlgorithm.sha512,
+);
 ```
 
 Then, you can derive a `SecretKey` from a password and salt.
@@ -88,22 +90,40 @@ And now, you can use the `SecretKey` to encrypt/decrypt a message.
 First, you need to initialize a `Cipher` object.
 
 ```dart
-AES cipher = AES(secretKey, AESMode.gcm);
+AES cipher = AES(secretKey);
 ```
 
-Then, you can encrypt/decrypt your message.
+Then, you can encrypt your message.
 
 ```dart
-CipherText encrypted = await cipher.encrypt(message);
-Uint8List decrypted = await cipher.decrypt(encrypted);
+CipherTextWrapper wrapper = await cipher.encrypt(message);
+
+CipherText cipherText = wrapper.unwrap<CipherText>();
+// same as
+CipherText cipherText = wrapper.single;
+
+// or
+
+List<CipherText> cipherTexts = wrapper.unwrap<List<CipherText>>();
+// same as
+List<CipherText> cipherTexts = wrapper.list;
 ```
 
-After an encryption, you can use the `CipherText` object to access underlying data.
+After an encryption you obtain a `CipherTextWrapper` which contains `CipherText` or `List<CipherText>` depending on the message size. It's up to you to know how to unwrap the `CipherTextWrapper` depending the chunk size you configured.
+
+Uppon receiving encrypted message, you can decrypt it.
+You have to reconstruct the wrapper before decrypting.
 
 ```dart
-Uint8List iv = encrypted.iv;
-Uint8List data = encrypted.data;
-Uint8List tag = encrypted.tag;
+CipherTextWrapper wrapper = CipherTextWrapper.fromBytes(
+    data,
+    ivLength: AESMode.gcm.ivLength,
+    tagLength: AESMode.gcm.tagLength,
+);
 ```
 
-Note that data and tag are costly to access, so you should only use them if you need to !
+Then, you can decrypt your message.
+
+```dart
+Uint8List message = await cipher.decrypt(wrapper);
+```
