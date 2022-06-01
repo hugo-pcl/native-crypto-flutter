@@ -1,0 +1,57 @@
+name: NativeCrypto
+# repository: https://git.pointcheval.fr/NativeCrypto/native-crypto-flutter
+
+packages:
+  - packages/**
+
+command:
+  version:
+    updateGitTagRefs: true
+    linkToCommits: false # Gitea not support this
+    workspaceChangelog: true
+    # branch: master
+
+scripts:
+  lint:all:
+    run: melos run analyze && melos run format
+    description: Run all static analysis checks.
+  
+  test:all:
+    run: |
+      melos run test --no-select
+    description: |
+      Run all tests available.
+  
+  test:
+    run: |
+      melos exec -c 6 --fail-fast -- \
+        "flutter test --no-pub --no-test-assets"
+    description: Run `flutter test` for a specific package.
+    select-package:
+      dir-exists:
+        - test
+      ignore:
+        - "*web*"
+        - "*example*"
+
+  analyze:
+    run: |
+      melos exec -c 10 -- \
+        flutter analyze --fatal-infos      
+    description: Run `flutter analyze` for all packages.
+
+  format:
+    run: melos exec flutter format . --fix
+    description: Run `flutter format` for all packages.
+  
+  format-check:
+    run: melos exec flutter format . --set-exit-if-changed
+    description: Run `flutter format` checks for all packages.
+
+  clean:deep:
+    run: git clean -x -d -f -q
+    description: Clean things very deeply with `git clean`.
+  
+  # Additional cleanup lifecycle script, executed when `melos clean` is run.
+  postclean: >
+        melos exec -c 6 -- "flutter clean"

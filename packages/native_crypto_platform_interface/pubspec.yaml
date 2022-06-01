@@ -1,0 +1,25 @@
+name: native_crypto_platform_interface
+description: A common interface for NativeCrypto plugin.
+version: 0.1.1
+
+environment:
+  sdk: ">=2.17.0 <3.0.0"
+  flutter: ">=2.5.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  plugin_platform_interface: ^2.1.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  mockito: ^5.2.0
+
+  wyatt_analysis:
+    git:
+      url: https://git.wyatt-studio.fr/Wyatt-FOSS/wyatt-packages
+      ref: wyatt_analysis-v2.1.0
+      path: packages/wyatt_analysis

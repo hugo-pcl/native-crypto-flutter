@@ -1,0 +1,17 @@
+kind: pipeline
+type: docker
+name: default
+
+steps:
+- name: test:all
+  image: cirrusci/flutter:stable
+  commands:
+    - PATH=$PATH:$HOME/.pub-cache/bin
+    - flutter doctor
+    - flutter pub global activate melos
+    - melos bs
+    - melos run test:all
+
+trigger:
+  branch:
+  - master

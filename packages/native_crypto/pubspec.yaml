@@ -1,0 +1,52 @@
+name: native_crypto
+description: Fast and secure cryptography for Flutter.
+version: 0.1.1
+
+publish_to: 'none'
+
+environment:
+  sdk: ">=2.17.0 <3.0.0"
+  flutter: ">=2.5.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  native_crypto_android:
+    git:
+      url: https://github.com/hugo-pcl/native-crypto-flutter.git
+      ref: native_crypto_android-v0.1.1
+      path: packages/native_crypto_android
+  
+  native_crypto_ios:
+    git:
+      url: https://github.com/hugo-pcl/native-crypto-flutter.git
+      ref: native_crypto_ios-v0.1.1
+      path: packages/native_crypto_ios
+
+  native_crypto_platform_interface:
+    git:
+      url: https://github.com/hugo-pcl/native-crypto-flutter.git
+      ref: native_crypto_platform_interface-v0.1.1
+      path: packages/native_crypto_platform_interface
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  mockito: ^5.2.0
+  plugin_platform_interface: ^2.1.2
+
+  wyatt_analysis:
+    git:
+      url: https://git.wyatt-studio.fr/Wyatt-FOSS/wyatt-packages
+      ref: wyatt_analysis-v2.1.0
+      path: packages/wyatt_analysis
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        default_package: native_crypto_android
+      ios:
+        default_package: native_crypto_ios

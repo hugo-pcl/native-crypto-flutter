@@ -1,0 +1,22 @@
+name: native_crypto_ios
+description: iOS implementation of NativeCrypto
+version: 0.1.1
+
+environment:
+  sdk: ">=2.15.0 <3.0.0"
+  flutter: ">=2.5.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  plugin:
+    implements: native_crypto
+    platforms:
+      ios:
+        pluginClass: NativeCryptoIosPlugin
