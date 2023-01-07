@@ -1,43 +1,26 @@
 name: NativeCrypto
-# repository: https://git.pointcheval.fr/NativeCrypto/native-crypto-flutter
 
 packages:
   - packages/**
 
 command:
+  bootstrap:
+    usePubspecOverrides: true
+  
   version:
     updateGitTagRefs: true
-    linkToCommits: false # Gitea not support this
+    linkToCommits: false # Gitea not yet supported
     workspaceChangelog: true
-    # branch: master
+    branch: master
 
 scripts:
   lint:all:
     run: melos run analyze && melos run format
     description: Run all static analysis checks.
-  
-  test:all:
-    run: |
-      melos run test --no-select
-    description: |
-      Run all tests available.
-  
-  test:
-    run: |
-      melos exec -c 6 --fail-fast -- \
-        "flutter test --no-pub --no-test-assets"
-    description: Run `flutter test` for a specific package.
-    select-package:
-      dir-exists:
-        - test
-      ignore:
-        - "*web*"
-        - "*example*"
 
   analyze:
     run: |
-      melos exec -c 10 -- \
-        flutter analyze --fatal-infos      
+            melos exec -c 1 -- flutter analyze --fatal-infos
     description: Run `flutter analyze` for all packages.
 
   format:
@@ -51,6 +34,32 @@ scripts:
   clean:deep:
     run: git clean -x -d -f -q
     description: Clean things very deeply with `git clean`.
+
+  test:selective_unit_test:
+    run: melos exec -- flutter test --no-pub --coverage
+    description: Run Flutter tests for a specific package in this project.
+    select-package:
+      dir-exists:
+        - test
+      ignore:
+        - '*example*'
+
+  test:all:
+    run: melos run test:selective_unit_test --no-select
+    description: Run all Flutter tests in this project.
+
+  quality-check:
+    run: |
+      melos clean && \
+      melos bootstrap && \
+      melos run test:all      
+    description: Run all targets generally expected in CI for a full local quality check.
+
+  publish:validate:
+    run: melos publish --diff="origin/$DRONE_COMMIT_BRANCH...HEAD" --yes
+  
+  # publish:
+  #   run: melos publish --diff="origin/$DRONE_COMMIT_BRANCH...HEAD" --no-dry-run --yes
   
   # Additional cleanup lifecycle script, executed when `melos clean` is run.
   postclean: >

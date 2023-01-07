@@ -3,15 +3,18 @@ type: docker
 name: default
 
 steps:
-- name: test:all
-  image: cirrusci/flutter:stable
+- name: quality-check
+  image: git.wyatt-studio.fr/wyatt-foss/flutter-melos:2.9.0
   commands:
-    - PATH=$PATH:$HOME/.pub-cache/bin
-    - flutter doctor
-    - flutter pub global activate melos
-    - melos bs
-    - melos run test:all
+  - melos run quality-check
+  - melos run publish:validate
+- name: publish
+  image: git.wyatt-studio.fr/wyatt-foss/flutter-melos:2.9.0
+  commands:
+  - melos run publish:validate
 
 trigger:
   branch:
   - master
+  event:
+  - push
