@@ -1,0 +1,29 @@
+@startuml digest_dss
+
+actor user
+participant Flutter as flt
+participant Sha256 as sha
+participant HmacSha256 as hmac
+participant NativeCrypto as nc
+
+user -> flt : getDigest("sha256")
+flt -> sha : getInstance()
+sha --> flt : Sha256
+flt --> user : Sha256
+
+user -> sha : digest(data)
+sha --> nc : hash(data, "sha256")
+nc --> sha : digest
+sha --> user : digest
+
+user -> flt : getDigest("hmacSha256")
+flt -> hmac : getInstance()
+hmac --> flt : HmacSha256
+flt --> user : HmacSha256
+
+user -> hmac : digest(data)
+hmac --> nc : hmac(data, key, "sha256")
+nc --> hmac : digest
+hmac --> user : digest
+
+@enduml

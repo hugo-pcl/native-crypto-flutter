@@ -1,0 +1,20 @@
+@startuml kdf_dss
+
+actor user
+participant Pbkdf2 as kdf
+participant NativeCrypto as nc
+
+user -> kdf: new(hash, iterations, salt, length)
+kdf--> user : Pbkdf2
+
+user -> kdf: derive(password)
+kdf--> nc : pbkdf2(password, hash, iterations, salt, length)
+nc --> kdf: Uint8List(length)
+kdf--> user : SecretKey
+
+user -> kdf : verify(password, key)
+kdf--> nc : pbkdf2(password, hash, iterations, salt, length)
+nc --> kdf: Uint8List(length)
+kdf--> user : bool
+
+@enduml

@@ -1,0 +1,40 @@
+@startuml key_classes
+
+abstract class ByteArray {
+    bytes : Uint8List
+    length : int
+
+    fromList(list: List<int> )
+    fromLength(length: int, {fill: int = 0})
+    fromUtf16(encoded: String)
+    fromUtf8(encoded: String)
+    fromBase64(encoded: String)
+    fromBase16(encoded: String)
+
+    toList() : List<int>
+    toUtf16() : String
+    toUtf8() : String
+    toBase64() : String
+    toBase16() : String
+
+}
+
+abstract class Key extends ByteArray {
+    fromList(list: List<int> )
+    fromUtf16(encoded: String)
+    fromUtf8(encoded: String)
+    fromBase64(encoded: String)
+    fromBase16(encoded: String)
+}
+
+class SecretKey extends Key {
+    fromList(list: List<int>)
+    fromUtf16(encoded: String)
+    fromUtf8(encoded: String)
+    fromBase64(encoded: String)
+    fromBase16(encoded: String)
+    
+    async fromSecureRandom(bytes: int)
+}
+
+@enduml

@@ -1,0 +1,44 @@
+@startuml aes_dss
+
+actor user
+participant AES as aes
+participant CipherText as ct
+participant CipherChunk as cc
+participant NativeCrypto as nc
+
+user -> aes : new(key: SecretKey, mode: Mode, padding: Padding, chunkSize: int)
+activate aes
+aes --> user : AES
+user -> aes : encrypt(plainText: Uint8List)
+
+loop for each chunk in plainText
+    aes -> nc : encrypt(chunk: Uint8List, key: Uint8List, "aes/gcm/NoPadding")
+    nc --> aes : Uint8List
+    aes -> cc : new(chunk: Uint8List)
+    cc --> aes : CipherChunk
+end
+
+aes -> ct : new(chunks: List<CipherChunk>)
+ct --> aes : CipherText
+aes --> user : CipherText
+
+user -> aes : decrypt(cipherText: CipherText)
+loop for each chunk in cipherText.chunks
+    aes -> nc : decrypt(chunk: Uint8List, key: Uint8List, "aes/gcm/NoPadding")
+    nc --> aes : Uint8List
+    aes --> aes : concat Uint8List
+end
+
+aes --> user : Uint8List
+
+user -> aes : encryptFile(plainTextFile: File, cipherTextFile: File)
+aes -> nc : encryptFile(plainTextFile: File, cipherTextFile: File, key: Uint8List, "aes/gcm/NoPadding")
+nc --> aes : void
+aes --> user : void
+
+user -> aes : decryptFile(cipherTextFile: File, plainTextFile: File)
+aes -> nc : decryptFile(cipherTextFile: File, plainTextFile: File, key: Uint8List, "aes/gcm/NoPadding")
+nc --> aes : void
+aes --> user : void
+
+@enduml

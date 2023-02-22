@@ -1,0 +1,25 @@
+@startuml aes_classes
+
+abstract class Cipher<T extends CipherChunk> {
+    encrypt(plainText: Uint8List): CipherText<T>
+    decrypt(cipherText: CipherText<T>): Uint8List
+    encryptFile(plainTextFile: Path, cipherTextFile: Path)
+    decryptFile(cipherTextFile: Path, plainTextFile: Path)
+}
+
+class AES extends Cipher {
+    key: SecretKey
+    mode: AESMode
+    padding: Padding
+    chunkSize: int
+
+    encrypt(plainText: Uint8List): CipherText<AESCipherChunk>
+    decrypt(cipherText: CipherText<AESCipherChunk>): Uint8List
+    encryptFile(plainTextFile: Path, cipherTextFile: Path)
+    decryptFile(cipherTextFile: Path, plainTextFile: Path)
+
+    encryptWithIV(plainText: Uint8List, iv: Uint8List): AESCipherChunk
+    decryptWithIV(cipherChunk: AESCipherChunk, iv: Uint8List): Uint8List
+}
+
+@enduml

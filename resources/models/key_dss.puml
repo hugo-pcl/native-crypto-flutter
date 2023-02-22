@@ -1,0 +1,17 @@
+@startuml key_dss
+
+actor user
+participant SecretKey as sk
+participant SecureRandom as rand
+participant NativeCrypto as nc
+
+user -> sk : fromSecureRandom(32)
+sk -> rand : new()
+rand --> sk : SecureRandom
+sk -> rand : generate(32)
+rand -> nc : generateRandomBytes(32)
+nc --> rand : Uint8List(32)
+rand --> sk : Uint8List(32)
+sk --> user : SecretKey
+
+@enduml

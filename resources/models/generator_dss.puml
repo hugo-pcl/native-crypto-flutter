@@ -1,0 +1,15 @@
+@startuml generator_dss
+
+actor user
+participant SecureRandom as rand
+participant NativeCrypto as nc
+
+user -> rand : new()
+rand --> user : SecureRandom
+
+user -> rand : generate(32)
+rand -> nc : generateRandomBytes(32)
+nc --> rand : Uint8List(32)
+rand --> user : Uint8List(32)
+
+@enduml

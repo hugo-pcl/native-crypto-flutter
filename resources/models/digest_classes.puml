@@ -1,0 +1,25 @@
+@startuml digest_classes
+
+abstract class Hash {
+    digest(data: Uint8List): Uint8List
+}
+
+abstract class Hmac {
+    digest(data: Uint8List, key: Uint8List): Uint8List
+}
+
+Hmac o-- Hash
+
+class Sha256 extends Hash {
+    static instance: Sha256
+}
+
+class Sha512 extends Hash {
+    static instance: Sha512
+}
+
+class HmacSha256 extends Hmac {
+    static instance: HmacSha256
+}
+
+@enduml

@@ -1,0 +1,9 @@
+@startuml generator_classes
+
+abstract class Random {
+    generate(bytes: int): Uint8List
+}
+
+class SecureRandom extends Random {}
+
+@enduml

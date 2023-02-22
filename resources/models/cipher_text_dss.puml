@@ -1,0 +1,19 @@
+@startuml cipher_text_dss
+
+actor user
+participant CipherText as ct
+participant CipherChunk as cc
+
+user -> ct : new(bytes)
+loop for each chunk
+    ct -> cc : new(bytes)
+    cc --> ct
+end
+ct --> user : CipherText
+
+user -> ct : new(bytes, chunkSize: bytes.length)
+ct -> cc : new(bytes)
+cc --> ct
+ct --> user : CipherText
+
+@enduml

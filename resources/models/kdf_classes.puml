@@ -1,0 +1,17 @@
+@startuml kdf_classes
+
+abstract class KeyDerivationFunction {
+    derive(keyMaterial: Uint8List) : Uint8List
+    verify(keyMaterial: Uint8List, expected: Uint8List) : bool
+}
+
+class PBKDF2 extends KeyDerivationFunction {
+    hashAlgorithm: Hash
+    iterations: int
+    salt: Uint8List
+    length: int
+
+    call({password: String}) : SecretKey
+}
+
+@enduml

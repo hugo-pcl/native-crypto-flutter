@@ -1,0 +1,63 @@
+@startuml cipher_text_classes
+
+abstract class ByteArray {
+    bytes : Uint8List
+    length : int
+
+    ByteArray(bytes: Uint8List)
+
+    fromList(list: List<int>)
+    fromLength(length: int, {fill: int = 0})
+    fromUtf16(encoded: String)
+    fromUtf8(encoded: String)
+    fromBase64(encoded: String)
+    fromBase16(encoded: String)
+
+    toList() : List<int>
+    toUtf16() : String
+    toUtf8() : String
+    toBase64() : String
+    toBase16() : String
+}
+
+class CipherChunk extends ByteArray {
+    CipherChunk(bytes: Uint8List)
+
+    fromList(list: List<int>)
+    fromUtf16(encoded: String)
+    fromUtf8(encoded: String)
+    fromBase64(encoded: String)
+    fromBase16(encoded: String)
+}
+
+class CipherText<T extends CipherChunk> extends ByteArray {
+    chunkSize : int
+    chunks : List<T>
+
+    CipherText(bytes: Uint8List, {chunkSize: int = 33554432})
+
+    fromList(list: List<int>)
+    fromUtf16(encoded: String)
+    fromUtf8(encoded: String)
+    fromBase64(encoded: String)
+    fromBase16(encoded: String)
+
+    toList() : List<int>
+    toUtf16() : String
+    toUtf8() : String
+    toBase64() : String
+    toBase16() : String
+
+    fromChunks(chunks: List<T>)
+    toChunks() : List<T>
+    toBytes() : Uint8List
+}
+
+class AESCipherChunk extends CipherChunk {
+    iv : Uint8List
+    message : Uint8List
+    tag : Uint8List
+}
+
+
+@enduml
