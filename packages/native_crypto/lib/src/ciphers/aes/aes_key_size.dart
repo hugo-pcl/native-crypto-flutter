@@ -1,17 +1,19 @@
-// Author: Hugo Pointcheval
-// Email: git@pcl.ovh
-// -----
-// File: aes_key_size.dart
-// Created Date: 23/05/2022 22:10:07
-// Last Modified: 26/05/2022 18:45:01
-// -----
-// Copyright (c) 2022
+// Copyright 2019-2023 Hugo Pointcheval
+// 
+// Use of this source code is governed by an MIT-style
+// license that can be found in the LICENSE file or at
+// https://opensource.org/licenses/MIT.
 
-/// Defines all available key sizes.
+/// {@template aes_key_size}
+/// Defines the key size of an AES cipher.
+/// {@endtemplate}
 enum AESKeySize {
   bits128(128),
   bits192(192),
   bits256(256);
+
+  /// {@macro aes_key_size}
+  const AESKeySize(this.bits);
 
   /// Returns the number of bits supported by an [AESKeySize].
   static final List<int> supportedSizes = [128, 192, 256];
@@ -21,6 +23,4 @@ enum AESKeySize {
 
   /// Returns the number of bytes in this [AESKeySize].
   int get bytes => bits ~/ 8;
-
-  const AESKeySize(this.bits);
 }

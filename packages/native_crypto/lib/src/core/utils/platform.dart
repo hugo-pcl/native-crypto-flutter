@@ -4,8 +4,6 @@
 // license that can be found in the LICENSE file or at
 // https://opensource.org/licenses/MIT.
 
-/// Padding used for AES encryption.
-enum AESPadding {
-  /// No padding.
-  none,
-}
+import 'package:native_crypto_platform_interface/native_crypto_platform_interface.dart';
+
+NativeCryptoPlatform platform = NativeCryptoPlatform.instance;

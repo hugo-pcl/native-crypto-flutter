@@ -1,11 +1,11 @@
-// Author: Hugo Pointcheval
-// Email: git@pcl.ovh
-// -----
-// File: core.dart
-// Created Date: 23/05/2022 23:05:26
-// Last Modified: 26/05/2022 17:10:25
-// -----
-// Copyright (c) 2022
+// Copyright 2019-2023 Hugo Pointcheval
+//
+// Use of this source code is governed by an MIT-style
+// license that can be found in the LICENSE file or at
+// https://opensource.org/licenses/MIT.
 
-export 'cipher_text.dart';
-export 'cipher_text_wrapper.dart';
+export './constants/constants.dart';
+export './enums/enums.dart';
+export './extensions/extensions.dart';
+export './utils/utils.dart';
+export 'utils/platform.dart';

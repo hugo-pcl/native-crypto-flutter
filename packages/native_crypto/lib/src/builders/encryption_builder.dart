@@ -12,42 +12,43 @@ import 'package:native_crypto/src/core/utils/cipher_text.dart';
 import 'package:native_crypto/src/domain/cipher.dart';
 import 'package:native_crypto/src/domain/cipher_chunk.dart';
 
-/// {@template decryption_builder}
-/// A [StatelessWidget] that builds a [FutureBuilder] that will decrypt a
-/// [CipherText] using a [Cipher].
+/// {@template encryption_builder}
+/// A [StatelessWidget] that builds a [FutureBuilder] that will
+/// encrypt a [Uint8List] using a [Cipher].
 /// {@endtemplate}
-class DecryptionBuilder<T extends CipherChunk> extends StatelessWidget {
-  /// {@macro decryption_builder}
-  const DecryptionBuilder({
+class EncryptionBuilder<T extends CipherChunk> extends StatelessWidget {
+  /// {@macro encryption_builder}
+  const EncryptionBuilder({
     required this.cipher,
-    required this.cipherText,
+    required this.plainText,
     required this.onLoading,
     required this.onError,
     required this.onSuccess,
     super.key,
   });
 
-  /// The [Cipher] that will be used to decrypt the [CipherText].
+  /// The [Cipher] that will be used to encrypt the [Uint8List].
   final Cipher<T> cipher;
 
-  /// The [CipherText] that will be decrypted.
-  final CipherText<T> cipherText;
+  /// The [Uint8List] that will be encrypted.
+  final Uint8List plainText;
 
-  /// The [Widget] that will be displayed while the [CipherText] is being
-  /// decrypted.
+  /// The [Widget] that will be displayed while the [Uint8List] is being
+  /// encrypted.
   final Widget Function(BuildContext context) onLoading;
 
-  /// The [Widget] that will be displayed if an error occurs while decrypting
-  /// the [CipherText].
+  /// The [Widget] that will be displayed if an error occurs while encrypting
+  /// the [Uint8List].
   final Widget Function(BuildContext context, Object error) onError;
 
-  /// The [Widget] that will be displayed once the [CipherText] has been
-  /// decrypted.
-  final Widget Function(BuildContext context, Uint8List plainText) onSuccess;
+  /// The [Widget] that will be displayed once the [Uint8List] has been
+  /// encrypted.
+  final Widget Function(BuildContext context, CipherText<T> cipherText)
+      onSuccess;
 
   @override
-  Widget build(BuildContext context) => FutureBuilder<Uint8List>(
-        future: cipher.decrypt(cipherText),
+  Widget build(BuildContext context) => FutureBuilder<CipherText<T>>(
+        future: cipher.encrypt(plainText),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return onSuccess(context, snapshot.data!);

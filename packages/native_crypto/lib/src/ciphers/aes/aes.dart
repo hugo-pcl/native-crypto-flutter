@@ -1,181 +1,300 @@
-// Author: Hugo Pointcheval
-// Email: git@pcl.ovh
-// -----
-// File: aes.dart
-// Created Date: 16/12/2021 16:28:00
-// Last Modified: 27/05/2022 12:13:28
-// -----
-// Copyright (c) 2022
+// Copyright 2019-2023 Hugo Pointcheval
+//
+// Use of this source code is governed by an MIT-style
+// license that can be found in the LICENSE file or at
+// https://opensource.org/licenses/MIT.
 
+import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:native_crypto/src/ciphers/aes/aes_cipher_chunk.dart';
 import 'package:native_crypto/src/ciphers/aes/aes_key_size.dart';
 import 'package:native_crypto/src/ciphers/aes/aes_mode.dart';
 import 'package:native_crypto/src/ciphers/aes/aes_padding.dart';
-import 'package:native_crypto/src/core/cipher_text.dart';
-import 'package:native_crypto/src/core/cipher_text_wrapper.dart';
-import 'package:native_crypto/src/interfaces/cipher.dart';
+import 'package:native_crypto/src/core/constants/constants.dart';
+import 'package:native_crypto/src/core/extensions/uint8_list_extension.dart';
+import 'package:native_crypto/src/core/utils/cipher_text.dart';
+import 'package:native_crypto/src/core/utils/platform.dart';
+import 'package:native_crypto/src/domain/cipher.dart';
 import 'package:native_crypto/src/keys/secret_key.dart';
-import 'package:native_crypto/src/platform.dart';
-import 'package:native_crypto/src/utils/cipher_algorithm.dart';
-import 'package:native_crypto/src/utils/extensions.dart';
 import 'package:native_crypto_platform_interface/native_crypto_platform_interface.dart';
 
+export 'aes_cipher_chunk.dart';
 export 'aes_key_size.dart';
 export 'aes_mode.dart';
 export 'aes_padding.dart';
 
-/// An AES cipher.
+/// {@template aes}
+/// AES cipher.
 ///
-/// [AES] is a [Cipher] that can be used to encrypt or decrypt data.
-class AES implements Cipher {
-  final SecretKey _key;
+/// [AES] is a symmetric cipher which means that the same key is used to encrypt
+/// and decrypt the data.
+/// {@endtemplate}
+class AES implements Cipher<AESCipherChunk> {
+  const AES({
+    required this.key,
+    required this.mode,
+    required this.padding,
+    this.chunkSize = Constants.defaultChunkSize,
+  });
+
+  static const String _algorithm = 'aes';
+
+  /// The key used to encrypt and decrypt the data.
+  final SecretKey key;
+
+  /// The [AESMode] used by this [AES].
   final AESMode mode;
+
+  /// The [AESPadding] used by this [AES].
   final AESPadding padding;
 
-  @override
-  CipherAlgorithm get algorithm => CipherAlgorithm.aes;
+  /// The size of the cipher text chunks.
+  final int chunkSize;
 
-  AES(SecretKey key, [this.mode = AESMode.gcm, this.padding = AESPadding.none])
-      : _key = key {
-    if (!AESKeySize.supportedSizes.contains(key.bitLength)) {
-      throw NativeCryptoException(
-        message: 'Invalid key size! '
-            'Expected: ${AESKeySize.supportedSizes.join(', ')} bits',
-        code: NativeCryptoExceptionCode.invalid_key_length.code,
+  @override
+  Future<Uint8List> decrypt(CipherText<AESCipherChunk> cipherText) async {
+    final BytesBuilder plainText = BytesBuilder(copy: false);
+    final chunks = cipherText.chunks;
+
+    int i = 0;
+    for (final chunk in chunks) {
+      plainText.add(await _decryptChunk(chunk.bytes, count: i++));
+    }
+
+    return plainText.toBytes();
+  }
+
+  @override
+  Future<void> decryptFile(File cipherTextFile, File plainTextFile) {
+    if (!cipherTextFile.existsSync()) {
+      throw ArgumentError.value(
+        cipherTextFile.path,
+        'cipherTextFile.path',
+        'File does not exist!',
+      );
+    }
+
+    if (plainTextFile.existsSync()) {
+      throw ArgumentError.value(
+        plainTextFile.path,
+        'plainTextFile.path',
+        'File already exists!',
+      );
+    }
+
+    return platform.decryptFile(
+      cipherTextPath: cipherTextFile.path,
+      plainTextPath: plainTextFile.path,
+      key: key.bytes,
+      algorithm: _algorithm,
+    );
+  }
+
+  @override
+  Future<CipherText<AESCipherChunk>> encrypt(Uint8List plainText) async {
+    final chunks = <AESCipherChunk>[];
+    final chunkedPlainText = plainText.chunked(chunkSize);
+
+    int i = 0;
+    for (final plainTextChunk in chunkedPlainText) {
+      final bytes = await _encryptChunk(plainTextChunk, count: i++);
+      chunks.add(
+        AESCipherChunk(
+          bytes,
+          ivLength: mode.ivLength,
+          tagLength: mode.tagLength,
+        ),
+      );
+    }
+
+    return CipherText.fromChunks(
+      chunks,
+      chunkFactory: (bytes) => AESCipherChunk(
+        bytes,
+        ivLength: mode.ivLength,
+        tagLength: mode.tagLength,
+      ),
+      chunkSize: chunkSize,
+    );
+  }
+
+  @override
+  Future<void> encryptFile(File plainTextFile, File cipherTextFile) {
+    if (!plainTextFile.existsSync()) {
+      throw ArgumentError.value(
+        plainTextFile.path,
+        'plainTextFile.path',
+        'File does not exist!',
+      );
+    }
+
+    if (cipherTextFile.existsSync()) {
+      throw ArgumentError.value(
+        cipherTextFile.path,
+        'cipherTextFile.path',
+        'File already exists!',
+      );
+    }
+
+    return platform.encryptFile(
+      plainTextPath: plainTextFile.path,
+      cipherTextPath: cipherTextFile.path,
+      key: key.bytes,
+      algorithm: _algorithm,
+    );
+  }
+
+  /// Encrypts the [plainText] with the [iv] chosen by the Flutter side.
+  ///
+  /// Prefer using [encrypt] instead which will generate a
+  /// random [iv] on the native side.
+  ///
+  /// Note: this method doesn't chunk the data. It can lead to memory issues
+  /// if the [plainText] is too big. Use [encrypt] instead.
+  Future<AESCipherChunk> encryptWithIV(
+    Uint8List plainText,
+    Uint8List iv,
+  ) async {
+    // Check if the cipher is correctly initialized
+    _isCorrectlyInitialized();
+
+    if (iv.length != mode.ivLength) {
+      throw ArgumentError.value(
+        iv.length,
+        'iv.length',
+        'Invalid iv length! '
+            'Expected: ${mode.ivLength}',
+      );
+    }
+
+    final bytes = await platform.encryptWithIV(
+      plainText: plainText,
+      iv: iv,
+      key: key.bytes,
+      algorithm: _algorithm,
+    );
+
+    // TODO(hpcl): move these checks to the platform interface
+    if (bytes == null) {
+      throw const NativeCryptoException(
+        code: NativeCryptoExceptionCode.nullError,
+        message: 'Platform returned null bytes',
+      );
+    }
+
+    if (bytes.isEmpty) {
+      throw const NativeCryptoException(
+        code: NativeCryptoExceptionCode.invalidData,
+        message: 'Platform returned no data',
+      );
+    }
+
+    return AESCipherChunk(
+      bytes,
+      ivLength: mode.ivLength,
+      tagLength: mode.tagLength,
+    );
+  }
+
+  /// Ensures that the cipher is correctly initialized.
+  bool _isCorrectlyInitialized() {
+    final keySize = key.length * 8;
+    if (!AESKeySize.supportedSizes.contains(keySize)) {
+      throw ArgumentError.value(
+        keySize,
+        'keySize',
+        'Invalid key size! '
+            'Expected: ${AESKeySize.supportedSizes.join(', ')}',
       );
     }
 
     if (!mode.supportedPaddings.contains(padding)) {
-      throw NativeCryptoException(
-        message: 'Invalid padding! '
+      throw ArgumentError.value(
+        padding,
+        'padding',
+        'Invalid padding! '
             'Expected: ${mode.supportedPaddings.join(', ')}',
-        code: NativeCryptoExceptionCode.invalid_padding.code,
       );
     }
+
+    return true;
   }
 
-  Future<Uint8List> _decrypt(
-    CipherText cipherText, {
-    int chunkCount = 0,
+  /// Encrypts the plain text chunk.
+  Future<Uint8List> _encryptChunk(Uint8List plainChunk, {int count = 0}) async {
+    // Check if the cipher is correctly initialized
+    _isCorrectlyInitialized();
+
+    Uint8List? bytes;
+
+    try {
+      bytes = await platform.encrypt(
+        plainChunk,
+        key: key.bytes,
+        algorithm: _algorithm,
+      );
+    } on NativeCryptoException catch (e) {
+      throw e.copyWith(
+        message: 'Failed to encrypt chunk #$count: ${e.message}',
+      );
+    }
+
+    // TODO(hpcl): move these checks to the platform interface
+    if (bytes == null) {
+      throw NativeCryptoException(
+        code: NativeCryptoExceptionCode.nullError,
+        message: 'Platform returned null bytes on chunk #$count',
+      );
+    }
+
+    if (bytes.isEmpty) {
+      throw NativeCryptoException(
+        code: NativeCryptoExceptionCode.invalidData,
+        message: 'Platform returned no data on chunk #$count',
+      );
+    }
+
+    return bytes;
+  }
+
+  /// Decrypts the cipher text chunk.
+  Future<Uint8List> _decryptChunk(
+    Uint8List cipherChunk, {
+    int count = 0,
   }) async {
-    Uint8List? decrypted;
+    // Check if the cipher is correctly initialized
+    _isCorrectlyInitialized();
+
+    Uint8List? bytes;
 
     try {
-      decrypted = await platform.decrypt(
-        cipherText.bytes,
-        _key.bytes,
-        algorithm.name,
+      bytes = await platform.decrypt(
+        cipherChunk,
+        key: key.bytes,
+        algorithm: _algorithm,
       );
-    } catch (e, s) {
+    } on NativeCryptoException catch (e) {
+      throw e.copyWith(
+        message: 'Failed to decrypt chunk #$count: ${e.message}',
+      );
+    }
+
+    // TODO(hpcl): move these checks to the platform interface
+    if (bytes == null) {
       throw NativeCryptoException(
-        message: '$e',
-        code: NativeCryptoExceptionCode.platform_throws.code,
-        stackTrace: s,
+        code: NativeCryptoExceptionCode.nullError,
+        message: 'Platform returned null bytes on chunk #$count',
       );
     }
 
-    if (decrypted.isNull) {
+    if (bytes.isEmpty) {
       throw NativeCryptoException(
-        message: 'Platform returned null when decrypting chunk #$chunkCount',
-        code: NativeCryptoExceptionCode.platform_returned_null.code,
-      );
-    } else if (decrypted!.isEmpty) {
-      throw NativeCryptoException(
-        message: 'Platform returned no data when decrypting chunk #$chunkCount',
-        code: NativeCryptoExceptionCode.platform_returned_empty_data.code,
-      );
-    } else {
-      return decrypted;
-    }
-  }
-
-  Future<CipherText> _encrypt(Uint8List data, {int chunkCount = 0}) async {
-    Uint8List? encrypted;
-
-    try {
-      encrypted = await platform.encrypt(
-        data,
-        _key.bytes,
-        algorithm.name,
-      );
-    } catch (e, s) {
-      throw NativeCryptoException(
-        message: '$e on chunk #$chunkCount',
-        code: NativeCryptoExceptionCode.platform_throws.code,
-        stackTrace: s,
+        code: NativeCryptoExceptionCode.invalidData,
+        message: 'Platform returned no data on chunk #$count',
       );
     }
 
-    if (encrypted.isNull) {
-      throw NativeCryptoException(
-        message: 'Platform returned null when encrypting chunk #$chunkCount',
-        code: NativeCryptoExceptionCode.platform_returned_null.code,
-      );
-    } else if (encrypted!.isEmpty) {
-      throw NativeCryptoException(
-        message: 'Platform returned no data when encrypting chunk #$chunkCount',
-        code: NativeCryptoExceptionCode.platform_returned_empty_data.code,
-      );
-    } else {
-      try {
-        return CipherText.fromBytes(
-          encrypted,
-          ivLength: 12,
-          messageLength: encrypted.length - 28,
-          tagLength: 16,
-          cipherAlgorithm: CipherAlgorithm.aes,
-        );
-      } on NativeCryptoException catch (e, s) {
-        throw NativeCryptoException(
-          message: '${e.message} on chunk #$chunkCount',
-          code: e.code,
-          stackTrace: s,
-        );
-      }
-    }
-  }
-
-  @override
-  Future<Uint8List> decrypt(CipherTextWrapper cipherText) async {
-    final BytesBuilder decryptedData = BytesBuilder(copy: false);
-
-    if (cipherText.isList) {
-      int chunkCount = 0;
-      for (final CipherText chunk in cipherText.list) {
-        decryptedData.add(await _decrypt(chunk, chunkCount: chunkCount++));
-      }
-    } else {
-      decryptedData.add(await _decrypt(cipherText.single));
-    }
-
-    return decryptedData.toBytes();
-  }
-
-  @override
-  Future<CipherTextWrapper> encrypt(Uint8List data) async {
-    if (data.isEmpty) {
-      return CipherTextWrapper.empty();
-    }
-    CipherTextWrapper cipherTextWrapper;
-    Uint8List dataToEncrypt;
-    final int chunkNb = (data.length / Cipher.bytesCountPerChunk).ceil();
-
-    if (chunkNb > 1) {
-      cipherTextWrapper = CipherTextWrapper.empty();
-      for (var i = 0; i < chunkNb; i++) {
-        dataToEncrypt = i < (chunkNb - 1)
-            ? data.sublist(
-                i * Cipher.bytesCountPerChunk,
-                (i + 1) * Cipher.bytesCountPerChunk,
-              )
-            : data.sublist(i * Cipher.bytesCountPerChunk);
-        cipherTextWrapper.add(await _encrypt(dataToEncrypt, chunkCount: i));
-      }
-    } else {
-      cipherTextWrapper = CipherTextWrapper.single(await _encrypt(data));
-    }
-
-    return cipherTextWrapper;
+    return bytes;
   }
 }

@@ -1,0 +1,8 @@
+# melos_managed_dependency_overrides: native_crypto_android,native_crypto_ios,native_crypto_platform_interface,native_crypto_web
+dependency_overrides:
+  native_crypto_android:
+    path: ../native_crypto_android
+  native_crypto_ios:
+    path: ../native_crypto_ios
+  native_crypto_platform_interface:
+    path: ../native_crypto_platform_interface

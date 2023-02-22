@@ -1,1 +1,1 @@
-include: package:wyatt_analysis/analysis_options.flutter.experimental.yaml
+include: package:wyatt_analysis/analysis_options.flutter.yaml

@@ -1,11 +1,8 @@
-// Author: Hugo Pointcheval
-// Email: git@pcl.ovh
-// -----
-// File: native_crypto.dart
-// Created Date: 16/12/2021 16:28:00
-// Last Modified: 26/05/2022 12:10:42
-// -----
-// Copyright (c) 2021
+// Copyright 2019-2023 Hugo Pointcheval
+//
+// Use of this source code is governed by an MIT-style
+// license that can be found in the LICENSE file or at
+// https://opensource.org/licenses/MIT.
 
 /// Fast and powerful cryptographic functions
 /// thanks to javax.crypto, CommonCrypto and CryptoKit.
@@ -13,18 +10,13 @@
 /// Author: Hugo Pointcheval
 library native_crypto;
 
-export 'package:native_crypto_platform_interface/src/utils/exception.dart';
+export 'package:native_crypto_platform_interface/src/core/exceptions/exception.dart';
 
 export 'src/builders/builders.dart';
 export 'src/ciphers/ciphers.dart';
 export 'src/core/core.dart';
-export 'src/interfaces/interfaces.dart';
-export 'src/kdf/kdf.dart';
-export 'src/keys/keys.dart';
-// Utils
-export 'src/utils/cipher_algorithm.dart';
-export 'src/utils/hash_algorithm.dart';
-export 'src/utils/kdf_algorithm.dart';
-
-// ignore: constant_identifier_names
-const String AUTHOR = 'Hugo Pointcheval';
+export 'src/digest/digest.dart';
+export 'src/domain/domain.dart';
+export 'src/kdf/pbkdf2.dart';
+export 'src/keys/secret_key.dart';
+export 'src/random/secure_random.dart';

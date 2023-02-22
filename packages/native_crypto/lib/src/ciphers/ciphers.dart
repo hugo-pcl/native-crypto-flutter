@@ -1,10 +1,7 @@
-// Author: Hugo Pointcheval
-// Email: git@pcl.ovh
-// -----
-// File: ciphers.dart
-// Created Date: 23/05/2022 22:56:30
-// Last Modified: 23/05/2022 22:56:47
-// -----
-// Copyright (c) 2022
+// Copyright 2019-2023 Hugo Pointcheval
+//
+// Use of this source code is governed by an MIT-style
+// license that can be found in the LICENSE file or at
+// https://opensource.org/licenses/MIT.
 
 export 'aes/aes.dart';
