@@ -1,5 +1,12 @@
+/*
+ * Copyright 2019-2023 Hugo Pointcheval
+ * 
+ * Use of this source code is governed by an MIT-style
+ * license that can be found in the LICENSE file or at
+ * https://opensource.org/licenses/MIT.
+ */
 <p align="center">
-<img width="700px" src="resources/native_crypto.png" style="background-color: rgb(255,255,255)">
+<img width="700px" src="resources/native_crypto.png" style="background-color: rgb(255, 255, 255)">
 <h5 align="center">Fast and powerful cryptographic functions for Flutter.</h5>
 </p>
 
@@ -131,3 +138,21 @@ Then, you can decrypt your message.
 ```dart
 Uint8List message = await cipher.decrypt(wrapper);
 ```
+
+## Development
+
+### Android
+
+> https://docs.flutter.dev/development/packages-and-plugins/developing-packages#step-2b-add-android-platform-code-ktjava
+
+* Launch Android Studio.
+* Select Open an existing Android Studio Project in the Welcome to Android Studio dialog, or select File > Open from the menu, and select the `packages/native_crypto/example/android/build.gradle` file.
+* In the Gradle Sync dialog, select OK.
+* In the Android Gradle Plugin Update dialog, select Don’t remind me again for this project.
+
+### iOS
+
+> https://docs.flutter.dev/development/packages-and-plugins/developing-packages#step-2c-add-ios-platform-code-swifthm
+
+* Launch Xcode.
+* Select File > Open, and select the `packages/native_crypto/example/ios/Runner.xcworkspace` file.
