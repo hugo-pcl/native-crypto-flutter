@@ -7,19 +7,19 @@ environment:
   flutter: ">=2.5.0"
 
 dependencies:
-  flutter:
-    sdk: flutter
+  equatable: ^2.0.5
+  flutter: { sdk: flutter }
 
   plugin_platform_interface: ^2.1.3
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
+  flutter_test: { sdk: flutter }
 
   mockito: ^5.3.2
+  pigeon: ^9.0.0
 
   wyatt_analysis:
     hosted:
       url: https://git.wyatt-studio.fr/api/packages/Wyatt-FOSS/pub/
       name: wyatt_analysis
-    version: 2.3.0
+    version: 2.4.0

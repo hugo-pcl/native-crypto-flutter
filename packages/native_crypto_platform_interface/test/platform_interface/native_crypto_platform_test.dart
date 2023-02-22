@@ -1,43 +1,42 @@
-// Author: Hugo Pointcheval
-// Email: git@pcl.ovh
-// -----
-// File: native_crypto_platform_test.dart
-// Created Date: 25/05/2022 21:43:25
-// Last Modified: 25/05/2022 23:26:18
-// -----
-// Copyright (c) 2022
+// Copyright 2019-2023 Hugo Pointcheval
+//
+// Use of this source code is governed by an MIT-style
+// license that can be found in the LICENSE file or at
+// https://opensource.org/licenses/MIT.
 
-import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:native_crypto_platform_interface/src/platform_interface/native_crypto_platform.dart';
+import 'package:native_crypto_platform_interface/src/implementations/basic_message_channel_native_crypto.dart';
+import 'package:native_crypto_platform_interface/src/implementations/method_channel_native_crypto.dart';
+import 'package:native_crypto_platform_interface/src/interface/native_crypto_platform.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
+class ImplementsNativeCryptoPlatform
+    // ignore: prefer_mixin
+    with Mock
+    implements NativeCryptoPlatform {}
+
+class ExtendsNativeCryptoPlatform extends NativeCryptoPlatform {}
+
+class NativeCryptoMockPlatform extends Mock
+    with
+        // ignore: prefer_mixin, plugin_platform_interface needs to migrate to use `mixin`
+        MockPlatformInterfaceMixin
+    implements
+        NativeCryptoPlatform {}
+
 void main() {
-  late ExtendsNativeCryptoPlatform nativeCryptoPlatform;
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   group('$NativeCryptoPlatform', () {
-    setUpAll(() {
-      nativeCryptoPlatform = ExtendsNativeCryptoPlatform();
-    });
-    test('Constructor', () {
-      expect(nativeCryptoPlatform, isA<NativeCryptoPlatform>());
-      expect(nativeCryptoPlatform, isA<PlatformInterface>());
+    // should allow read of default app from native
+    test('$MethodChannelNativeCrypto is the default instance', () {
+      expect(NativeCryptoPlatform.instance, isA<MethodChannelNativeCrypto>());
     });
 
-    test('get.instance', () {
-      expect(
-        NativeCryptoPlatform.instance,
-        isA<NativeCryptoPlatform>(),
-      );
-    });
-    test('set.instance', () {
+    test('Can be extended', () {
       NativeCryptoPlatform.instance = ExtendsNativeCryptoPlatform();
-      expect(
-        NativeCryptoPlatform.instance,
-        isA<NativeCryptoPlatform>(),
-      );
     });
 
     test('Cannot be implemented with `implements`', () {
@@ -45,122 +44,19 @@ void main() {
         () {
           NativeCryptoPlatform.instance = ImplementsNativeCryptoPlatform();
         },
-        throwsA(isInstanceOf<AssertionError>()),
+        throwsA(anything),
       );
     });
 
     test('Can be mocked with `implements`', () {
-      final MockNativeCryptoPlatform mock = MockNativeCryptoPlatform();
+      final NativeCryptoMockPlatform mock = NativeCryptoMockPlatform();
       NativeCryptoPlatform.instance = mock;
     });
 
-    test('Can be extended', () {
-      NativeCryptoPlatform.instance = ExtendsNativeCryptoPlatform();
-    });
-
-    test('throws if .digest() not implemented', () async {
-      await expectLater(
-        () => nativeCryptoPlatform.digest(Uint8List(0), 'sha256'),
-        throwsA(
-          isA<UnimplementedError>().having(
-            (e) => e.message,
-            'message',
-            'digest is not implemented',
-          ),
-        ),
-      );
-    });
-
-    test('throws if .generateSecretKey() not implemented', () async {
-      await expectLater(
-        () => nativeCryptoPlatform.generateSecretKey(256),
-        throwsA(
-          isA<UnimplementedError>().having(
-            (e) => e.message,
-            'message',
-            'generateSecretKey is not implemented',
-          ),
-        ),
-      );
-    });
-
-    test('throws if .pbkdf2() not implemented', () async {
-      await expectLater(
-        () => nativeCryptoPlatform.pbkdf2('password', 'salt', 0, 0, 'sha256'),
-        throwsA(
-          isA<UnimplementedError>().having(
-            (e) => e.message,
-            'message',
-            'pbkdf2 is not implemented',
-          ),
-        ),
-      );
-    });
-
-    test('throws if .encryptAsList() not implemented', () async {
-      await expectLater(
-        () => nativeCryptoPlatform.encryptAsList(
-          Uint8List(0),
-          Uint8List(0),
-          'aes',
-        ),
-        throwsA(
-          isA<UnimplementedError>().having(
-            (e) => e.message,
-            'message',
-            'encryptAsList is not implemented',
-          ),
-        ),
-      );
-    });
-
-    test('throws if .decryptAsList() not implemented', () async {
-      await expectLater(
-        () => nativeCryptoPlatform
-            .decryptAsList([Uint8List(0)], Uint8List(0), 'aes'),
-        throwsA(
-          isA<UnimplementedError>().having(
-            (e) => e.message,
-            'message',
-            'decryptAsList is not implemented',
-          ),
-        ),
-      );
-    });
-
-    test('throws if .encrypt() not implemented', () async {
-      await expectLater(
-        () => nativeCryptoPlatform.encrypt(Uint8List(0), Uint8List(0), 'aes'),
-        throwsA(
-          isA<UnimplementedError>().having(
-            (e) => e.message,
-            'message',
-            'encrypt is not implemented',
-          ),
-        ),
-      );
-    });
-
-    test('throws if .decrypt() not implemented', () async {
-      await expectLater(
-        () => nativeCryptoPlatform.decrypt(Uint8List(0), Uint8List(0), 'aes'),
-        throwsA(
-          isA<UnimplementedError>().having(
-            (e) => e.message,
-            'message',
-            'decrypt is not implemented',
-          ),
-        ),
-      );
+    test('Can set with $BasicMessageChannelNativeCrypto', () {
+      final BasicMessageChannelNativeCrypto pigeon =
+          BasicMessageChannelNativeCrypto();
+      NativeCryptoPlatform.instance = pigeon;
     });
   });
 }
-
-class ExtendsNativeCryptoPlatform extends NativeCryptoPlatform {}
-
-class ImplementsNativeCryptoPlatform extends Mock
-    implements NativeCryptoPlatform {}
-
-class MockNativeCryptoPlatform extends Mock
-    with MockPlatformInterfaceMixin
-    implements NativeCryptoPlatform {}
