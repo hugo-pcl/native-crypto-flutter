@@ -6,13 +6,18 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:native_crypto_platform_interface/native_crypto_platform_interface.dart';
-import 'package:native_crypto_platform_interface/src/pigeon/messages.pigeon.dart';
 
 /// An implementation of [NativeCryptoPlatform] that uses Pigeon generated code.
 class BasicMessageChannelNativeCrypto extends NativeCryptoPlatform {
+  /// Creates a new instance of [BasicMessageChannelNativeCrypto].
+  ///
+  /// The [api] parameter permits to override the default Pigeon API used to
+  /// interact with the native platform. This is useful for testing.
+  BasicMessageChannelNativeCrypto({NativeCryptoAPI? api})
+      : api = api ?? NativeCryptoAPI();
+
   /// The Pigeon API used to interact with the native platform.
-  @visibleForTesting
-  NativeCryptoAPI api = NativeCryptoAPI();
+  final NativeCryptoAPI api;
 
   @override
   Future<Uint8List?> hash(Uint8List data, {required String algorithm}) async {

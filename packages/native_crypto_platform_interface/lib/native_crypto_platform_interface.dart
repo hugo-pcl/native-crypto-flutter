@@ -13,3 +13,5 @@ export 'src/core/exceptions/exception.dart';
 export 'src/implementations/basic_message_channel_native_crypto.dart';
 export 'src/implementations/method_channel_native_crypto.dart';
 export 'src/interface/native_crypto_platform.dart';
+export 'src/pigeon/messages.pigeon.dart';
+export 'src/pigeon/test_api.dart';
