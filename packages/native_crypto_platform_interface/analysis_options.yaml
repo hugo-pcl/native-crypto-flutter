@@ -1,6 +1,1 @@
 include: package:wyatt_analysis/analysis_options.flutter.yaml
-
-analyzer:
-  exclude:
-    - "**/*.pigeon.dart"
-    - "lib/src/pigeon/test_api.dart"

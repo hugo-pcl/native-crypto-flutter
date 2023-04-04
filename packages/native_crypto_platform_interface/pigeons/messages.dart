@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 // Copyright 2019-2023 Hugo Pointcheval
 //
 // Use of this source code is governed by an MIT-style
@@ -10,213 +9,80 @@ import 'package:pigeon/pigeon.dart';
 @ConfigurePigeon(
   PigeonOptions(
     copyrightHeader: 'pigeons/copyright_header.txt',
-    dartOut: 'lib/src/pigeon/messages.pigeon.dart',
+    dartOut: 'lib/src/gen/messages.g.dart',
     // We export in the lib folder to expose the class to other packages.
-    dartTestOut: 'lib/src/pigeon/test_api.dart',
-    javaOut:
-        '../native_crypto_android/android/src/main/java/fr/pointcheval/native_crypto_android/GeneratedAndroidNativeCrypto.java',
-    javaOptions: JavaOptions(
+    dartTestOut: 'lib/src/gen/test.g.dart',
+    kotlinOut:
+        '../native_crypto_android/android/src/main/kotlin/fr/pointcheval/native_crypto_android/Pigeon.kt',
+    kotlinOptions: KotlinOptions(
       package: 'fr.pointcheval.native_crypto_android',
-      className: 'GeneratedAndroidNativeCrypto',
     ),
-    objcHeaderOut: '../native_crypto_ios/ios/Classes/Public/messages.g.h',
-    objcSourceOut: '../native_crypto_ios/ios/Classes/messages.g.m',
+    swiftOut: '../native_crypto_ios/ios/Classes/messages.g.swift',
   ),
 )
-class HashRequest {
-  const HashRequest({
-    this.data,
-    this.algorithm,
-  });
-
-  final Uint8List? data;
-  final String? algorithm;
+enum HashAlgorithm {
+  sha256,
+  sha384,
+  sha512;
 }
 
-class HashResponse {
-  const HashResponse({
-    this.hash,
-  });
-
-  final Uint8List? hash;
-}
-
-class HmacRequest {
-  const HmacRequest({
-    this.data,
-    this.key,
-    this.algorithm,
-  });
-
-  final Uint8List? data;
-  final Uint8List? key;
-  final String? algorithm;
-}
-
-class HmacResponse {
-  const HmacResponse({
-    this.hmac,
-  });
-
-  final Uint8List? hmac;
-}
-
-class GenerateSecureRandomRequest {
-  const GenerateSecureRandomRequest({
-    this.length,
-  });
-
-  final int? length;
-}
-
-class GenerateSecureRandomResponse {
-  const GenerateSecureRandomResponse({
-    this.random,
-  });
-
-  final Uint8List? random;
-}
-
-class Pbkdf2Request {
-  const Pbkdf2Request({
-    this.password,
-    this.salt,
-    this.length,
-    this.iterations,
-    this.hashAlgorithm,
-  });
-
-  final Uint8List? password;
-  final Uint8List? salt;
-  final int? length;
-  final int? iterations;
-  final String? hashAlgorithm;
-}
-
-class Pbkdf2Response {
-  const Pbkdf2Response({
-    this.key,
-  });
-
-  final Uint8List? key;
-}
-
-class EncryptRequest {
-  const EncryptRequest({
-    this.plainText,
-    this.key,
-    this.algorithm,
-  });
-
-  final Uint8List? plainText;
-  final Uint8List? key;
-  final String? algorithm;
-}
-
-class EncryptResponse {
-  const EncryptResponse({
-    this.cipherText,
-  });
-
-  final Uint8List? cipherText;
-}
-
-class DecryptRequest {
-  const DecryptRequest({
-    this.cipherText,
-    this.key,
-    this.algorithm,
-  });
-
-  final Uint8List? cipherText;
-  final Uint8List? key;
-  final String? algorithm;
-}
-
-class DecryptResponse {
-  const DecryptResponse({
-    this.plainText,
-  });
-
-  final Uint8List? plainText;
-}
-
-class EncryptFileRequest {
-  const EncryptFileRequest({
-    this.plainTextPath,
-    this.cipherTextPath,
-    this.key,
-    this.algorithm,
-  });
-
-  final String? plainTextPath;
-  final String? cipherTextPath;
-  final Uint8List? key;
-  final String? algorithm;
-}
-
-class EncryptFileResponse {
-  const EncryptFileResponse({
-    this.success,
-  });
-
-  final bool? success;
-}
-
-class DecryptFileRequest {
-  const DecryptFileRequest({
-    this.cipherTextPath,
-    this.plainTextPath,
-    this.key,
-    this.algorithm,
-  });
-
-  final String? cipherTextPath;
-  final String? plainTextPath;
-  final Uint8List? key;
-  final String? algorithm;
-}
-
-class DecryptFileResponse {
-  const DecryptFileResponse({
-    this.success,
-  });
-
-  final bool? success;
-}
-
-class EncryptWithIVRequest {
-  const EncryptWithIVRequest({
-    this.plainText,
-    this.iv,
-    this.key,
-    this.algorithm,
-  });
-
-  final Uint8List? plainText;
-  final Uint8List? iv;
-  final Uint8List? key;
-  final String? algorithm;
+enum CipherAlgorithm {
+  aes;
 }
 
 @HostApi(dartHostTestHandler: 'TestNativeCryptoAPI')
 abstract class NativeCryptoAPI {
-  HashResponse hash(HashRequest request);
-  HmacResponse hmac(HmacRequest request);
+  Uint8List? hash(Uint8List data, HashAlgorithm algorithm);
+  Uint8List? hmac(Uint8List data, Uint8List key, HashAlgorithm algorithm);
+  Uint8List? generateSecureRandom(int length);
 
-  GenerateSecureRandomResponse generateSecureRandom(
-    GenerateSecureRandomRequest request,
+  Uint8List? pbkdf2(
+    Uint8List password,
+    Uint8List salt,
+    int length,
+    int iterations,
+    HashAlgorithm algorithm,
   );
 
-  Pbkdf2Response pbkdf2(Pbkdf2Request request);
+  Uint8List? encrypt(
+    Uint8List plainText,
+    Uint8List key,
+    CipherAlgorithm algorithm,
+  );
 
-  EncryptResponse encrypt(EncryptRequest request);
+  Uint8List? encryptWithIV(
+    Uint8List plainText,
+    Uint8List iv,
+    Uint8List key,
+    CipherAlgorithm algorithm,
+  );
 
-  DecryptResponse decrypt(DecryptRequest request);
+  Uint8List? decrypt(
+    Uint8List cipherText,
+    Uint8List key,
+    CipherAlgorithm algorithm,
+  );
 
-  EncryptFileResponse encryptFile(EncryptFileRequest request);
+  bool? encryptFile(
+    String plainTextPath,
+    String cipherTextPath,
+    Uint8List key,
+    CipherAlgorithm algorithm,
+  );
 
-  DecryptFileResponse decryptFile(DecryptFileRequest request);
+  bool? encryptFileWithIV(
+    String plainTextPath,
+    String cipherTextPath,
+    Uint8List iv,
+    Uint8List key,
+    CipherAlgorithm algorithm,
+  );
 
-  EncryptResponse encryptWithIV(EncryptWithIVRequest request);
+  bool? decryptFile(
+    String cipherTextPath,
+    String plainTextPath,
+    Uint8List key,
+    CipherAlgorithm algorithm,
+  );
+
 }

@@ -7,7 +7,6 @@
 import 'dart:typed_data';
 
 import 'package:native_crypto_platform_interface/native_crypto_platform_interface.dart';
-import 'package:native_crypto_platform_interface/src/implementations/method_channel_native_crypto.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 /// The interface that implementations of native_crypto must implement.
@@ -24,11 +23,11 @@ abstract class NativeCryptoPlatform extends PlatformInterface {
 
   static final Object _token = Object();
 
-  static NativeCryptoPlatform _instance = MethodChannelNativeCrypto();
+  static NativeCryptoPlatform _instance = BasicMessageChannelNativeCrypto();
 
   /// The default instance of [NativeCryptoPlatform] to use.
   ///
-  /// Defaults to [MethodChannelNativeCrypto].
+  /// Defaults to [BasicMessageChannelNativeCrypto].
   static NativeCryptoPlatform get instance => _instance;
 
   /// Platform-specific plugins should set this with their own platform-specific
@@ -77,6 +76,18 @@ abstract class NativeCryptoPlatform extends PlatformInterface {
     throw UnimplementedError('encrypt is not implemented');
   }
 
+  /// Encrypts the given data using the given key, algorithm and iv.
+  ///
+  /// Users should use [encrypt] instead if they don't need to specify the iv.
+  Future<Uint8List?> encryptWithIV({
+    required Uint8List plainText,
+    required Uint8List iv,
+    required Uint8List key,
+    required String algorithm,
+  }) {
+    throw UnimplementedError('encryptWithIV is not implemented');
+  }
+
   /// Decrypts the given data using the given key and algorithm.
   Future<Uint8List?> decrypt(
     Uint8List cipherText, {
@@ -96,6 +107,20 @@ abstract class NativeCryptoPlatform extends PlatformInterface {
     throw UnimplementedError('encryptFile is not implemented');
   }
 
+  /// Encrypts the given file using the given key, algorithm and iv.
+  ///
+  /// Users should use [encryptFile] instead if they don't need to specify
+  /// the iv.
+  Future<bool?> encryptFileWithIV({
+    required String plainTextPath,
+    required String cipherTextPath,
+    required Uint8List iv,
+    required Uint8List key,
+    required String algorithm,
+  }) {
+    throw UnimplementedError('encryptFileWithIV is not implemented');
+  }
+
   /// Decrypts the given file using the given key and algorithm.
   Future<bool?> decryptFile({
     required String cipherTextPath,
@@ -104,17 +129,5 @@ abstract class NativeCryptoPlatform extends PlatformInterface {
     required String algorithm,
   }) {
     throw UnimplementedError('decryptFile is not implemented');
-  }
-
-  /// Encrypts the given data using the given key, algorithm and iv.
-  ///
-  /// Users should use [encrypt] instead if they don't need to specify the iv.
-  Future<Uint8List?> encryptWithIV({
-    required Uint8List plainText,
-    required Uint8List iv,
-    required Uint8List key,
-    required String algorithm,
-  }) {
-    throw UnimplementedError('encryptWithIV is not implemented');
   }
 }

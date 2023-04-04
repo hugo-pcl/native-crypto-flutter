@@ -4,18 +4,18 @@
 // license that can be found in the LICENSE file or at
 // https://opensource.org/licenses/MIT.
 
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:native_crypto_platform_interface/src/implementations/basic_message_channel_native_crypto.dart';
-import 'package:native_crypto_platform_interface/src/implementations/method_channel_native_crypto.dart';
 import 'package:native_crypto_platform_interface/src/interface/native_crypto_platform.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 class ImplementsNativeCryptoPlatform
     // ignore: prefer_mixin
-    with Mock
-    implements NativeCryptoPlatform {}
+    with
+        Mock
+    implements
+        NativeCryptoPlatform {}
 
 class ExtendsNativeCryptoPlatform extends NativeCryptoPlatform {}
 
@@ -31,10 +31,6 @@ void main() {
 
   group('$NativeCryptoPlatform', () {
     // should allow read of default app from native
-    test('$MethodChannelNativeCrypto is the default instance', () {
-      expect(NativeCryptoPlatform.instance, isA<MethodChannelNativeCrypto>());
-    });
-
     test('Can be extended', () {
       NativeCryptoPlatform.instance = ExtendsNativeCryptoPlatform();
     });

@@ -7,9 +7,5 @@
 /// The interface that implementations of native_crypto must implement.
 library native_crypto_platform_interface;
 
-export 'src/core/enums/exception_code.dart';
-export 'src/core/enums/methods.dart';
-export 'src/core/exceptions/exception.dart';
+export 'src/gen/messages.g.dart';
 export 'src/gen/test.g.dart';
-export 'src/implementations/basic_message_channel_native_crypto.dart';
-export 'src/interface/native_crypto_platform.dart';

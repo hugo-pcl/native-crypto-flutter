@@ -6,6 +6,8 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:native_crypto_platform_interface/native_crypto_platform_interface.dart';
+import 'package:native_crypto_platform_interface/src/core/utils/enum_parser.dart';
+import 'package:native_crypto_platform_interface/src/gen/messages.g.dart';
 
 /// An implementation of [NativeCryptoPlatform] that uses Pigeon generated code.
 class BasicMessageChannelNativeCrypto extends NativeCryptoPlatform {
@@ -22,14 +24,10 @@ class BasicMessageChannelNativeCrypto extends NativeCryptoPlatform {
   @override
   Future<Uint8List?> hash(Uint8List data, {required String algorithm}) async {
     try {
-      return api
-          .hash(
-            HashRequest(
-              data: data,
-              algorithm: algorithm,
-            ),
-          )
-          .then((value) => value.hash);
+      return api.hash(
+        data,
+        EnumParser.hashAlgorithmFromString(algorithm),
+      );
     } catch (e, s) {
       NativeCryptoException.convertPlatformException(e, s);
     }
@@ -42,15 +40,11 @@ class BasicMessageChannelNativeCrypto extends NativeCryptoPlatform {
     required String algorithm,
   }) async {
     try {
-      return api
-          .hmac(
-            HmacRequest(
-              data: data,
-              key: key,
-              algorithm: algorithm,
-            ),
-          )
-          .then((value) => value.hmac);
+      return api.hmac(
+        data,
+        key,
+        EnumParser.hashAlgorithmFromString(algorithm),
+      );
     } catch (e, s) {
       NativeCryptoException.convertPlatformException(e, s);
     }
@@ -59,13 +53,7 @@ class BasicMessageChannelNativeCrypto extends NativeCryptoPlatform {
   @override
   Future<Uint8List?> generateSecureRandom(int length) async {
     try {
-      return api
-          .generateSecureRandom(
-            GenerateSecureRandomRequest(
-              length: length,
-            ),
-          )
-          .then((value) => value.random);
+      return api.generateSecureRandom(length);
     } catch (e, s) {
       NativeCryptoException.convertPlatformException(e, s);
     }
@@ -80,17 +68,13 @@ class BasicMessageChannelNativeCrypto extends NativeCryptoPlatform {
     required String hashAlgorithm,
   }) async {
     try {
-      return api
-          .pbkdf2(
-            Pbkdf2Request(
-              password: password,
-              salt: salt,
-              length: length,
-              iterations: iterations,
-              hashAlgorithm: hashAlgorithm,
-            ),
-          )
-          .then((value) => value.key);
+      return api.pbkdf2(
+        password,
+        salt,
+        length,
+        iterations,
+        EnumParser.hashAlgorithmFromString(hashAlgorithm),
+      );
     } catch (e, s) {
       NativeCryptoException.convertPlatformException(e, s);
     }
@@ -103,82 +87,11 @@ class BasicMessageChannelNativeCrypto extends NativeCryptoPlatform {
     required String algorithm,
   }) async {
     try {
-      return api
-          .encrypt(
-            EncryptRequest(
-              plainText: plainText,
-              key: key,
-              algorithm: algorithm,
-            ),
-          )
-          .then((value) => value.cipherText);
-    } catch (e, s) {
-      NativeCryptoException.convertPlatformException(e, s);
-    }
-  }
-
-  @override
-  Future<Uint8List?> decrypt(
-    Uint8List cipherText, {
-    required Uint8List key,
-    required String algorithm,
-  }) async {
-    try {
-      return api
-          .decrypt(
-            DecryptRequest(
-              cipherText: cipherText,
-              key: key,
-              algorithm: algorithm,
-            ),
-          )
-          .then((value) => value.plainText);
-    } catch (e, s) {
-      NativeCryptoException.convertPlatformException(e, s);
-    }
-  }
-
-  @override
-  Future<bool?> encryptFile({
-    required String plainTextPath,
-    required String cipherTextPath,
-    required Uint8List key,
-    required String algorithm,
-  }) async {
-    try {
-      return api
-          .encryptFile(
-            EncryptFileRequest(
-              plainTextPath: plainTextPath,
-              cipherTextPath: cipherTextPath,
-              key: key,
-              algorithm: algorithm,
-            ),
-          )
-          .then((value) => value.success);
-    } catch (e, s) {
-      NativeCryptoException.convertPlatformException(e, s);
-    }
-  }
-
-  @override
-  Future<bool?> decryptFile({
-    required String cipherTextPath,
-    required String plainTextPath,
-    required Uint8List key,
-    required String algorithm,
-  }) async {
-    try {
-      return api
-          .decryptFile(
-            DecryptFileRequest(
-              cipherTextPath: cipherTextPath,
-              plainTextPath: plainTextPath,
-              key: key,
-              algorithm: algorithm,
-            ),
-          )
-          .then((value) => value.success);
+      return api.encrypt(
+        plainText,
+        key,
+        EnumParser.cipherAlgorithmFromString(algorithm),
+      );
     } catch (e, s) {
       NativeCryptoException.convertPlatformException(e, s);
     }
@@ -192,16 +105,88 @@ class BasicMessageChannelNativeCrypto extends NativeCryptoPlatform {
     required String algorithm,
   }) async {
     try {
-      return api
-          .encryptWithIV(
-            EncryptWithIVRequest(
-              plainText: plainText,
-              iv: iv,
-              key: key,
-              algorithm: algorithm,
-            ),
-          )
-          .then((value) => value.cipherText);
+      return api.encryptWithIV(
+        plainText,
+        iv,
+        key,
+        EnumParser.cipherAlgorithmFromString(algorithm),
+      );
+    } catch (e, s) {
+      NativeCryptoException.convertPlatformException(e, s);
+    }
+  }
+
+  @override
+  Future<Uint8List?> decrypt(
+    Uint8List cipherText, {
+    required Uint8List key,
+    required String algorithm,
+  }) async {
+    try {
+      return api.decrypt(
+        cipherText,
+        key,
+        EnumParser.cipherAlgorithmFromString(algorithm),
+      );
+    } catch (e, s) {
+      NativeCryptoException.convertPlatformException(e, s);
+    }
+  }
+
+  @override
+  Future<bool?> encryptFile({
+    required String plainTextPath,
+    required String cipherTextPath,
+    required Uint8List key,
+    required String algorithm,
+  }) async {
+    try {
+      return api.encryptFile(
+        plainTextPath,
+        cipherTextPath,
+        key,
+        EnumParser.cipherAlgorithmFromString(algorithm),
+      );
+    } catch (e, s) {
+      NativeCryptoException.convertPlatformException(e, s);
+    }
+  }
+
+  @override
+  Future<bool?> encryptFileWithIV({
+    required String plainTextPath,
+    required String cipherTextPath,
+    required Uint8List iv,
+    required Uint8List key,
+    required String algorithm,
+  }) async {
+    try {
+      return api.encryptFileWithIV(
+        plainTextPath,
+        cipherTextPath,
+        iv,
+        key,
+        EnumParser.cipherAlgorithmFromString(algorithm),
+      );
+    } catch (e, s) {
+      NativeCryptoException.convertPlatformException(e, s);
+    }
+  }
+
+  @override
+  Future<bool?> decryptFile({
+    required String cipherTextPath,
+    required String plainTextPath,
+    required Uint8List key,
+    required String algorithm,
+  }) async {
+    try {
+      return api.decryptFile(
+        cipherTextPath,
+        plainTextPath,
+        key,
+        EnumParser.cipherAlgorithmFromString(algorithm),
+      );
     } catch (e, s) {
       NativeCryptoException.convertPlatformException(e, s);
     }
