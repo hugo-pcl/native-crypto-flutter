@@ -31,7 +31,8 @@ public class NativeCrypto: NSObject, NativeCryptoAPI {
     
     func generateSecureRandom(length: Int64) throws -> FlutterStandardTypedData? {
         let lengthInt = Int(truncatingIfNeeded: length)
-        let symmetricKey = SymmetricKey.init(size: SymmetricKeySize(bitCount: lengthInt / 8))
+        let bitCount = lengthInt * 8
+        let symmetricKey = SymmetricKey.init(size: SymmetricKeySize(bitCount: bitCount))
         let bytes = symmetricKey.withUnsafeBytes
         {
             return Data(Array($0))
