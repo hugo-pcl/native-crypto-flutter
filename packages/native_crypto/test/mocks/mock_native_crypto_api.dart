@@ -6,7 +6,7 @@
 
 import 'dart:typed_data';
 
-import 'package:native_crypto_platform_interface/native_crypto_platform_interface.dart';
+import 'package:native_crypto_platform_interface/native_crypto_platform_interface_gen.dart';
 
 class MockNativeCryptoAPI implements NativeCryptoAPI {
   static Uint8List? Function(int length)? generateSecureRandomFn;
@@ -41,6 +41,13 @@ class MockNativeCryptoAPI implements NativeCryptoAPI {
     String algorithm,
   )? encryptFn;
 
+  static Uint8List? Function(
+    Uint8List plainText,
+    Uint8List key,
+    Uint8List iv,
+    String algorithm,
+  )? encryptWithIVFn;
+
   static bool? Function(
     String plainTextPath,
     String cipherTextPath,
@@ -48,12 +55,13 @@ class MockNativeCryptoAPI implements NativeCryptoAPI {
     String algorithm,
   )? encryptFileFn;
 
-  static Uint8List? Function(
-    Uint8List plainText,
+  static bool? Function(
+    String plainTextPath,
+    String cipherTextPath,
     Uint8List key,
     Uint8List iv,
     String algorithm,
-  )? encryptWithIVFn;
+  )? encryptFileWithIVFn;
 
   static Uint8List? Function(
     Uint8List password,
@@ -64,130 +72,158 @@ class MockNativeCryptoAPI implements NativeCryptoAPI {
   )? pbkdf2Fn;
 
   @override
-  Future<DecryptResponse> decrypt(DecryptRequest argRequest) async =>
-      decryptFn != null
-          ? DecryptResponse(
-              plainText: decryptFn!(
-                argRequest.cipherText!,
-                argRequest.key!,
-                argRequest.algorithm!,
-              ),
-            )
-          : DecryptResponse(
-              plainText: Uint8List.fromList([1, 2, 3]),
-            );
+  Future<Uint8List?> decrypt(
+    Uint8List argCiphertext,
+    Uint8List argKey,
+    CipherAlgorithm argAlgorithm,
+  ) async {
+    if (decryptFn != null) {
+      return decryptFn!(argCiphertext, argKey, argAlgorithm.toString());
+    } else {
+      return Uint8List.fromList([1, 2, 3]);
+    }
+  }
 
   @override
-  Future<DecryptFileResponse> decryptFile(
-    DecryptFileRequest argRequest,
-  ) async =>
-      decryptFileFn != null
-          ? DecryptFileResponse(
-              success: decryptFileFn!(
-                argRequest.cipherTextPath!,
-                argRequest.plainTextPath!,
-                argRequest.key!,
-                argRequest.algorithm!,
-              ),
-            )
-          : DecryptFileResponse(success: true);
+  Future<bool?> decryptFile(
+    String argCiphertextpath,
+    String argPlaintextpath,
+    Uint8List argKey,
+    CipherAlgorithm argAlgorithm,
+  ) async {
+    if (decryptFileFn != null) {
+      return decryptFileFn!(
+        argCiphertextpath,
+        argPlaintextpath,
+        argKey,
+        argAlgorithm.toString(),
+      );
+    } else {
+      return Future.value(true);
+    }
+  }
 
   @override
-  Future<EncryptResponse> encrypt(EncryptRequest argRequest) async =>
-      encryptFn != null
-          ? EncryptResponse(
-              cipherText: encryptFn!(
-                argRequest.plainText!,
-                argRequest.key!,
-                argRequest.algorithm!,
-              ),
-            )
-          : EncryptResponse(
-              cipherText: Uint8List.fromList([1, 2, 3]),
-            );
+  Future<Uint8List?> encrypt(
+    Uint8List argPlaintext,
+    Uint8List argKey,
+    CipherAlgorithm argAlgorithm,
+  ) async {
+    if (encryptFn != null) {
+      return encryptFn!(argPlaintext, argKey, argAlgorithm.toString());
+    } else {
+      return Uint8List.fromList([1, 2, 3]);
+    }
+  }
 
   @override
-  Future<EncryptFileResponse> encryptFile(
-    EncryptFileRequest argRequest,
-  ) async =>
-      encryptFileFn != null
-          ? EncryptFileResponse(
-              success: encryptFileFn!(
-                argRequest.plainTextPath!,
-                argRequest.cipherTextPath!,
-                argRequest.key!,
-                argRequest.algorithm!,
-              ),
-            )
-          : EncryptFileResponse(success: true);
+  Future<bool?> encryptFile(
+    String argPlaintextpath,
+    String argCiphertextpath,
+    Uint8List argKey,
+    CipherAlgorithm argAlgorithm,
+  ) async {
+    if (encryptFileFn != null) {
+      return encryptFileFn!(
+        argPlaintextpath,
+        argCiphertextpath,
+        argKey,
+        argAlgorithm.toString(),
+      );
+    } else {
+      return Future.value(true);
+    }
+  }
 
   @override
-  Future<EncryptResponse> encryptWithIV(
-    EncryptWithIVRequest argRequest,
-  ) async =>
-      encryptWithIVFn != null
-          ? EncryptResponse(
-              cipherText: encryptWithIVFn!(
-                argRequest.plainText!,
-                argRequest.key!,
-                argRequest.iv!,
-                argRequest.algorithm!,
-              ),
-            )
-          : EncryptResponse(
-              cipherText: Uint8List.fromList([1, 2, 3]),
-            );
+  Future<bool?> encryptFileWithIV(
+    String argPlaintextpath,
+    String argCiphertextpath,
+    Uint8List argIv,
+    Uint8List argKey,
+    CipherAlgorithm argAlgorithm,
+  ) async {
+    if (encryptFileWithIVFn != null) {
+      return encryptFileWithIVFn!(
+        argPlaintextpath,
+        argCiphertextpath,
+        argKey,
+        argIv,
+        argAlgorithm.toString(),
+      );
+    } else {
+      return Future.value(true);
+    }
+  }
 
   @override
-  Future<GenerateSecureRandomResponse> generateSecureRandom(
-    GenerateSecureRandomRequest argRequest,
-  ) async =>
-      generateSecureRandomFn != null
-          ? GenerateSecureRandomResponse(
-              random: generateSecureRandomFn!(argRequest.length!),
-            )
-          : GenerateSecureRandomResponse(
-              random: Uint8List.fromList([1, 2, 3]),
-            );
+  Future<Uint8List?> encryptWithIV(
+    Uint8List argPlaintext,
+    Uint8List argIv,
+    Uint8List argKey,
+    CipherAlgorithm argAlgorithm,
+  ) async {
+    if (encryptWithIVFn != null) {
+      return encryptWithIVFn!(
+        argPlaintext,
+        argKey,
+        argIv,
+        argAlgorithm.toString(),
+      );
+    } else {
+      return Future.value(Uint8List.fromList([1, 2, 3]));
+    }
+  }
 
   @override
-  Future<HashResponse> hash(HashRequest argRequest) async => hashFn != null
-      ? HashResponse(
-          hash: hashFn!(
-            argRequest.data!,
-            argRequest.algorithm!,
-          ),
-        )
-      : HashResponse(
-          hash: Uint8List.fromList([1, 2, 3]),
-        );
+  Future<Uint8List?> generateSecureRandom(int argLength) {
+    if (generateSecureRandomFn != null) {
+      return Future.value(generateSecureRandomFn!(argLength));
+    } else {
+      return Future.value(Uint8List.fromList([1, 2, 3]));
+    }
+  }
 
   @override
-  Future<HmacResponse> hmac(HmacRequest argRequest) async => hmacFn != null
-      ? HmacResponse(
-          hmac: hmacFn!(
-            argRequest.data!,
-            argRequest.key!,
-            argRequest.algorithm!,
-          ),
-        )
-      : HmacResponse(
-          hmac: Uint8List.fromList([1, 2, 3]),
-        );
+  Future<Uint8List?> hash(Uint8List argData, HashAlgorithm argAlgorithm) {
+    if (hashFn != null) {
+      return Future.value(hashFn!(argData, argAlgorithm.toString()));
+    } else {
+      return Future.value(Uint8List.fromList([1, 2, 3]));
+    }
+  }
 
   @override
-  Future<Pbkdf2Response> pbkdf2(Pbkdf2Request argRequest) async =>
-      pbkdf2Fn != null
-          ? Pbkdf2Response(
-              key: pbkdf2Fn!(
-                argRequest.password!,
-                argRequest.salt!,
-                argRequest.iterations!,
-                argRequest.length!,
-                argRequest.hashAlgorithm!,
-              ),
-            )
-          : Pbkdf2Response(
-              key: Uint8List.fromList([1, 2, 3]),
-            );
+  Future<Uint8List?> hmac(
+    Uint8List argData,
+    Uint8List argKey,
+    HashAlgorithm argAlgorithm,
+  ) {
+    if (hmacFn != null) {
+      return Future.value(hmacFn!(argData, argKey, argAlgorithm.toString()));
+    } else {
+      return Future.value(Uint8List.fromList([1, 2, 3]));
+    }
+  }
+
+  @override
+  Future<Uint8List?> pbkdf2(
+    Uint8List argPassword,
+    Uint8List argSalt,
+    int argLength,
+    int argIterations,
+    HashAlgorithm argAlgorithm,
+  ) {
+    if (pbkdf2Fn != null) {
+      return Future.value(pbkdf2Fn!(
+        argPassword,
+        argSalt,
+        argIterations,
+        argLength,
+        argAlgorithm.toString(),
+      ),);
+    } else {
+      return Future.value(Uint8List.fromList([1, 2, 3]));
+    }
+  }
 }
