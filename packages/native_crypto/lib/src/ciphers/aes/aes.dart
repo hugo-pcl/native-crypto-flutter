@@ -288,13 +288,6 @@ class AES implements Cipher<AESCipherChunk> {
       );
     }
 
-    if (bytes.isEmpty) {
-      throw NativeCryptoException(
-        code: NativeCryptoExceptionCode.invalidData,
-        message: 'Platform returned no data on chunk #$count',
-      );
-    }
-
     return bytes;
   }
 }

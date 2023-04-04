@@ -6,8 +6,13 @@
 
 abstract class Constants {
   /// The default chunk size in bytes used for encryption and decryption.
+  /// 
+  /// ~32MB
   static const int defaultChunkSize = 33554432;
 
+  /// The length of the initialization vector in bytes used for AES GCM.
   static const int aesGcmNonceLength = 12;
+
+  /// The length of the tag in bytes used for AES GCM.
   static const int aesGcmTagLength = 16;
 }
