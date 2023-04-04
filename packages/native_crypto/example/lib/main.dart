@@ -3,23 +3,16 @@
 // -----
 // File: main.dart
 // Created Date: 27/12/2021 21:15:12
-// Last Modified: 28/12/2021 13:51:36
+// Last Modified: 10/01/2023 14:59:05
 // -----
 // Copyright (c) 2021
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:native_crypto_example/home.dart';
+import 'package:native_crypto_example/core/get_it.dart';
+import 'package:native_crypto_example/presentation/app/app.dart';
 
-void main() {
-  runApp(const ProviderScope(child: MyApp()));
-}
+Future<void> main() async {
+  await GetItInitializer.init();
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(home: Home());
-  }
+  runApp(App());
 }

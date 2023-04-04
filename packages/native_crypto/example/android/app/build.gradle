@@ -57,6 +57,7 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+    namespace 'fr.pointcheval.native_crypto_example'
 }
 
 flutter {

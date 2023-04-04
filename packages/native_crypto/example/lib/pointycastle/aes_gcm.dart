@@ -1,11 +1,8 @@
-// Author: Hugo Pointcheval
-// Email: git@pcl.ovh
-// -----
-// File: aes_gcm.dart
-// Created Date: 24/05/2022 16:34:54
-// Last Modified: 27/05/2022 17:36:31
-// -----
-// Copyright (c) 2022
+// Copyright 2019-2023 Hugo Pointcheval
+//
+// Use of this source code is governed by an MIT-style
+// license that can be found in the LICENSE file or at
+// https://opensource.org/licenses/MIT.
 
 // ignore_for_file: implementation_imports
 
@@ -69,7 +66,8 @@ class AesGcm {
 
       _secureRandom = FortunaRandom();
       _secureRandom!.seed(
-          KeyParameter(Platform.instance.platformEntropySource().getBytes(32)));
+        KeyParameter(Platform.instance.platformEntropySource().getBytes(32)),
+      );
     }
 
     // Use it to generate the random bytes
