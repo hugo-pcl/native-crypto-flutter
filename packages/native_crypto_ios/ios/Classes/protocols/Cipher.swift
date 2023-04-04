@@ -8,9 +8,8 @@
 import Foundation
 
 protocol Cipher {
-    var algorithm: CipherAlgorithm { get }
-    func encrypt(data: Data, key: Data) throws -> Data
+    func encrypt(data: Data, key: Data, predefinedIV: Data?) throws -> Data
     func decrypt(data: Data, key: Data) throws -> Data
-    func encryptAsList(data: Data, key: Data) throws -> [Data]
-    func decryptAsList(data: [Data], key: Data) throws-> Data
+    func encryptFile(fileParameters: FileParameters, key: Data, predefinedIV: Data?) throws -> Bool
+    func decryptFile(fileParameters: FileParameters, key: Data) throws -> Bool
 }

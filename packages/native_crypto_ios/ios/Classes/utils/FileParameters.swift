@@ -6,3 +6,15 @@
 //
 
 import Foundation
+
+class FileParameters {
+    var inputPath: String
+    var outputPath: String
+
+    init(input: String, output: String) {
+        self.inputPath = input
+        self.outputPath = output
+    }
+    
+    
+}

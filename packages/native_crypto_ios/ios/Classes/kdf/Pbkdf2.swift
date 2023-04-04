@@ -9,45 +9,42 @@ import Foundation
 import CommonCrypto
 
 class Pbkdf2 : KeyDerivation {
-    var algorithm: KdfAlgorithm = KdfAlgorithm.pbkdf2
-    
-    var keyBytesCount: Int
+    var length: Int
     var iterations: Int
-    var hash: HashAlgorithm = HashAlgorithm.HashSHA256
+    var hashAlgorithm: HashAlgorithm
     
-    var password: String? = nil
-    var salt: String? = nil
+    var password: Data? = nil
+    var salt: Data? = nil
     
-    init(keyBytesCount: Int, iterations: Int) {
-        self.keyBytesCount = keyBytesCount
+    init(length: Int, iterations: Int, hashAlgorithm: HashAlgorithm) {
+        self.length = length
         self.iterations = iterations
+        self.hashAlgorithm = hashAlgorithm
     }
     
-    func initialize(password: String, salt: String) {
+    func initialize(password: Data, salt: Data) {
         self.password = password
         self.salt = salt
     }
     
-    func derive() throws -> SecretKey {
+    func derive() throws -> Data? {
         if (password == nil || salt == nil) {
-            throw NativeCryptoError.pbkdf2Error
+            throw NativeCryptoError.kdfError(reason: "Password and salt cannot be null.")
         }
         
-        let passwordData = password!.data(using: .utf8)!
-        let saltData = salt!.data(using: .utf8)!
-        
-        var derivedKeyData = Data(repeating: 0, count: keyBytesCount)
+        var derivedKeyData = Data(repeating: 0, count: length)
         let localDerivedKeyData = derivedKeyData
+        let identifier = HashAlgorithmParser.getPbkdf2Identifier(algorithm: hashAlgorithm)
         
         let status = derivedKeyData.withUnsafeMutableBytes { (derivedKeyBytes: UnsafeMutableRawBufferPointer) in
-            saltData.withUnsafeBytes { (saltBytes: UnsafeRawBufferPointer) in
+            salt!.withUnsafeBytes { (saltBytes: UnsafeRawBufferPointer) in
                 CCKeyDerivationPBKDF(
                     CCPBKDFAlgorithm(kCCPBKDF2),
-                    password,
-                    passwordData.count,
+                    (password! as NSData).bytes,
+                    password!.count,
                     saltBytes.bindMemory(to: UInt8.self).baseAddress,
-                    saltData.count,
-                    hash.pbkdf2identifier,
+                    salt!.count,
+                    identifier,
                     UInt32(iterations),
                     derivedKeyBytes.bindMemory(to: UInt8.self).baseAddress,
                     localDerivedKeyData.count)
@@ -55,9 +52,9 @@ class Pbkdf2 : KeyDerivation {
         }
         
         if (status != kCCSuccess) {
-            throw NativeCryptoError.pbkdf2Error
+            throw NativeCryptoError.kdfError()
         }
         
-        return SecretKey(derivedKeyData)
+        return derivedKeyData
     }
 }
