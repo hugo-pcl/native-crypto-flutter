@@ -8,8 +8,10 @@
 enum HashAlgorithm {
   /// The SHA-256 hash algorithm.
   sha256,
+
   /// The SHA-384 hash algorithm.
   sha384,
+
   /// The SHA-512 hash algorithm.
   sha512,
 }

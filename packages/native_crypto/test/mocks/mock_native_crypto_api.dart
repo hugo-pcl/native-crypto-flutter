@@ -215,13 +215,15 @@ class MockNativeCryptoAPI implements NativeCryptoAPI {
     HashAlgorithm argAlgorithm,
   ) {
     if (pbkdf2Fn != null) {
-      return Future.value(pbkdf2Fn!(
-        argPassword,
-        argSalt,
-        argIterations,
-        argLength,
-        argAlgorithm.toString(),
-      ),);
+      return Future.value(
+        pbkdf2Fn!(
+          argPassword,
+          argSalt,
+          argIterations,
+          argLength,
+          argAlgorithm.toString(),
+        ),
+      );
     } else {
       return Future.value(Uint8List.fromList([1, 2, 3]));
     }

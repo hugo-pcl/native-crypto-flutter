@@ -6,7 +6,7 @@
 
 abstract class Constants {
   /// The default chunk size in bytes used for encryption and decryption.
-  /// 
+  ///
   /// ~32MB
   static const int defaultChunkSize = 33554432;
 

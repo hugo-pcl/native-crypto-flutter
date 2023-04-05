@@ -8,10 +8,13 @@
 enum Encoding {
   /// UTF-8 encoding, as defined by the Unicode standard.
   utf8,
+
   /// UTF-16 encoding, as defined by the Unicode standard.
   utf16,
+
   /// Base64 encoding, as defined by RFC 4648.
   base64,
+
   /// Hexadecimal encoding.
   base16,
 }

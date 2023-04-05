@@ -1,10 +1,3 @@
-/*
- * Copyright 2019-2023 Hugo Pointcheval
- * 
- * Use of this source code is governed by an MIT-style
- * license that can be found in the LICENSE file or at
- * https://opensource.org/licenses/MIT.
- */
 <p align="center">
 <img width="700px" src="resources/native_crypto.png" style="background-color: rgb(255, 255, 255)">
 <h5 align="center">Fast and powerful cryptographic functions for Flutter.</h5>
@@ -42,6 +35,71 @@ For comparison, on a *iPhone 13*, you can encrypt/decrypt a message of **2MiB** 
 
 In short, NativeCrypto is incomparable with PointyCastle.
 
+## Features
+
+* Hash functions
+    - SHA-256
+    - SHA-384
+    - SHA-512
+* HMAC functions
+    - HMAC-SHA-256
+    - HMAC-SHA-384
+    - HMAC-SHA-512
+* Secure random
+* PBKDF2
+* AES
+    - Uint8List encryption/decryption
+    - File encryption/decryption
+
+## Quick start
+
+```dart
+import 'package:native_crypto/native_crypto.dart';
+
+Future<void> main() async {
+    // Message to encrypt
+    final Uint8List message = 'Hello World!'.toBytes();
+    
+    // Ask user for a password
+    final String password = await getPassword();
+
+    // Initialize a PBKDF2 object
+    final Pbkdf2 pbkdf2 = Pbkdf2(
+        length: 32, // 32 bytes
+        iterations: 1000,
+        salt: 'salt'.toBytes(),
+        hashAlgorithm: HashAlgorithm.sha256,
+    );
+    
+    // Derive a secret key from the password
+    final SecretKey secretKey = await pbkdf2(password: password);
+
+    // Initialize an AES cipher
+    final AES cipher = AES(
+        key: secretKey,
+        mode: AESMode.gcm,
+        padding: AESPadding.none,
+    );
+
+    // Encrypt the message
+    final CipherText<AESCipherChunk> cipherText = await cipher.encrypt(message);
+
+    // Decrypt the message
+    final Uint8List decryptedMessage = await cipher.decrypt(cipherText);
+
+    // Verify and print the decrypted message
+    assert(listEquals(message, decryptedMessage));
+    
+    print(decryptedMessage.toStr());
+}
+```
+
+Check the [example](./native_crypto/example) for a complete example.
+
+Please take a look a the compatibility table below to check if your target is supported.
+
+> Note: This **Flutter** example must run on a real device or a simulator.
+
 ## Usage
 
 First, check compatibility with your targets.
@@ -50,26 +108,42 @@ First, check compatibility with your targets.
 | --- | ------- | ----- | ----- | ------- | --- |
 | ✅  | ✅      | ❌     | ❌     | ❌      | ❌  |
 
+> Warning: NativeCrypto 0.2.0+ is not compatible with lower NativeCrypto versions. Especially, with NativeCrypto 0.0. X because the cipher mode is not the same. Now, NativeCrypto uses AES-GCM mode instead of AES-CBC mode. (See [Changelog](./CHANGELOG.md)) 
+
 #### Hash
 
-To digest a message, you can use the following function:
+To digest a message, you'll need to initialize a Hasher object implementing `Hash` . Then, you can digest your message.
 
 ```dart
-Uint8List hash = await HashAlgorithm.sha256.digest(message);
+Hash hasher = Sha256();
+Uint8List digest = await hasher.digest(message);
 ```
 
 > In NativeCrypto, you can use the following hash functions: SHA-256, SHA-384, SHA-512
 
-#### Keys
+#### HMAC
 
-You can build a `SecretKey` from a utf8, base64, base16 (hex) strings or raw bytes. You can also generate a SecretKey from secure random.
+To generate a HMAC, you'll need to initialize a `Hmac` object. Then, you can generate a HMAC from a message and a secret key.
 
 ```dart
-SecretKey secretKey = SecretKey(Uint8List.fromList([0x73, 0x65, 0x63, 0x72, 0x65, 0x74]));
+Hmac hmac = HmacSha256();
+Uint8List hmac = await hmac.digest(message, secretKey);
+```
+
+> In NativeCrypto, you can use the following HMAC functions: HMAC-SHA-256, HMAC-SHA-384, HMAC-SHA-512
+
+#### Keys
+
+You can build a `SecretKey` from utf8, utf16, base64, base16 (hex) strings, int list or raw bytes. You can also generate a SecretKey from secure random.
+
+```dart
+SecretKey secretKey = SecretKey(bytes); // bytes is a Uint8List
 SecretKey secretKey = SecretKey.fromUtf8('secret');
+SecretKet secretKey = SecretKey.fromUtf16('secret');
 SecretKey secretKey = SecretKey.fromBase64('c2VjcmV0');
 SecretKey secretKey = SecretKey.fromBase16('63657274');
-SecretKey secretKey = await SecretKey.fromSecureRandom(256);
+SecretKey secretKey = SecretKey.fromList([0x73, 0x65, 0x63, 0x72, 0x65, 0x74]);
+SecretKey secretKey = await SecretKey.fromSecureRandom(32); // 32 bytes
 ```
 
 #### Key derivation
@@ -79,20 +153,21 @@ You can derive a `SecretKey` using **PBKDF2**.
 First, you need to initialize a `Pbkdf2` object.
 
 ```dart
-Pbkdf2 pbkdf2 = Pbkdf2(
-    keyBytesCount: 32,
+final Pbkdf2 pbkdf2 = Pbkdf2(
+    length: 32, // 32 bytes
     iterations: 1000,
-    algorithm: HashAlgorithm.sha512,
+    salt: salt.toBytes(),
+    hashAlgorithm: HashAlgorithm.sha256,
 );
 ```
 
-Then, you can derive a `SecretKey` from a password and salt.
+Then, you can derive a `SecretKey` from a password.
 
 ```dart
-SecretKey secretKey = await pbkdf2.derive(password: password, salt: 'salt');
+SecretKey secretKey = await pbkdf2(password: password); 
 ```
 
-> In NativeCrypto, you can use the following key derivation function: PBKDF2
+> Note: Pbkdf2 is a callable class. You can use it like a function.
 
 #### Cipher
 
@@ -101,43 +176,78 @@ And now, you can use the `SecretKey` to encrypt/decrypt a message.
 First, you need to initialize a `Cipher` object.
 
 ```dart
-AES cipher = AES(secretKey);
+final AES cipher = AES(
+    key: key,
+    mode: AESMode.gcm,
+    padding: AESPadding.none,
+);
 ```
 
 Then, you can encrypt your message.
 
 ```dart
-CipherTextWrapper wrapper = await cipher.encrypt(message);
-
-CipherText cipherText = wrapper.unwrap<CipherText>();
-// same as
-CipherText cipherText = wrapper.single;
-
-// or
-
-List<CipherText> cipherTexts = wrapper.unwrap<List<CipherText>>();
-// same as
-List<CipherText> cipherTexts = wrapper.list;
+final CipherText<AESCipherChunk> cipherText = await cipher.encrypt(message); 
 ```
 
-After an encryption you obtain a `CipherTextWrapper` which contains `CipherText` or `List<CipherText>` depending on the message size. It's up to you to know how to unwrap the `CipherTextWrapper` depending the chunk size you configured.
+After an encryption you obtain a `CipherText` which contains chunks. You can get the underlying bytes with `cipherText.bytes` .
 
-Uppon receiving encrypted message, you can decrypt it.
-You have to reconstruct the wrapper before decrypting.
+Uppon receiving encrypted message `receivedData` , you can decrypt it.
+You have to reconstruct the ciphertext and the setup the chunk factory.
 
 ```dart
-CipherTextWrapper wrapper = CipherTextWrapper.fromBytes(
-    data,
-    ivLength: AESMode.gcm.ivLength,
-    tagLength: AESMode.gcm.tagLength,
-);
+final CipherText<AESCipherChunk> receivedCipherText CipherText(
+    receivedData,
+    chunkFactory: (bytes) => AESCipherChunk(
+        bytes,
+        ivLength: cipher.mode.ivLength,
+        tagLength: cipher.mode.tagLength,
+    ),
+),
 ```
 
 Then, you can decrypt your message.
 
 ```dart
-Uint8List message = await cipher.decrypt(wrapper);
+Uint8List message = await cipher.decrypt(receivedCipherText);
 ```
+
+#### Files
+
+You can encrypt/decrypt files.
+
+First, you need to initialize a `Cipher` object.
+
+```dart
+final AES cipher = AES(
+    key: key,
+    mode: AESMode.gcm,
+    padding: AESPadding.none,
+);
+```
+
+Then, you can encrypt your file.
+
+```dart
+await cipher.encryptFile(plainText, cipherText);
+```
+
+> Note: `plainText` and `cipherText` are `File` objects.
+
+You can decrypt your file.
+
+```dart
+await cipher.decryptFile(cipherText, plainText);
+```
+
+#### Advanced
+
+You can force the use of a specific IV. Please note that the IV must be unique for each encryption.
+
+```dart
+final CipherText<AESCipherChunk> cipherText = await cipher.encryptWithIV(message, iv);
+```
+
+⚠️ Use `encrypt(...)` instead of `encryptWithIV(...)` if you don't know what you are doing.
 
 ## Development
 

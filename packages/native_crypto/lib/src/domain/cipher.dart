@@ -16,6 +16,7 @@ import 'package:native_crypto/src/domain/cipher_chunk.dart';
 abstract class Cipher<T extends CipherChunk> {
   /// {@macro cipher}
   const Cipher();
+
   /// Encrypts a [Uint8List] and returns a [CipherText].
   Future<CipherText<T>> encrypt(Uint8List plainText);
 

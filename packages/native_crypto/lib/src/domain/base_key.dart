@@ -12,7 +12,7 @@ import 'package:native_crypto/src/domain/byte_array.dart';
 /// [BaseKey] is a [ByteArray] that can be used to store keys.
 ///
 /// This interface is implemented by all the key classes.
-/// 
+///
 /// Note: [BaseKey] is named [BaseKey] instead of Key to avoid conflicts with
 /// the Key class from Flutter.
 /// {@endtemplate}
