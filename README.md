@@ -102,13 +102,25 @@ Please take a look a the compatibility table below to check if your target is su
 
 ## Usage
 
+#### Compatibility
+
 First, check compatibility with your targets.
 
 | iOS | Android | MacOS | Linux | Windows | Web |
 | --- | ------- | ----- | ----- | ------- | --- |
 | ✅  | ✅      | ❌     | ❌     | ❌      | ❌  |
 
-> Warning: NativeCrypto 0.2.0+ is not compatible with lower NativeCrypto versions. Especially, with NativeCrypto 0.0. X because the cipher mode is not the same. Now, NativeCrypto uses AES-GCM mode instead of AES-CBC mode. (See [Changelog](./CHANGELOG.md)) 
+> Warning: NativeCrypto 0.2.0+ is not compatible with lower NativeCrypto versions. Especially, with NativeCrypto 0.0. X because the cipher mode is not the same. Now, NativeCrypto uses AES-GCM mode instead of AES-CBC mode. (See [Changelog](./CHANGELOG.md))
+
+NativeCrypto ciphertexts are formatted as follow:
+
+```
++------------------+--------------------+------------------+
+| Nonce (12 bytes) | Cipher text (n-28) |  Tag (16 bytes)  |
++------------------+--------------------+------------------+
+```
+
+> Warning: If your data comes from another source, make sur to use the same format.
 
 #### Hash
 
