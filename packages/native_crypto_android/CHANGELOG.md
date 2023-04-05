@@ -1,3 +1,10 @@
+## 0.1.2
+
+ - **FIX**: file encryption.
+ - **FEAT**: use kotlin pigeon generator.
+ - **FEAT**: generate pigeon messages.
+ - **DOCS**: update readmes/licences.
+
 ## 0.1.1
 
  - **REFACTOR**: clean and modernize kotlin code.

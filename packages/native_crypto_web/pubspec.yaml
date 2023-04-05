@@ -1,0 +1,40 @@
+name: native_crypto_web
+description: Web implementation of NativeCrypto
+version: 0.1.1
+
+publish_to: 'none'
+
+environment:
+  sdk: ">=2.15.1 <3.0.0"
+  flutter: ">=2.5.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+  
+  js: ^0.6.4
+  
+  native_crypto_platform_interface:
+    git:
+      url: https://github.com/hugo-pcl/native-crypto-flutter.git
+      ref: native_crypto_platform_interface-v0.2.0
+      path: packages/native_crypto_platform_interface
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  
+  wyatt_analysis:
+    git:
+      url: https://git.wyatt-studio.fr/Wyatt-FOSS/wyatt-packages
+      ref: wyatt_analysis-v2.1.0
+      path: packages/wyatt_analysis
+
+flutter:
+  plugin:
+    platforms:
+      web:
+        pluginClass: NativeCryptoWeb
+        fileName: native_crypto_web.dart

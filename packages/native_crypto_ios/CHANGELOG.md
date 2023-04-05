@@ -1,3 +1,11 @@
+## 0.1.2
+
+ - **REFACTOR**: remove useless lines/classes.
+ - **FIX**: key length in bits.
+ - **FEAT**: use swift pigeon generator.
+ - **FEAT**: generate pigeon messages.
+ - **DOCS**: update readmes/licences.
+
 ## 0.1.1
 
  - **REFACTOR**: rework swift part.

@@ -1,6 +1,6 @@
 name: native_crypto_ios
 description: iOS implementation of NativeCrypto
-version: 0.1.1
+version: 0.1.2
 
 environment:
   sdk: ">=2.15.0 <3.0.0"

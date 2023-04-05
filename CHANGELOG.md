@@ -3,6 +3,49 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2023-04-05
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - [`native_crypto_platform_interface` - `v0.2.0`](#native_crypto_platform_interface---v020)
+
+Packages with other changes:
+
+ - [`native_crypto_android` - `v0.1.2`](#native_crypto_android---v012)
+ - [`native_crypto_ios` - `v0.1.2`](#native_crypto_ios---v012)
+
+---
+
+#### `native_crypto_platform_interface` - `v0.2.0`
+
+ - **REFACTOR**: (WIP) optimize exceptions and bytearray.
+ - **FIX**: update verify function.
+ - **FEAT**: make api injectable for test.
+ - **FEAT**: add exception code for platform throw.
+ - **DOCS**: update readmes/licences.
+ - **BREAKING** **FEAT**: set pigeon as default implementation.
+ - **BREAKING** **FEAT**: add pigeon + add hmac + remove useless decryption method.
+
+#### `native_crypto_android` - `v0.1.2`
+
+ - **FIX**: file encryption.
+ - **FEAT**: use kotlin pigeon generator.
+ - **FEAT**: generate pigeon messages.
+ - **DOCS**: update readmes/licences.
+
+#### `native_crypto_ios` - `v0.1.2`
+
+ - **REFACTOR**: remove useless lines/classes.
+ - **FIX**: key length in bits.
+ - **FEAT**: use swift pigeon generator.
+ - **FEAT**: generate pigeon messages.
+ - **DOCS**: update readmes/licences.
+
+
 ## 2022-05-25
 
 ### Changes

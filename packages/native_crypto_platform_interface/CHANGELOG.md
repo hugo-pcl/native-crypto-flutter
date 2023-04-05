@@ -1,3 +1,15 @@
+## 0.2.0
+
+> Note: This release has breaking changes.
+
+ - **REFACTOR**: (WIP) optimize exceptions and bytearray.
+ - **FIX**: update verify function.
+ - **FEAT**: make api injectable for test.
+ - **FEAT**: add exception code for platform throw.
+ - **DOCS**: update readmes/licences.
+ - **BREAKING** **FEAT**: set pigeon as default implementation.
+ - **BREAKING** **FEAT**: add pigeon + add hmac + remove useless decryption method.
+
 ## 0.1.1
 
  - **PERF**: x10 perfomance improvement on android with better list management.

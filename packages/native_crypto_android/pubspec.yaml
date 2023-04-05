@@ -1,6 +1,6 @@
 name: native_crypto_android
 description: Android implementation of NativeCrypto
-version: 0.1.1
+version: 0.1.2
 
 environment:
   sdk: ">=2.15.1 <3.0.0"
