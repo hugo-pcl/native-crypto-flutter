@@ -15,7 +15,6 @@ public class HashAlgorithmParser {
         case .sha256: return SHA256.init()
         case .sha384: return SHA384.init()
         case .sha512: return SHA512.init()
-        @unknown default: fatalError("Unknown algorithm")
         }
     }
     
@@ -24,7 +23,6 @@ public class HashAlgorithmParser {
         case .sha256: return CCPBKDFAlgorithm(kCCPRFHmacAlgSHA256)
         case .sha384: return CCPBKDFAlgorithm(kCCPRFHmacAlgSHA384)
         case .sha512: return CCPBKDFAlgorithm(kCCPRFHmacAlgSHA512)
-        @unknown default: fatalError("Unknown algorithm")
         }
     }
 

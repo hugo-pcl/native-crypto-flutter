@@ -25,7 +25,6 @@ public class NativeCrypto: NSObject, NativeCryptoAPI {
         case .sha256: return FlutterStandardTypedData(bytes: Data(HMAC<SHA256>(key: symmetricKey).finalize()))
         case .sha384: return FlutterStandardTypedData(bytes: Data(HMAC<SHA384>(key: symmetricKey).finalize()))
         case .sha512: return FlutterStandardTypedData(bytes: Data(HMAC<SHA512>(key: symmetricKey).finalize()))
-        @unknown default: fatalError("Unknown algorithm")
         }
     }
     
