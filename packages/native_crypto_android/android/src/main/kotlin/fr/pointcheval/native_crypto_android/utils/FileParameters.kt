@@ -43,14 +43,15 @@ class FileParameters(ctx: Context, input: String, output: String) {
         }
     }
 
-    fun getFileOutputStream(): OutputStream? {
+    fun getFileOutputStream(append: Boolean): OutputStream? {
         val path = outputPath
         return try{
-            FileOutputStream(path)
+            FileOutputStream(path, append)
         } catch(e: IOException){
             val documentFile: DocumentFile = this.getDocumentFileByPath(path)
             val documentUri = documentFile.uri
-            context.contentResolver.openOutputStream(documentUri)
+            val mode = if(append) "wa" else "w"
+            context.contentResolver.openOutputStream(documentUri, mode)
         }
     }
 

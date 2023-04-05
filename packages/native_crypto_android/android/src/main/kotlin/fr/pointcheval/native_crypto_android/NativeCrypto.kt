@@ -111,7 +111,7 @@ class NativeCrypto(private val context: Context) : NativeCryptoAPI {
     ): Boolean {
         // For now, only AES is supported
         val aes = AES()
-        val params = FileParameters(context, plainTextPath, cipherTextPath)
+        val params = FileParameters(context, cipherTextPath, plainTextPath)
 
         return aes.decryptFile(params, key)
     }

@@ -2,6 +2,9 @@ package fr.pointcheval.native_crypto_android.ciphers
 
 import fr.pointcheval.native_crypto_android.interfaces.Cipher
 import fr.pointcheval.native_crypto_android.utils.FileParameters
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
+import javax.crypto.CipherInputStream
 import javax.crypto.CipherOutputStream
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
@@ -60,28 +63,32 @@ class AES : Cipher {
             cipherInstance!!.init(javax.crypto.Cipher.ENCRYPT_MODE, sk)
         }
 
-        var len: Int?
-        val buffer = ByteArray(8192)
-        val inputFile = fileParameters.getFileInputStream()
-        val outputFile = fileParameters.getFileOutputStream()
-        val iv: ByteArray? = cipherInstance!!.iv
+        val input = BufferedInputStream(fileParameters.getFileInputStream())
 
-        outputFile?.write(iv)
-        outputFile?.flush()
+        var outputBuffered = BufferedOutputStream(fileParameters.getFileOutputStream(false))
+        val iv: ByteArray = cipherInstance!!.iv
 
-        val encryptedStream = CipherOutputStream(outputFile!!, cipherInstance)
-        while(true) {
-            len = inputFile?.read(buffer)
-            if (len != null && len > 0) {
-                encryptedStream.write(buffer,0,len)
-            } else {
-                break
-            }
-        }
-        encryptedStream.flush()
-        encryptedStream.close()
-        inputFile?.close()
-        outputFile.close()
+        // Prepend the IV to the cipherText file
+        outputBuffered.write(iv)
+        outputBuffered.flush()
+        outputBuffered.close()
+
+        // Reopen the file and append the cipherText
+        outputBuffered = BufferedOutputStream(fileParameters.getFileOutputStream(true))
+        val output = CipherOutputStream(outputBuffered, cipherInstance)
+
+        var i: Int
+        do {
+            i = input.read()
+            if (i != -1) output.write(i)
+        } while (i != -1)
+
+        output.flush()
+        output.close()
+
+        input.close()
+        outputBuffered.close()
+
 
         return fileParameters.outputExists()
     }
@@ -110,9 +117,7 @@ class AES : Cipher {
         val inputFile = fileParameters.getFileInputStream() ?: throw Exception("Error while reading IV")
 
         // Read the first 12 bytes from the file
-        for (i in 0 until 12) {
-            iv[i] = inputFile.read().toByte()
-        }
+        inputFile.read(iv)
 
         // Initialize secret key spec
         val sk = SecretKeySpec(key, "AES")
@@ -125,21 +130,19 @@ class AES : Cipher {
 
         cipherInstance!!.init(javax.crypto.Cipher.DECRYPT_MODE, sk, gcmParameterSpec)
 
-        var len: Int?
-        val buffer = ByteArray(8192)
-        val outputFile = fileParameters.getFileOutputStream()
-        val decryptedStream = CipherOutputStream(outputFile!!, cipherInstance)
-        while (true) {
-            len = inputFile.read(buffer)
-            if(len > 0){
-                decryptedStream.write(buffer,0, len)
-            } else {
-                break
-            }
-        }
-        decryptedStream.flush()
-        decryptedStream.close()
-        inputFile.close()
+        val input = CipherInputStream(BufferedInputStream(inputFile), cipherInstance)
+        val output = BufferedOutputStream(fileParameters.getFileOutputStream(false))
+
+        var i: Int
+        do {
+            i = input.read()
+            if (i != -1) output.write(i)
+        } while (i != -1)
+
+        output.flush()
+        output.close()
+
+        input.close()
 
         return fileParameters.outputExists()
     }
