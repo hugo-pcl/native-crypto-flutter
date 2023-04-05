@@ -1,3 +1,21 @@
+## 0.2.0
+
+> Note: This release has breaking changes.
+
+ - **REFACTOR**: (WIP) optimize exceptions and bytearray.
+ - **REFACTOR**: update benchmark page.
+ - **FIX**: accept empty decrypted plaintext.
+ - **FIX**: update code to pass tests.
+ - **FIX**: update code to pass all tests.
+ - **FIX**: change tag length in aes gcm cipher.
+ - **FEAT**: update example for ios file encryption.
+ - **FEAT**: update example with benchmark + file encryption.
+ - **FEAT**: update example.
+ - **FEAT**: rework bytearray and memory optimization, simplify API.
+ - **DOCS**: update readmes/licences.
+ - **DOCS**: update readme.
+ - **BREAKING** **FEAT**: rework full api with better object oriented architecture.
+
 ## 0.1.1
 
  - **REFACTOR**: change file organization.
