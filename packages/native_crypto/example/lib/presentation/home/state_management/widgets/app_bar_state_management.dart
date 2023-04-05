@@ -22,12 +22,12 @@ class AppBarStateManagement
               : 'PointyCastle',
         ),
         backgroundColor: state.currentMode.primaryColor,
-        // TODO(hpcl): enable mode switcher
-        // actions: [
-        //   Switch(
-        //     value: state.currentMode == const NativeCryptoMode(),
-        //     onChanged: (_) => bloc(context).switchMode(),
-        //   )
-        // ],
+        actions: [
+          Switch(
+            activeColor: Colors.white,
+            value: state.currentMode == const NativeCryptoMode(),
+            onChanged: (_) => bloc(context).switchMode(),
+          )
+        ],
       );
 }

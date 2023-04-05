@@ -5,12 +5,12 @@
 // https://opensource.org/licenses/MIT.
 
 import 'package:flutter/material.dart';
+import 'package:native_crypto_example/presentation/benchmark/state_management/benchmark_state_management.dart';
 import 'package:native_crypto_example/presentation/cipher/state_management/aes_state_management.dart';
 import 'package:native_crypto_example/presentation/hash/state_management/hash_state_management.dart';
 import 'package:native_crypto_example/presentation/home/blocs/navigation_bar/navigation_bar_cubit.dart';
 import 'package:native_crypto_example/presentation/home/state_management/widgets/app_bar_state_management.dart';
 import 'package:native_crypto_example/presentation/home/state_management/widgets/bottom_navigation_bar_state_management.dart';
-import 'package:native_crypto_example/presentation/home/widgets/blank.dart';
 import 'package:native_crypto_example/presentation/kdf/state_management/key_derivation_state_management.dart';
 import 'package:native_crypto_example/presentation/test_vectors/state_management/test_vectors_state_management.dart';
 import 'package:wyatt_bloc_helper/wyatt_bloc_helper.dart';
@@ -24,7 +24,7 @@ class HomeStateManagement
     HashStateManagement(),
     AESStateManagement(),
     TestVectorsStateManagement(),
-    const Blank()
+    const BenchmarkStateManagement(),
   ];
 
   @override

@@ -8,9 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:native_crypto_example/core/get_it.dart';
 import 'package:native_crypto_example/data/data_sources/native_crypto_data_source_impl.dart';
-import 'package:native_crypto_example/data/repositories/crypto_repository_impl.dart';
+import 'package:native_crypto_example/data/data_sources/pointy_castle_data_source_impl.dart';
+import 'package:native_crypto_example/data/repositories/crypto_repository_switchable_impl.dart';
 import 'package:native_crypto_example/data/repositories/logger_repository_impl.dart';
 import 'package:native_crypto_example/data/repositories/session_repository_impl.dart';
+import 'package:native_crypto_example/domain/entities/mode.dart';
 import 'package:native_crypto_example/domain/repositories/crypto_repository.dart';
 import 'package:native_crypto_example/domain/repositories/logger_repository.dart';
 import 'package:native_crypto_example/domain/repositories/session_repository.dart';
@@ -28,6 +30,12 @@ class App extends StatelessWidget {
   final SessionRepository _sessionRepository =
       SessionRepositoryImpl(sessionDataSource: getIt());
 
+  final CryptoRepository _cryptoRepository = CryptoRepositorySwitchableImpl(
+    nativeCryptoDataSource: getIt<NativeCryptoDataSourceImpl>(),
+    pointyCastleDataSource: getIt<PointyCastleDataSourceImpl>(),
+    currentMode: const NativeCryptoMode(),
+  );
+
   @override
   Widget build(BuildContext context) => MultiProvider(
         repositoryProviders: [
@@ -35,18 +43,17 @@ class App extends StatelessWidget {
           RepositoryProvider<SessionRepository>.value(
             value: _sessionRepository,
           ),
-          RepositoryProvider<CryptoRepository>(
-            create: (_) => CryptoRepositoryImpl(
-              cryptoDataSource: getIt<NativeCryptoDataSourceImpl>(),
-            ),
-          ),
+          RepositoryProvider<CryptoRepository>.value(value: _cryptoRepository),
         ],
         blocProviders: [
           BlocProvider<OutputCubit>(
             create: (_) => OutputCubit(_loggerRepository),
           ),
           BlocProvider<ModeSwitcherCubit>(
-            create: (_) => ModeSwitcherCubit(_sessionRepository),
+            create: (_) => ModeSwitcherCubit(
+              _sessionRepository,
+              _cryptoRepository,
+            ),
           )
         ],
         child: MaterialApp(

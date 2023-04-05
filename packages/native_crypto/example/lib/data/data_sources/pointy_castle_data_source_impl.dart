@@ -6,6 +6,8 @@
 
 // ignore_for_file: implementation_imports
 
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:native_crypto/native_crypto.dart';
 import 'package:native_crypto_example/domain/data_sources/crypto_data_source.dart';
@@ -35,6 +37,15 @@ class PointyCastleDataSourceImpl extends CryptoDataSource {
     final paddedPlainText = gcm.process(cipherTextWithoutIv);
 
     return paddedPlainText;
+  }
+
+  @override
+  Future<void> decryptFile(
+    File cipherText,
+    Uri folderResult,
+    SecretKey key,
+  ) async {
+    throw UnimplementedError();
   }
 
   @override
@@ -125,7 +136,10 @@ class PointyCastleDataSourceImpl extends CryptoDataSource {
 
   @override
   Future<Uint8List> encryptWithIV(
-      Uint8List data, SecretKey key, Uint8List iv,) async {
+    Uint8List data,
+    SecretKey key,
+    Uint8List iv,
+  ) async {
     final gcm = GCMBlockCipher(AESEngine())
       ..init(
         true,
@@ -142,6 +156,15 @@ class PointyCastleDataSourceImpl extends CryptoDataSource {
     return Uint8List.fromList(
       iv + cipherText,
     );
+  }
+
+  @override
+  Future<void> encryptFile(
+    File plainText,
+    Uri folderResult,
+    SecretKey key,
+  ) async {
+    throw UnimplementedError();
   }
 
   @override

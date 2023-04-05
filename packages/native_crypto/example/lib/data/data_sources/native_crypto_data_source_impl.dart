@@ -4,6 +4,8 @@
 // license that can be found in the LICENSE file or at
 // https://opensource.org/licenses/MIT.
 
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:native_crypto/native_crypto.dart';
 import 'package:native_crypto_example/domain/data_sources/crypto_data_source.dart';
@@ -28,6 +30,29 @@ class NativeCryptoDataSourceImpl extends CryptoDataSource {
     );
 
     return plainText;
+  }
+
+  @override
+  Future<void> decryptFile(
+    File cipherText,
+    Uri folderResult,
+    SecretKey key,
+  ) async {
+    final AES cipher = AES(
+      key: key,
+      mode: AESMode.gcm,
+      padding: AESPadding.none,
+    );
+
+    final plainText = File.fromUri(
+      Uri.parse(
+        '${folderResult.path}/${cipherText.path.split('/').last.replaceAll('.enc', '')}',
+      ),
+    );
+    await cipher.decryptFile(
+      cipherText,
+      plainText,
+    );
   }
 
   @override
@@ -93,6 +118,27 @@ class NativeCryptoDataSourceImpl extends CryptoDataSource {
     );
 
     return cipherText.bytes;
+  }
+
+  @override
+  Future<void> encryptFile(
+    File plainText,
+    Uri folderResult,
+    SecretKey key,
+  ) async {
+    final AES cipher = AES(
+      key: key,
+      mode: AESMode.gcm,
+      padding: AESPadding.none,
+    );
+
+    final cipherText = File.fromUri(
+      Uri.parse(
+        '${folderResult.path}/${plainText.path.split('/').last}.enc',
+      ),
+    );
+
+    await cipher.encryptFile(plainText, cipherText);
   }
 
   @override

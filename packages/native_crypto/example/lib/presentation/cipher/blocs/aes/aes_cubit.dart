@@ -5,7 +5,9 @@
 // https://opensource.org/licenses/MIT.
 
 import 'dart:async';
+import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:native_crypto/native_crypto.dart';
@@ -224,6 +226,186 @@ class AESCubit extends Cubit<AESState> {
           return state.copyWith(
             state: State.failure,
             cipherText: cipherText,
+            error: error.message,
+          );
+        },
+      ),
+    );
+
+    return;
+  }
+
+  FutureOr<void> encryptFile() async {
+    emit(state.copyWith(state: State.loading));
+
+    final sk = await sessionRepository.getSessionKey();
+
+    if (sk.isErr) {
+      await loggerRepository.addLog(
+        const LogError('No SecretKey!\n'
+            'Go in Key tab and generate or derive one.'),
+      );
+      emit(
+        state.copyWith(
+          state: State.failure,
+          error: sk.err?.message,
+        ),
+      );
+
+      return;
+    }
+
+    // Pick file to encrypt
+    final pickFileResult = await FilePicker.platform.pickFiles();
+
+    if (pickFileResult == null) {
+      await loggerRepository.addLog(
+        const LogError('No file selected.'),
+      );
+      emit(
+        state.copyWith(
+          state: State.failure,
+          error: 'No file selected.',
+        ),
+      );
+
+      return;
+    }
+
+    final file = File(pickFileResult.files.single.path!);
+
+    // Pick folder to store the encrypted file
+    final resultFolder = await FilePicker.platform.getDirectoryPath();
+
+    if (resultFolder == null) {
+      await loggerRepository.addLog(
+        const LogError('No folder selected.'),
+      );
+      emit(
+        state.copyWith(
+          state: State.failure,
+          error: 'No folder selected.',
+        ),
+      );
+
+      return;
+    }
+
+    final folder = Directory(resultFolder);
+
+    final encryption = await cryptoRepository.encryptFile(
+      file,
+      folder.uri,
+      sk.ok!,
+    );
+
+    emit(
+      await encryption.foldAsync(
+        (_) async {
+          await loggerRepository.addLog(
+            const LogInfo('File successfully encrypted.\n'),
+          );
+          return state.copyWith(
+            state: State.success,
+            plainTextFile: '',
+            cipherTextFile: '',
+          );
+        },
+        (error) async {
+          await loggerRepository.addLog(
+            LogError(error.message ?? 'Error during encryption.'),
+          );
+          return state.copyWith(
+            state: State.failure,
+            error: error.message,
+          );
+        },
+      ),
+    );
+
+    return;
+  }
+
+  FutureOr<void> decryptFile() async {
+    emit(state.copyWith(state: State.loading));
+
+    final sk = await sessionRepository.getSessionKey();
+
+    if (sk.isErr) {
+      await loggerRepository.addLog(
+        const LogError('No SecretKey!\n'
+            'Go in Key tab and generate or derive one.'),
+      );
+      emit(
+        state.copyWith(
+          state: State.failure,
+          error: sk.err?.message,
+        ),
+      );
+
+      return;
+    }
+
+    await FilePicker.platform.clearTemporaryFiles();
+
+    final resultPickFile = await FilePicker.platform.pickFiles();
+
+    if (resultPickFile == null) {
+      await loggerRepository.addLog(
+        const LogError('No file selected.'),
+      );
+      emit(
+        state.copyWith(
+          state: State.failure,
+          error: 'No file selected.',
+        ),
+      );
+
+      return;
+    }
+
+    final file = File(resultPickFile.files.single.path!);
+
+    // Pick folder to store the encrypted file
+    final resultFolder = await FilePicker.platform.getDirectoryPath();
+
+    if (resultFolder == null) {
+      await loggerRepository.addLog(
+        const LogError('No folder selected.'),
+      );
+      emit(
+        state.copyWith(
+          state: State.failure,
+          error: 'No folder selected.',
+        ),
+      );
+
+      return;
+    }
+
+    final folder = Directory(resultFolder);
+
+    final decryption =
+        await cryptoRepository.decryptFile(file, folder.uri, sk.ok!);
+
+    emit(
+      await decryption.foldAsync(
+        (_) async {
+          await loggerRepository.addLog(
+            const LogInfo('File successfully decrypted.\n'),
+          );
+          return state.copyWith(
+            state: State.success,
+            plainTextFile: '',
+            cipherTextFile: '',
+          );
+        },
+        (error) async {
+          await loggerRepository.addLog(
+            LogError(error.message ?? 'Error during decryption.'),
+          );
+          return state.copyWith(
+            state: State.failure,
             error: error.message,
           );
         },

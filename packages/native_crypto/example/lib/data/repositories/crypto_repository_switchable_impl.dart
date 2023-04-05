@@ -9,15 +9,35 @@ import 'dart:typed_data';
 
 import 'package:native_crypto/native_crypto.dart';
 import 'package:native_crypto_example/domain/data_sources/crypto_data_source.dart';
+import 'package:native_crypto_example/domain/entities/mode.dart';
 import 'package:native_crypto_example/domain/repositories/crypto_repository.dart';
 import 'package:wyatt_architecture/wyatt_architecture.dart';
 import 'package:wyatt_type_utils/wyatt_type_utils.dart';
 
-class CryptoRepositoryImpl extends CryptoRepository {
-  CryptoRepositoryImpl({
-    required this.cryptoDataSource,
+class CryptoRepositorySwitchableImpl extends CryptoRepository {
+  CryptoRepositorySwitchableImpl({
+    required this.nativeCryptoDataSource,
+    required this.pointyCastleDataSource,
+    required this.currentMode,
   });
-  CryptoDataSource cryptoDataSource;
+
+  CryptoDataSource nativeCryptoDataSource;
+  CryptoDataSource pointyCastleDataSource;
+  Mode currentMode;
+
+  set mode(Mode mode) {
+    currentMode = mode;
+  }
+
+  CryptoDataSource get cryptoDataSource {
+    if (currentMode is NativeCryptoMode) {
+      return nativeCryptoDataSource;
+    } else if (currentMode is PointyCastleMode) {
+      return pointyCastleDataSource;
+    } else {
+      throw Exception('Unknown mode');
+    }
+  }
 
   @override
   FutureOrResult<Uint8List> decrypt(Uint8List data, SecretKey key) =>

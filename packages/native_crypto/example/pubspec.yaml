@@ -32,6 +32,7 @@ dependencies:
     hosted: https://git.wyatt-studio.fr/api/packages/Wyatt-FOSS/pub/
     version: 2.0.0
   get_it: ^7.2.0
+  file_picker: ^5.2.7
 
 dev_dependencies:
   flutter_test: { sdk: flutter }

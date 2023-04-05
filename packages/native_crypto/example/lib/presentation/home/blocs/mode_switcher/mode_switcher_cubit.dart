@@ -8,7 +8,9 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:native_crypto_example/data/repositories/crypto_repository_switchable_impl.dart';
 import 'package:native_crypto_example/domain/entities/mode.dart';
+import 'package:native_crypto_example/domain/repositories/crypto_repository.dart';
 import 'package:native_crypto_example/domain/repositories/session_repository.dart';
 
 part 'mode_switcher_state.dart';
@@ -16,8 +18,11 @@ part 'mode_switcher_state.dart';
 class ModeSwitcherCubit extends Cubit<ModeSwitcherState> {
   ModeSwitcherCubit(
     this.sessionRepository,
+    this.cryptoRepository,
   ) : super(const ModeSwitcherState(NativeCryptoMode()));
+
   SessionRepository sessionRepository;
+  CryptoRepository cryptoRepository;
 
   FutureOr<void> switchMode() async {
     final currentMode = await sessionRepository.getCurrentMode();
@@ -31,9 +36,16 @@ class ModeSwitcherCubit extends Cubit<ModeSwitcherState> {
       }
 
       sessionRepository.setCurrentMode(newMode);
+      if (cryptoRepository is CryptoRepositorySwitchableImpl) {
+        (cryptoRepository as CryptoRepositorySwitchableImpl).mode = newMode;
+      }
     } else {
       newMode = const NativeCryptoMode();
       sessionRepository.setCurrentMode(newMode);
+
+      if (cryptoRepository is CryptoRepositorySwitchableImpl) {
+        (cryptoRepository as CryptoRepositorySwitchableImpl).mode = newMode;
+      }
     }
 
     emit(ModeSwitcherState(newMode));

@@ -82,6 +82,27 @@ class AESStateManagement extends CubitScreen<AESCubit, AESState> {
           const Padding(
             padding: EdgeInsets.all(8),
             child: Text(
+              'File',
+              style: AppTypography.title,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: ButtonStateManagement(
+              label: 'Encrypt file',
+              onPressed: () => bloc(context).encryptFile(),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: ButtonStateManagement(
+              label: 'Decrypt file',
+              onPressed: () => bloc(context).decryptFile(),
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.all(8),
+            child: Text(
               'External CipherText',
               style: AppTypography.title,
             ),
